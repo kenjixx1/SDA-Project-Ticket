@@ -14,6 +14,7 @@ then here.
 |---|---|---|
 | Use case diagram | To draw | — |
 | System Sequence Diagram | **Built** | [`ssd-booking-payment.html`](ssd-booking-payment.html) |
+| Sequence Diagram, boundary / control / entity | **Built** | [`sequence-bce.html`](sequence-bce.html) |
 | Activity diagram | **Built** | [`activity-booking-flow.html`](activity-booking-flow.html) |
 | UI mockups | To draw — prompt ready | [`ui-mockup-prompt.md`](ui-mockup-prompt.md) → built in [`../design/`](../design/) |
 
@@ -131,6 +132,45 @@ external call should be visible. **Recommended: leave it out.** An SSD is
 about the boundary between the actor and the system; the provider is behind
 that boundary, and `docs/06-architecture.md` already shows it.
 
+### Two sequence diagrams, and why both
+
+They answer different questions, so neither replaces the other.
+
+| | `ssd-booking-payment.html` | `sequence-bce.html` |
+|---|---|---|
+| Kind | System Sequence Diagram | Sequence Diagram |
+| Lifelines | 2: the customer and the system | 7: actor, boundary, control, three entities, one plug-in |
+| Shows | What the customer asks for and what comes back | Which object does which part of the work |
+| Belongs in | Requirements Model | Design |
+| Question it answers | What must the system do? | How does the system do it? |
+
+**The SSD is a black box on purpose.** That is what makes it a requirements
+artefact: it says nothing about how the system is built, so it cannot be
+wrong about a design that has not been decided yet. The brief asks for this
+one by name.
+
+**The BCE diagram opens the box** using the three analysis stereotypes:
+
+- **Boundary** `:TicketUI` is what the customer touches. It never reaches an
+  entity directly; it only ever calls the control.
+- **Control** `:Booking` coordinates. Every rule and every ordering decision
+  lives here.
+- **Entity** `:QueueToken`, `:TicketTier`, `:Reservation` are the stored
+  things. They know their own state and nothing about screens.
+
+`:Payment` sits outside the three as the plug-in seam from
+`docs/06-architecture.md`.
+
+Two moments are worth pointing at while presenting it:
+
+1. **`reserveAtomic(qty)` on `:TicketTier`.** That entity is the only lifeline
+   in the whole diagram that changes a seat count. One owner, one indivisible
+   step, which is why the same seat cannot be sold twice.
+2. **`stillHeld()` on `:Reservation`, after the provider has already
+   authorised.** Control asks before it captures. A yes confirms the order, a
+   no voids the authorisation, and that is the difference between losing a
+   seat and being charged for nothing.
+
 ### What the built version does
 
 `ssd-booking-payment.html` shows 10 messages rather than the 16 the table
@@ -217,7 +257,7 @@ Attach a **timer event** to the region that covers *Show countdown* through
 
 ### Wording is generic on purpose
 
-The activity diagram describes the workflow for **any customer buying any
+Both sequence diagrams and the activity diagram describe the workflow for **any customer buying any
 event**, so it carries no artist, no customer name, no tier name, no
 quantities and no payment brand. "Choose tier and quantity", not "Choose
 VIP x 2".

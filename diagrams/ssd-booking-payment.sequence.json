@@ -17,7 +17,7 @@
           "kenji",
           "system"
         ],
-        "note": "Kenji takes a numbered place and polls it until the system admits them."
+        "note": "The customer takes a numbered place and polls it until the system admits them."
       },
       {
         "id": "hold",
@@ -26,7 +26,7 @@
           "kenji",
           "system"
         ],
-        "note": "The atomic hold either takes 2 seats or takes none."
+        "note": "The hold is all or nothing: the requested quantity, or none of it."
       },
       {
         "id": "pay",
@@ -63,8 +63,8 @@
     {
       "id": "kenji",
       "type": "external",
-      "label": "Kenji",
-      "sublabel": "Customer"
+      "label": "Customer",
+      "sublabel": "the actor"
     },
     {
       "id": "system",
@@ -119,7 +119,7 @@
       "from": "system",
       "to": "kenji",
       "y": 220,
-      "label": "tokenId, position 4,182",
+      "label": "tokenId, queue position",
       "variant": "return"
     },
     {
@@ -136,7 +136,7 @@
       "from": "system",
       "to": "kenji",
       "y": 324,
-      "label": "admitted + tiers: VIP 16 left",
+      "label": "admitted, tiers with price and remaining",
       "variant": "emphasis"
     },
     {
@@ -144,7 +144,7 @@
       "from": "kenji",
       "to": "system",
       "y": 376,
-      "label": "holdTickets(tokenId, VIP, qty 2)",
+      "label": "holdTickets(tokenId, tierId, quantity)",
       "variant": "emphasis"
     },
     {
@@ -152,7 +152,7 @@
       "from": "system",
       "to": "kenji",
       "y": 408,
-      "label": "[acquired] reservationId, expires 10:14:40",
+      "label": "[acquired] reservationId, expiresAt",
       "variant": "return"
     },
     {
@@ -168,7 +168,7 @@
       "from": "kenji",
       "to": "system",
       "y": 492,
-      "label": "checkout(reservationId, \"promptpay\") = ฿13,000",
+      "label": "checkout(reservationId, paymentMethod)",
       "variant": "emphasis"
     },
     {
@@ -184,7 +184,7 @@
       "from": "system",
       "to": "kenji",
       "y": 576,
-      "label": "[hold expired] paymentVoided — nothing charged",
+      "label": "[hold expired] paymentVoided, nothing charged",
       "variant": "security"
     }
   ],
@@ -201,8 +201,8 @@
       "dot": "emerald",
       "title": "Read it as a black box",
       "items": [
-        "Only two lifelines: Kenji and the system",
-        "No filters, services or database appear: those are design, not requirements"
+        "Only two lifelines: the customer and the system",
+        "No screens, services or tables appear: those are design, not requirements"
       ]
     },
     {
@@ -210,7 +210,7 @@
       "title": "The race the brief never named",
       "items": [
         "Confirming needs two facts at once: payment authorised AND hold still alive",
-        "If the bank answers after the 10 minutes the payment is voided: they are never charged for nothing"
+        "If the provider answers after the hold expires the payment is voided, so nothing is charged"
       ]
     }
   ]
