@@ -61,6 +61,22 @@ demo, and it doubles as the start of the front end.
 | `image-to-code` | Generate an image, then build it | Partly — no image step |
 | `brandkit`, `industrial-brutalist-ui`, `gpt-taste`, `stitch-design-taste` | Not this project | — |
 
+### Two sets of images, and which to use
+
+| Set | What it is | Use it for |
+|---|---|---|
+| `mockups/screen-*.png` | **Screenshots of the real prototype.** Pixel-exact by definition. | Anything where the layout must be right: the report, the requirements section, anything a grader reads closely. |
+| `mockups/app-*.png` | Art-directed renders from an image model. Real concert photography, richer atmosphere. | Title slides, section openers, anywhere the mood matters more than the pixel. |
+
+**Image generation is not a rendering engine.** It approximates a layout from
+a description, so a render will drift: it invented radio circles on the ticket
+tiers, stacked the price under the name instead of right-aligning it, and
+dropped a hint line under a button. The brief now carries a section called
+"Layout is not yours to reinterpret" that closes most of that, but it cannot
+close all of it.
+
+If a picture has to be correct, use `screen-*.png`.
+
 ### Generating images: summon Codex
 
 Claude Code here has no text-to-image tool. **Codex does** (`image_gen__imagegen`),

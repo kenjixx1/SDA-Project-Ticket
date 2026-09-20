@@ -88,6 +88,48 @@ composition only.
 
 ---
 
+## Layout is not yours to reinterpret
+
+This app already exists. These renders must match its layout, not improve on
+it. Where this brief describes an arrangement, reproduce that arrangement.
+Where it does not, copy the nearest screen that does rather than inventing.
+
+**Never add a control that is not described here.** In particular: no radio
+circles, no checkboxes, no chevrons, no arrows, no "more" affordances, no
+badges, no progress rings. If a row has no marker described, it has no marker.
+
+**Row anatomy, used by every tier row.** One row, two lines:
+- Line 1: the tier name on the **left**, the price **right-aligned on the same
+  baseline**. Never stack the price under the name.
+- Line 2: the remaining count, in mono, aligned under the name.
+- The selected row, and only the selected row, carries a small filled cyan
+  circle with a dark check, sitting at the right of line 2.
+- Unselected rows carry nothing on the right of line 2. Empty space.
+
+**Text colour, per element.**
+- Tier name: `#F2F0FF` on every row, selected or not.
+- Tier price: `#F2F0FF` on unselected rows. Cyan **only** on the selected row.
+- Remaining count: `#A49CC8`, except a low count, which is magenta.
+- Order total: the `2 × VIP` label is `#A49CC8` and small; the amount is
+  `#F2F0FF` and large. **The total is not cyan.** Cyan is for actions.
+
+**Order total block.** A hairline across the content, then the label on the
+left and the amount on the right, sitting directly above the footer button
+with empty space pushed above it, not below.
+
+**Every footer button that this brief gives a hint line to must have it.**
+The hint is one small centred line in `#837AAD` directly under the button.
+
+**Screen titles are modest.** A plain screen title such as "You are in",
+"Seats held" or "Tickets" is about 21px and sits top-left with its subtitle
+under it. Only two things on this app are large: the act name on a stage-lit
+poster, and the queue position number. Do not turn a screen title into a hero
+headline.
+
+**Scale sanity.** Body text 14 to 16px, small print 12 to 13px, tier names
+about 17px. If an element looks more than twice the size of the same element
+on another screen, it is wrong.
+
 ## The app shell
 
 Four screens carry a **bottom tab bar**: Events, Tickets and Account.
@@ -149,17 +191,28 @@ Then a card: **Your place is saved.** Keep this page open.
 Bottom strip: a small cyan dot and `Updated just now`. **No refresh button.**
 
 ### 03 · Select
-Plain header: **You are in** / `Choose your tickets. Nothing is reserved yet.`
-Three tier cards stacked:
-- **VIP ฿6,500**, selected: cyan border, faint cyan wash, cyan price, small
-  cyan check at the right, and `only 16 left` in magenta.
-- **Zone A ฿3,800**, `350 left`.
-- **Zone B ฿1,900**, `2,020 left`.
-A quantity row: `How many` with minus, **2**, plus. Under it
-`Maximum 4 per person`.
-Anchored at the bottom of the content, above the button: `2 × VIP` on the
-left and **฿13,000** large on the right.
-Bottom: cyan button **Hold these seats**.
+Plain header, top-left: **You are in** at about 21px, and under it
+`Choose your tickets. Nothing is reserved yet.` A hairline under the header.
+
+Three tier rows, following the row anatomy above exactly:
+- **VIP**, selected. Cyan 2px border, faint cyan wash inside. `VIP` white on
+  the left, `฿6,500` cyan right-aligned on the same line. `only 16 left` in
+  magenta mono on the second line, and a filled cyan check circle at the right
+  of that line.
+- **Zone A**, not selected. `Zone A` white left, `฿3,800` white right, same
+  line. `350 left` in grey mono below. **Nothing on the right of line 2.**
+- **Zone B**, not selected. `Zone B` white left, `฿1,900` white right, same
+  line. `2,020 left` in grey mono below. **Nothing on the right of line 2.**
+
+A bordered quantity row: `How many` on the left, and on the right a minus
+button, **2**, and a plus button, each a rounded square about 44px.
+Under the row, left-aligned small grey: `Maximum 4 per person`.
+
+Then empty space, then a hairline, then the order total: `2 × VIP` small grey
+on the left and **฿13,000** large white on the right.
+
+Footer: full-width cyan **Hold these seats**, and directly under it the hint
+line `Holding takes them out of the sale for 10 minutes`.
 
 ### 04 · Held
 Header: **Seats held** / `Yours until the timer runs out.`
