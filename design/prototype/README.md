@@ -4,8 +4,9 @@ Real HTML screens. Open a file in a browser, or on your phone.
 
 | File | What it is |
 |---|---|
-| **`app.html`** | **The whole customer app. 8 screens, UC-01 to UC-04.** Start here. |
-| `01-queue.html` | Just the queue screen, standalone. Useful for a slide. |
+| **`themes.html`** | **Six visual directions, side by side. Pick one.** Start here. |
+| `app.html` | The whole customer app, 8 screens, UC-01 to UC-04, in the current direction. |
+| `01-queue.html` | Just the queue screen, standalone, in the first direction. |
 
 Visual language: `minimalist-ui`. Build: `design-taste-frontend`.
 Screen content comes from `../../diagrams/ui-mockup-prompt.md`.
@@ -119,3 +120,28 @@ The event poster is a typographic stand-in. It wants **real event artwork at
 
 QR codes are deterministic placeholder patterns, not scannable codes. They
 carry the finder squares people recognise so the screen reads correctly.
+
+
+---
+
+## Choosing a direction
+
+`themes.html` shows the same three screens (queue, select, confirmed) in six
+different visual worlds. Content, copy and numbers are identical in all six,
+so the only variable is the design.
+
+| # | Direction | In one line |
+|---|---|---|
+| 1 | Boarding Pass | A printed document. Cool paper, black masthead, stamped red, square corners. |
+| 2 | Neon Arena | Concert lighting. Violet-black with electric cyan, heavy wide type. |
+| 3 | Swiss Poster | Loud and flat. White, 2px black rules, condensed 900 weight, vermilion. |
+| 4 | Mint Consumer | Calm and friendly. Soft green, very round, light weights. |
+| 5 | Dark Terminal | Monospace everywhere. Phosphor green on near-black, 3px corners. |
+| 6 | Sunset Pop | Warm and bold. Deep plum with coral, Space Grotesk. |
+
+Each direction is one block of CSS custom properties under `[data-dir="..."]`.
+The components are shared, so applying a direction to the full app is a token
+swap, not a rebuild.
+
+Exported for the report: `../mockups/directions-1-2.png`,
+`directions-3-4.png`, `directions-5-6.png`.

@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Six Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+
+<style>
+/* ==========================================================================
+   Six visual directions for the same three screens.
+   Content is identical everywhere on purpose: only the visual world changes,
+   so the comparison is fair. Pick one and it gets applied to all 8 screens.
+   ========================================================================== */
+
+/* ---------------------------------- page --------------------------------- */
+
+:root {
+  --page:   #16171A;
+  --panel:  #1D1F23;
+  --pline:  #2C2F35;
+  --ptext:  #EDEEF0;
+  --ptext2: #9AA0A8;
+  --ptext3: #6B7178;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--page); color: var(--ptext);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  padding: 0 24px 80px;
+}
+
+.masthead { max-width: 1240px; margin: 0 auto; padding-block: 40px 10px; }
+.masthead h1 {
+  font-family: 'Archivo', sans-serif; font-variation-settings: 'wdth' 112;
+  font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em;
+  margin: 0 0 10px; line-height: 1.05;
+}
+.masthead p { margin: 0 0 6px; color: var(--ptext2); max-width: 70ch; font-size: 16.5px; }
+.masthead .how {
+  margin-top: 18px; padding: 14px 18px; border: 1px solid var(--pline);
+  border-radius: 10px; background: var(--panel); font-size: 15px; color: var(--ptext2);
+  max-width: 70ch;
+}
+.masthead .how b { color: var(--ptext); font-weight: 600; }
+
+.dir { max-width: 1240px; margin: 0 auto; padding-block: 44px 0; border-top: 1px solid var(--pline); margin-top: 44px; }
+.dir:first-of-type { border-top: 0; }
+.dir-head { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; margin-bottom: 4px; }
+.dir-head h2 {
+  font-family: 'Archivo', sans-serif; font-variation-settings: 'wdth' 108;
+  font-size: 25px; font-weight: 700; letter-spacing: -0.025em; margin: 0;
+}
+.dir-head .n {
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ptext3);
+  letter-spacing: 0.1em;
+}
+.dir-head .swatches { display: flex; gap: 5px; margin-left: auto; }
+.dir-head .sw { width: 19px; height: 19px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.14); }
+.dir p.why { margin: 0 0 22px; color: var(--ptext2); font-size: 15px; max-width: 76ch; }
+.dir p.why b { color: var(--ptext); font-weight: 600; }
+
+.row { display: flex; flex-wrap: wrap; gap: 20px; }
+.slot { width: 228px; }
+.slot .cap {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--ptext3); margin-bottom: 8px;
+}
+.wrap { width: 228px; height: 493px; overflow: hidden; }
+.phone { width: 390px; height: 844px; transform: scale(0.5846); transform-origin: top left; }
+
+@media (max-width: 560px) { .row { justify-content: center; } }
+
+/* ============================ shared components ==========================
+   Every direction uses these. Only the tokens below change. Colour is always
+   set explicitly, never inherited, because a <button> does not inherit it. */
+
+.phone {
+  background: var(--surface); color: var(--ink);
+  border: var(--frame-b) solid var(--line); border-radius: var(--r-ph);
+  overflow: hidden; display: flex; flex-direction: column;
+  font-family: var(--fb);
+}
+
+.p-sb {
+  flex: none; display: flex; justify-content: space-between; align-items: center;
+  padding: 15px 22px 0; font-family: var(--fm);
+  font-size: 11px; color: var(--ink-3); letter-spacing: 0.03em;
+}
+
+.p-head { flex: none; padding: 18px 22px 16px; border-bottom: var(--line-w) solid var(--line); }
+.p-head.hero { background: var(--hero-bg); border-bottom-color: var(--hero-line); }
+.p-head .act {
+  font-family: var(--fd); font-size: var(--act-size); font-weight: var(--act-w);
+  letter-spacing: var(--act-ls); font-variation-settings: var(--act-wd);
+  text-transform: var(--act-tt); line-height: 1; margin: 0 0 7px; color: var(--hero-ink);
+}
+.p-head .sub { margin: 0; font-family: var(--fm); font-size: 11px; color: var(--hero-ink-2); letter-spacing: 0.05em; text-transform: uppercase; }
+.p-head .t1 { font-family: var(--fd); font-size: 21px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 3px; color: var(--ink); }
+.p-head .t2 { margin: 0; font-size: 13px; color: var(--ink-2); }
+
+.p-body { flex: 1; padding: 0 22px; display: flex; flex-direction: column; overflow: hidden; }
+.p-body.mid { justify-content: center; text-align: center; }
+.p-body.top { padding-block: 18px; }
+
+.p-foot {
+  flex: none; padding: 15px 22px 20px; border-top: var(--line-w) solid var(--line);
+  display: grid; gap: 9px;
+}
+.cta {
+  appearance: none; border: var(--cta-b); width: 100%;
+  background: var(--accent); color: var(--on-accent);
+  font-family: var(--fd); font-size: 16px; font-weight: var(--cta-w);
+  letter-spacing: var(--cta-ls); text-transform: var(--cta-tt);
+  padding: 15px; border-radius: var(--r-sm); cursor: default;
+}
+.note { font-size: 12px; color: var(--ink-3); text-align: center; margin: 0; }
+
+.lab {
+  font-family: var(--fm); font-size: 10px; font-weight: 500; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--accent-ink); margin-bottom: 10px;
+}
+.figure {
+  font-family: var(--num); font-size: var(--fig-size); font-weight: var(--fig-w);
+  line-height: 0.88; letter-spacing: var(--fig-ls); font-variation-settings: var(--fig-wd);
+  font-variant-numeric: tabular-nums; color: var(--ink); margin-bottom: 8px;
+}
+.under { font-size: 13.5px; color: var(--ink-2); margin: 0 0 26px; }
+.under b { color: var(--ink); font-weight: 600; }
+
+.bar { height: var(--bar-h); border-radius: var(--r-bar); background: var(--bar-bg); overflow: hidden; margin-bottom: 12px; }
+.bar i { display: block; height: 100%; width: 62%; background: var(--accent); border-radius: var(--r-bar); }
+.bar-meta {
+  display: flex; justify-content: space-between; font-family: var(--fm);
+  font-size: 11px; color: var(--ink-3); letter-spacing: 0.03em; margin-bottom: 26px;
+}
+.bar-meta .r { color: var(--accent-ink); }
+
+.card {
+  background: var(--raise); border: var(--line-w) solid var(--line);
+  border-radius: var(--r); padding: 14px 16px; text-align: left;
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-2);
+}
+.card b { color: var(--ink); font-weight: 600; }
+
+.ticker { flex: none; padding: 13px 22px 18px; border-top: var(--line-w) solid var(--line);
+  display: flex; align-items: center; gap: 8px; font-family: var(--fm); font-size: 10.5px; color: var(--ink-3); }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+
+/* tier rows */
+.tier {
+  display: grid; grid-template-columns: 1fr auto; gap: 3px 12px; align-items: center;
+  border: var(--line-w) solid var(--line); border-radius: var(--r);
+  padding: 14px 15px; background: var(--raise); margin-bottom: 8px;
+  text-align: left; color: var(--ink); font-family: var(--fb);
+}
+.tier.on { border-color: var(--accent); background: var(--accent-soft); border-width: var(--sel-w); }
+.tier .nm { font-family: var(--fd); font-size: 16px; font-weight: 700; letter-spacing: -0.015em; color: var(--ink); }
+.tier .pr { font-family: var(--num); font-size: 17px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.tier.on .pr { color: var(--accent-ink); }
+.tier .lf { font-family: var(--fm); font-size: 10.5px; color: var(--ink-2); letter-spacing: 0.04em; }
+.tier .lf.low { color: var(--warn); }
+.tier .tk {
+  width: 17px; height: 17px; border-radius: 50%; background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; font-size: 11px; font-weight: 700; justify-self: end;
+}
+
+.qrow {
+  display: flex; align-items: center; justify-content: space-between;
+  border: var(--line-w) solid var(--line); border-radius: var(--r);
+  padding: 10px 13px; background: var(--raise); margin-bottom: 8px; color: var(--ink);
+}
+.qrow .l { font-size: 13px; color: var(--ink-2); }
+.qrow .c { display: flex; align-items: center; gap: 13px; }
+.qrow .b {
+  width: 32px; height: 32px; border-radius: var(--r-sm); border: var(--line-w) solid var(--line);
+  background: var(--raise-2); color: var(--ink); display: grid; place-items: center;
+  font-size: 16px; font-weight: 600;
+}
+.qrow .n { font-family: var(--num); font-size: 19px; font-weight: 700; min-width: 20px; text-align: center; color: var(--ink); }
+
+.sum {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: auto; padding-top: 15px; border-top: var(--line-w) solid var(--line);
+}
+.sum .l { font-size: 13px; color: var(--ink-2); }
+.sum .v {
+  font-family: var(--num); font-size: 27px; font-weight: 800; letter-spacing: -0.035em;
+  font-variation-settings: var(--fig-wd); font-variant-numeric: tabular-nums; color: var(--ink);
+}
+
+/* confirmed */
+.mark {
+  width: 50px; height: 50px; border-radius: var(--r-mark); margin: 0 auto 18px;
+  background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; font-size: 24px;
+}
+.big-head {
+  font-family: var(--fd); font-size: var(--head-size); font-weight: var(--head-w);
+  letter-spacing: var(--head-ls); font-variation-settings: var(--act-wd);
+  text-transform: var(--head-tt);
+  line-height: 1.08; margin: 0 0 10px; text-align: center; color: var(--ink);
+}
+.lede { font-size: 13.5px; color: var(--ink-2); margin: 0 0 20px; text-align: center; }
+
+.stub {
+  background: var(--raise); border: var(--line-w) solid var(--line);
+  border-radius: var(--r); margin-bottom: 11px; overflow: hidden;
+}
+.stub .sh { padding: 11px 14px 10px; display: flex; justify-content: space-between; align-items: baseline; }
+.stub .st { font-family: var(--fd); font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.stub .si { font-family: var(--fm); font-size: 9.5px; color: var(--ink-3); letter-spacing: 0.07em; }
+.stub .pf { position: relative; height: 0; border-top: 1px dashed var(--line); }
+.stub .pf::before, .stub .pf::after {
+  content: ""; position: absolute; top: -8px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--line);
+}
+.stub .pf::before { left: -8px; }
+.stub .pf::after { right: -8px; }
+.stub .sb2 { padding: 12px 14px; display: flex; gap: 13px; align-items: center; }
+.stub .si2 { font-size: 11.5px; color: var(--ink-2); line-height: 1.45; }
+.stub .si2 b { display: block; font-family: var(--fd); color: var(--accent-ink); font-weight: 800; font-size: 14px; text-transform: uppercase; margin-bottom: 2px; letter-spacing: -0.01em; }
+.stub .once { font-family: var(--fm); font-size: 8.5px; color: var(--ink-3); letter-spacing: 0.12em; margin-top: 5px; }
+
+.qr {
+  width: 78px; height: 78px; flex: none; padding: 5px; border-radius: 5px;
+  background: var(--qr-bg);
+  display: grid; grid-template-columns: repeat(21, 1fr); grid-template-rows: repeat(21, 1fr);
+}
+.qr i { background: transparent; }
+.qr i.on { background: var(--qr-ink); }
+
+/* ============================== the six worlds =========================== */
+
+/* shared defaults, each direction overrides what it needs */
+[data-dir] {
+  --frame-b: 1px; --line-w: 1px; --sel-w: 2px; --cta-b: 0;
+  --r-ph: 30px; --r: 12px; --r-sm: 9px; --r-bar: 4px; --r-mark: 50%;
+  --bar-h: 7px;
+  --act-size: 34px; --act-w: 800; --act-ls: -0.03em; --act-wd: 'wdth' 100; --act-tt: none;
+  --fig-size: 84px; --fig-w: 800; --fig-ls: -0.05em; --fig-wd: 'wdth' 100;
+  --head-size: 28px; --head-w: 800; --head-ls: -0.03em; --head-tt: none;
+  --cta-w: 700; --cta-ls: -0.005em; --cta-tt: none;
+}
+
+/* 1 ....................................................... BOARDING PASS */
+[data-dir="pass"] {
+  --surface:#FFFFFF; --raise:#F4F6F7; --raise-2:#E9ECEE; --line:#CFD5D9;
+  --ink:#14181B; --ink-2:#5A656C; --ink-3:#8C959B;
+  --accent:#C0362B; --on-accent:#FFFFFF; --accent-soft:#FBEDEB; --accent-ink:#A22B21;
+  --warn:#B0521A;
+  --hero-bg:#14181B; --hero-line:#14181B; --hero-ink:#FFFFFF; --hero-ink-2:#A9B3B9;
+  --qr-bg:#FFFFFF; --qr-ink:#14181B;
+  --fd:'IBM Plex Sans', sans-serif; --fb:'IBM Plex Sans', sans-serif;
+  --fm:'IBM Plex Mono', monospace; --num:'IBM Plex Mono', monospace;
+  --r-ph:26px; --r:5px; --r-sm:4px; --r-bar:0; --r-mark:5px;
+  --act-size:30px; --act-w:700; --act-tt:uppercase; --act-ls:-0.01em;
+  --fig-size:70px; --fig-w:600; --fig-ls:-0.03em;
+  --head-size:25px; --head-w:700; --head-tt:uppercase; --head-ls:-0.005em;
+  --cta-tt:uppercase; --cta-w:600; --cta-ls:0.07em;
+  --bar-h:6px;
+}
+
+/* 2 ......................................................... NEON ARENA */
+[data-dir="neon"] {
+  --surface:#0B0A12; --raise:#141322; --raise-2:#1D1B30; --line:#272442;
+  --ink:#F1EFFC; --ink-2:#9E98BE; --ink-3:#6F6990;
+  --accent:#3BE0F0; --on-accent:#031418; --accent-soft:#0F2C33; --accent-ink:#5FE8F5;
+  --warn:#F06AA8;
+  --hero-bg:linear-gradient(170deg,#1B1633 0%,#0B0A12 100%); --hero-line:#272442;
+  --hero-ink:#F1EFFC; --hero-ink-2:#9E98BE;
+  --qr-bg:#F1EFFC; --qr-ink:#0B0A12;
+  --fd:'Archivo', sans-serif; --fb:'Archivo', sans-serif;
+  --fm:'IBM Plex Mono', monospace; --num:'Archivo', sans-serif;
+  --r-ph:34px; --r:14px; --r-sm:10px;
+  --act-size:38px; --act-w:900; --act-wd:'wdth' 112; --act-tt:uppercase; --act-ls:-0.035em;
+  --fig-size:92px; --fig-w:800; --fig-wd:'wdth' 106;
+}
+
+/* 3 ....................................................... SWISS POSTER */
+[data-dir="swiss"] {
+  --surface:#FFFFFF; --raise:#FFFFFF; --raise-2:#F2F2F2; --line:#111111;
+  --ink:#0A0A0A; --ink-2:#4A4A4A; --ink-3:#767676;
+  --accent:#E63412; --on-accent:#FFFFFF; --accent-soft:#FDE9E5; --accent-ink:#C22A0C;
+  --warn:#C22A0C;
+  --hero-bg:#E63412; --hero-line:#111111; --hero-ink:#FFFFFF; --hero-ink-2:#FFD9D1;
+  --qr-bg:#FFFFFF; --qr-ink:#0A0A0A;
+  --fd:'Archivo', sans-serif; --fb:'Archivo', sans-serif;
+  --fm:'Archivo', sans-serif; --num:'Archivo', sans-serif;
+  --frame-b:2px; --line-w:2px; --sel-w:3px;
+  --r-ph:0; --r:0; --r-sm:0; --r-bar:0; --r-mark:0;
+  --act-size:40px; --act-w:900; --act-wd:'wdth' 78; --act-tt:uppercase; --act-ls:-0.02em;
+  --fig-size:98px; --fig-w:900; --fig-wd:'wdth' 78; --fig-ls:-0.03em;
+  --head-size:32px; --head-w:900; --head-tt:uppercase; --head-ls:-0.02em;
+  --cta-tt:uppercase; --cta-w:800; --cta-ls:0.02em;
+  --bar-h:10px;
+}
+
+/* 4 ...................................................... MINT CONSUMER */
+[data-dir="mint"] {
+  --surface:#FFFFFF; --raise:#F1F6F2; --raise-2:#E4EDE7; --line:#DCE7DF;
+  --ink:#122019; --ink-2:#55665D; --ink-3:#8496 8C;
+  --ink-3:#84968C;
+  --accent:#11A06B; --on-accent:#FFFFFF; --accent-soft:#E4F4EC; --accent-ink:#0B7A51;
+  --warn:#C2761B;
+  --hero-bg:#E4F4EC; --hero-line:#DCE7DF; --hero-ink:#0B3A28; --hero-ink-2:#4A7B64;
+  --qr-bg:#FFFFFF; --qr-ink:#122019;
+  --fd:'Outfit', sans-serif; --fb:'Outfit', sans-serif;
+  --fm:'IBM Plex Mono', monospace; --num:'Outfit', sans-serif;
+  --r-ph:38px; --r:20px; --r-sm:16px; --r-bar:8px;
+  --act-size:30px; --act-w:600; --act-ls:-0.025em;
+  --fig-size:86px; --fig-w:300; --fig-ls:-0.045em;
+  --head-size:28px; --head-w:600;
+  --cta-w:600;
+  --bar-h:10px;
+}
+
+/* 5 ...................................................... DARK TERMINAL */
+[data-dir="term"] {
+  --surface:#0A0C0A; --raise:#111512; --raise-2:#1A201C; --line:#232A25;
+  --ink:#DCE5DA; --ink-2:#8A9788; --ink-3:#5F6C5E;
+  --accent:#57C98A; --on-accent:#05160D; --accent-soft:#102019; --accent-ink:#6FD69B;
+  --warn:#D9A44E;
+  --hero-bg:#0A0C0A; --hero-line:#232A25; --hero-ink:#DCE5DA; --hero-ink-2:#8A9788;
+  --qr-bg:#DCE5DA; --qr-ink:#0A0C0A;
+  --fd:'IBM Plex Mono', monospace; --fb:'IBM Plex Mono', monospace;
+  --fm:'IBM Plex Mono', monospace; --num:'IBM Plex Mono', monospace;
+  --r-ph:20px; --r:3px; --r-sm:3px; --r-bar:0; --r-mark:3px;
+  --act-size:25px; --act-w:600; --act-tt:uppercase; --act-ls:0.01em;
+  --fig-size:66px; --fig-w:600; --fig-ls:-0.02em;
+  --head-size:21px; --head-w:600; --head-tt:uppercase; --head-ls:0.01em;
+  --cta-tt:uppercase; --cta-w:600; --cta-ls:0.09em;
+  --bar-h:6px;
+}
+
+/* 6 ........................................................ SUNSET POP */
+[data-dir="pop"] {
+  --surface:#1B1024; --raise:#271733; --raise-2:#33203F; --line:#3D2A4A;
+  --ink:#FDF2EA; --ink-2:#BFA3BA; --ink-3:#8E7489;
+  --accent:#FF6B45; --on-accent:#2A0C04; --accent-soft:#3A1A24; --accent-ink:#FF8D6D;
+  --warn:#FFC24D;
+  --hero-bg:linear-gradient(165deg,#3A1A3D 0%,#1B1024 100%); --hero-line:#3D2A4A;
+  --hero-ink:#FDF2EA; --hero-ink-2:#BFA3BA;
+  --qr-bg:#FDF2EA; --qr-ink:#1B1024;
+  --fd:'Space Grotesk', sans-serif; --fb:'Space Grotesk', sans-serif;
+  --fm:'IBM Plex Mono', monospace; --num:'Space Grotesk', sans-serif;
+  --r-ph:34px; --r:16px; --r-sm:12px; --r-bar:6px;
+  --act-size:34px; --act-w:700; --act-ls:-0.035em;
+  --fig-size:88px; --fig-w:700; --fig-ls:-0.05em;
+  --head-size:29px; --head-w:700; --head-ls:-0.035em;
+  --cta-w:700;
+  --bar-h:9px;
+}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <h1>Six directions for the ticket app</h1>
+  <p>Same three screens, same words, same numbers, six visual worlds. Only the
+  design changes, so the comparison is fair.</p>
+  <div class="how">
+    <b>How to choose:</b> ignore the details and squint. Which one would you be
+    happy to put on the projector? Tell me the name and I will build all eight
+    screens in it. You can also mix, for example "Swiss type on the Neon
+    palette".
+  </div>
+</div>
+
+<div id="out"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------ QR matrix ------------------------------ */
+  function qr(seed) {
+    var h = 0, i;
+    for (i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    var out = "", N = 21;
+    function fnd(r, c) { return (r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7); }
+    function fon(r, c) {
+      var lr = r > 13 ? r - 14 : r, lc = c > 13 ? c - 14 : c;
+      return lr === 0 || lr === 6 || lc === 0 || lc === 6 || (lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4);
+    }
+    for (var r = 0; r < N; r++) for (var c = 0; c < N; c++) {
+      var on;
+      if (fnd(r, c)) on = fon(r, c);
+      else { h = (h * 1103515245 + 12345) >>> 0; on = ((h >>> 16) & 1) === 1; }
+      out += '<i class="' + (on ? "on" : "") + '"></i>';
+    }
+    return out;
+  }
+
+  /* ------------------------------- screens ------------------------------- */
+
+  var SCREENS = {
+    queue: function () { return '' +
+      '<div class="p-sb"><span>10:04</span><span>LTE</span></div>' +
+      '<div class="p-head hero">' +
+        '<p class="act">Blackpink</p>' +
+        '<p class="sub">Impact Arena · 14 Nov 2026</p>' +
+      '</div>' +
+      '<div class="p-body mid">' +
+        '<p class="lab">Your position</p>' +
+        '<div class="figure">4,182</div>' +
+        '<p class="under"><b>4,181</b> people are ahead of you</p>' +
+        '<div class="bar"><i></i></div>' +
+        '<div class="bar-meta"><span>Moved 6,823 places</span><span class="r">about 6 min</span></div>' +
+        '<div class="card"><b>Your place is saved.</b> Keep this page open. When it is your turn you get 10 minutes to choose and pay.</div>' +
+      '</div>' +
+      '<div class="ticker"><span class="dot"></span><span>Updated just now</span></div>';
+    },
+
+    select: function () { return '' +
+      '<div class="p-sb"><span>10:10</span><span>LTE</span></div>' +
+      '<div class="p-head">' +
+        '<p class="t1">You are in</p>' +
+        '<p class="t2">Choose your tickets. Nothing is reserved yet.</p>' +
+      '</div>' +
+      '<div class="p-body top">' +
+        '<div class="tier on"><span class="nm">VIP</span><span class="pr">฿6,500</span>' +
+          '<span class="lf low">only 16 left</span><span class="tk">&#10003;</span></div>' +
+        '<div class="tier"><span class="nm">Zone A</span><span class="pr">฿3,800</span>' +
+          '<span class="lf">350 left</span><span></span></div>' +
+        '<div class="tier"><span class="nm">Zone B</span><span class="pr">฿1,900</span>' +
+          '<span class="lf">2,020 left</span><span></span></div>' +
+        '<div class="qrow"><span class="l">How many</span>' +
+          '<span class="c"><span class="b">&minus;</span><span class="n">2</span><span class="b">+</span></span></div>' +
+        '<p class="note" style="text-align:left;margin-top:2px">Maximum 4 per person</p>' +
+        '<div class="sum"><span class="l">2 × VIP</span><span class="v">฿13,000</span></div>' +
+      '</div>' +
+      '<div class="p-foot">' +
+        '<button class="cta" type="button">Hold these seats</button>' +
+        '<p class="note">Holding takes them out of the sale for 10 minutes</p>' +
+      '</div>';
+    },
+
+    done: function () { return '' +
+      '<div class="p-sb"><span>10:13</span><span>LTE</span></div>' +
+      '<div class="p-body top">' +
+        '<div class="mark">&#10003;</div>' +
+        '<p class="big-head">You are going</p>' +
+        '<p class="lede">Paid ฿13,000 by PromptPay. Two tickets, one for each seat.</p>' +
+        stub("1", "TKT-9F42-01") + stub("2", "TKT-9F42-02") +
+      '</div>' +
+      '<div class="p-foot">' +
+        '<button class="cta" type="button">Open ticket 1</button>' +
+      '</div>';
+    }
+  };
+
+  function stub(n, id) { return '' +
+    '<div class="stub">' +
+      '<div class="sh"><span class="st">Ticket ' + n + ' of 2</span><span class="si">' + id + '</span></div>' +
+      '<div class="pf"></div>' +
+      '<div class="sb2">' +
+        '<div class="qr">' + qr(id) + '</div>' +
+        '<div class="si2"><b>VIP</b>Blackpink, Bangkok<br>Impact Arena<br>14 Nov 2026, 19:00' +
+          '<div class="once">SINGLE USE</div></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ----------------------------- directions ------------------------------ */
+
+  var DIRS = [
+    { id: "pass",  name: "Boarding Pass",
+      why: "Treats a ticket as <b>a printed document</b>. Cool paper, a black masthead strip, IBM Plex, square corners, one stamped red. Quiet and official, like an airline boarding pass.",
+      sw: ["#FFFFFF", "#14181B", "#C0362B", "#CFD5D9"] },
+
+    { id: "neon",  name: "Neon Arena",
+      why: "<b>Concert lighting.</b> Deep violet-black with one electric cyan, heavy wide Archivo, generous rounding. The most energetic option and the closest to how a K-pop show actually looks.",
+      sw: ["#0B0A12", "#3BE0F0", "#1B1633", "#F06AA8"] },
+
+    { id: "swiss", name: "Swiss Poster",
+      why: "<b>Loud and flat.</b> Pure white, 2px black rules, condensed Archivo at 900 weight, one vermilion block. No rounding anywhere. Reads instantly from the back of a lecture hall.",
+      sw: ["#FFFFFF", "#0A0A0A", "#E63412", "#F2F2F2"] },
+
+    { id: "mint",  name: "Mint Consumer",
+      why: "<b>Calm and friendly.</b> Soft green, very round corners, light Outfit, thin numerals. The least intimidating option for someone panicking at 10am.",
+      sw: ["#FFFFFF", "#11A06B", "#E4F4EC", "#122019"] },
+
+    { id: "term",  name: "Dark Terminal",
+      why: "<b>Everything is monospace.</b> Near-black, phosphor green, 3px corners, wide-tracked caps. Reads as infrastructure, which suits a system whose whole point is queue mechanics.",
+      sw: ["#0A0C0A", "#57C98A", "#232A25", "#DCE5DA"] },
+
+    { id: "pop",   name: "Sunset Pop",
+      why: "<b>Warm and bold.</b> Deep plum with coral, Space Grotesk, medium rounding. Energy without neon, and the only direction that is warm rather than cool or clinical.",
+      sw: ["#1B1024", "#FF6B45", "#3A1A3D", "#FFC24D"] }
+  ];
+
+  var CAPS = { queue: "UC-01 Queue", select: "UC-02 Select", done: "UC-03 Confirmed" };
+
+  var out = document.getElementById("out");
+  DIRS.forEach(function (d, i) {
+    var sec = document.createElement("section");
+    sec.className = "dir";
+    sec.setAttribute("data-dir", d.id);
+
+    var sw = d.sw.map(function (c) {
+      return '<span class="sw" style="background:' + c + '"></span>';
+    }).join("");
+
+    var slots = ["queue", "select", "done"].map(function (k) {
+      return '<div class="slot"><div class="cap">' + CAPS[k] + '</div>' +
+             '<div class="wrap"><div class="phone">' + SCREENS[k]() + '</div></div></div>';
+    }).join("");
+
+    sec.innerHTML =
+      '<div class="dir-head">' +
+        '<h2>' + d.name + '</h2>' +
+        '<span class="n">0' + (i + 1) + '</span>' +
+        '<span class="swatches">' + sw + '</span>' +
+      '</div>' +
+      '<p class="why">' + d.why + '</p>' +
+      '<div class="row">' + slots + '</div>';
+
+    out.appendChild(sec);
+  });
+}());
+</script>
+</body>
+</html>
