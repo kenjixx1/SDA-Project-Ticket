@@ -2,12 +2,41 @@
 
 Real HTML screens. Open a file in a browser, or on your phone.
 
-| File | Screen | Traces to |
-|---|---|---|
-| `01-queue.html` | Customer Queue, two states | UC-01 · FR-02, FR-04 |
+| File | What it is |
+|---|---|
+| **`app.html`** | **The whole customer app. 8 screens, UC-01 to UC-04.** Start here. |
+| `01-queue.html` | Just the queue screen, standalone. Useful for a slide. |
 
-Built from `../../diagrams/ui-mockup-prompt.md` Block B1.
 Visual language: `minimalist-ui`. Build: `design-taste-frontend`.
+Screen content comes from `../../diagrams/ui-mockup-prompt.md`.
+
+## app.html - the eight screens
+
+| # | Screen | Traces to |
+|---|---|---|
+| 1 | Event, before the sale opens | UC-01 |
+| 2 | Queue, position and progress | UC-01 · FR-02, FR-04 |
+| 3 | Select tier and quantity | UC-02 · FR-07, FR-11 |
+| 4 | Seats held, countdown running | UC-02 · FR-09, FR-13 |
+| 5 | Pay by PromptPay | UC-03 · FR-14, FR-15 |
+| 6 | Confirmed, two tickets | UC-03 · FR-20 · INV-07 |
+| 7 | One ticket, full screen | UC-04 · FR-21 |
+| 8 | Hold expired while paying | UC-03 ext 7a · FR-17 |
+
+**Two view modes.**
+*Flow* gives you one phone to tap through, like a real app.
+*All screens* lays every screen out on one board, which is what goes on a
+slide or in the report. Exported already as
+[`../mockups/all-screens-light.png`](../mockups/all-screens-light.png) and
+`all-screens-dark.png`.
+
+**Two buttons that demonstrate the architecture.**
+*Restart* puts you back at the event page.
+*Let the hold expire* jumps straight to screen 8, which is the behaviour the
+brief never specified and the reason the design exists.
+
+The 10-minute countdown on screens 4 and 5 is real. Leave it running and it
+takes you to screen 8 by itself.
 
 ## How to open
 
@@ -59,8 +88,13 @@ doctype, charset and viewport, which is why they are stripped.
 - **No photography.** A queue screen with a stock concert photo behind the
   text would fight the one number that matters.
 
-## Still to build
+## Not built yet
 
-`02-selection.html` (two states, before and after the hold),
-`03-confirmation.html`, `04-expired.html`. Briefs are in
-`../../diagrams/ui-mockup-prompt.md`, blocks B2 to B4.
+The organizer side: UC-05 create event, UC-06 manage, UC-07 the live sales
+dashboard. UC-07 is the interesting one for a presentation, because it is
+where the held / sold / remaining split becomes visible.
+
+## Notes
+
+QR codes are deterministic placeholder patterns, not scannable codes. They
+carry the finder squares people recognise so the screen reads correctly.

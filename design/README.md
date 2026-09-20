@@ -4,9 +4,11 @@ Where the UI work lives: screen mockups and the clickable prototype.
 
 ```
 design/
-├── mockups/      screen images — PNG, one file per screen
-└── prototype/    clickable HTML — the real thing you can tap through
-    └── 01-queue.html   BUILT: the queue screen, two states
+├── mockups/      screen images
+│   └── all-screens-light.png / all-screens-dark.png   BUILT
+└── prototype/
+    ├── app.html        BUILT: the whole customer app, 8 screens
+    └── 01-queue.html   BUILT: the queue screen on its own
 ```
 
 **The brief for every screen is already written.** It is
