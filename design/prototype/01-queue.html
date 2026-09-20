@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Queue Screen Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+/* ============================================================
+   UC-01 Join Waiting Room - Customer Queue screen
+   Source of truth: diagrams/ui-mockup-prompt.md, Block B1
+   Visual language: minimalist-ui (warm monochrome, flat, 1px rules)
+   Build: design-taste-frontend
+   Native CSS on purpose. This repo has no build tooling and a
+   mockup should open with a double-click.
+   ============================================================ */
+
+:root {
+  /* warm monochrome canvas */
+  --canvas:      #F2F1EE;
+  --surface:     #FFFFFF;
+  --surface-sub: #FAFAF9;
+  --rule:        #E7E5E1;
+  --rule-soft:   #F0EEEA;
+
+  --ink:         #23282B;
+  --ink-2:       #5C6367;
+  --ink-3:       #8E9599;
+
+  /* one accent, locked for the whole page.
+     Same green as the project's diagrams and documents. */
+  --accent:      #1F6B57;
+  --accent-wash: #E8F0ED;
+  --accent-ink:  #1A5847;
+
+  --radius:      14px;
+  --radius-sm:   8px;
+
+  --font:  'Outfit', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  --mono:  'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --canvas:      #14171A;
+    --surface:     #1C2023;
+    --surface-sub: #22272A;
+    --rule:        #2E3438;
+    --rule-soft:   #262B2F;
+
+    --ink:         #E8EAEA;
+    --ink-2:       #A3ACB0;
+    --ink-3:       #757F84;
+
+    --accent:      #57B79B;
+    --accent-wash: #1B2E29;
+    --accent-ink:  #7FCCB4;
+  }
+}
+:root[data-theme="dark"] {
+  --canvas:      #14171A;
+  --surface:     #1C2023;
+  --surface-sub: #22272A;
+  --rule:        #2E3438;
+  --rule-soft:   #262B2F;
+  --ink:         #E8EAEA;
+  --ink-2:       #A3ACB0;
+  --ink-3:       #757F84;
+  --accent:      #57B79B;
+  --accent-wash: #1B2E29;
+  --accent-ink:  #7FCCB4;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 48px;
+}
+
+/* ---------- prototype chrome (not part of the app) ---------- */
+
+.chrome {
+  width: 100%;
+  max-width: 560px;
+  padding-block: 28px 20px;
+}
+.chrome-title {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 3px;
+}
+.chrome-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  margin: 0 0 18px;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+.seg button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 180ms var(--ease), color 180ms var(--ease);
+}
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--canvas); }
+.seg button:active { transform: scale(0.98); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.ghost {
+  appearance: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 180ms var(--ease), color 180ms var(--ease);
+}
+.ghost[aria-pressed="true"] { background: var(--accent-wash); color: var(--accent-ink); border-color: var(--accent); }
+.ghost:active { transform: scale(0.98); }
+.ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- phone ---------- */
+
+.phone {
+  width: 390px;
+  height: 844px;
+  max-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 34px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 18px 48px rgba(24,28,30,0.06);
+}
+@media (max-width: 430px) {
+  /* on a real phone the frame is silly. go full bleed. */
+  body { padding-inline: 0; }
+  .chrome { padding-inline: 16px; }
+  .phone {
+    width: 100%;
+    height: auto;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* ---------- app: status bar ---------- */
+
+.status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- app: event header ---------- */
+
+.event {
+  padding: 20px 24px 22px;
+  border-bottom: 1px solid var(--rule-soft);
+}
+.event h1 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 4px;
+}
+.event p {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+/* ---------- app: the position ---------- */
+
+.stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+/* the single largest element on the screen */
+.position {
+  font-family: var(--font);
+  font-size: 88px;
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.position .of { font-size: 30px; color: var(--ink-3); font-weight: 300; letter-spacing: -0.02em; }
+
+.ahead {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin: 0 0 32px;
+}
+.ahead b { font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* progress */
+.track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--rule);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.fill {
+  display: block;
+  height: 100%;
+  width: 62%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 900ms var(--ease);
+}
+
+.wait {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+  margin-bottom: 40px;
+}
+.wait .est { color: var(--ink-2); }
+
+/* reassurance: the sentence that stops a refresh */
+.hold {
+  background: var(--surface-sub);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.hold b { color: var(--ink); font-weight: 500; }
+
+/* ---------- app: live footer ---------- */
+
+.live {
+  border-top: 1px solid var(--rule-soft);
+  padding: 16px 24px calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+/* semantic state: the queue is live. not decoration. */
+.beacon {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+  position: relative;
+}
+.beacon::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .beacon::after { animation: ring 2.6s var(--ease) infinite; }
+}
+@keyframes ring {
+  0%   { opacity: 0.55; transform: scale(0.6); }
+  70%  { opacity: 0;    transform: scale(1.5); }
+  100% { opacity: 0;    transform: scale(1.5); }
+}
+
+/* state change on the number, motivated: it confirms movement */
+@media (prefers-reduced-motion: no-preference) {
+  .position.tick { animation: lift 520ms var(--ease); }
+}
+@keyframes lift {
+  from { opacity: 0.45; transform: translateY(5px); }
+  to   { opacity: 1;    transform: translateY(0); }
+}
+
+/* ---------- nearly-there state ---------- */
+
+.phone[data-state="near"] .position { color: var(--accent-ink); }
+.phone[data-state="near"] .hold { background: var(--accent-wash); border-color: var(--accent); }
+.phone[data-state="near"] .hold b { color: var(--accent-ink); }
+
+/* ---------- caption under the phone ---------- */
+
+.caption {
+  width: 100%;
+  max-width: 560px;
+  margin-top: 20px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.caption b { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <p class="chrome-title">Customer Queue screen</p>
+  <p class="chrome-sub">UC-01 · 390 x 844 · prototype, not final</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Screen state">
+      <button id="btn-far"  type="button" aria-pressed="true">In the queue</button>
+      <button id="btn-near" type="button" aria-pressed="false">Almost your turn</button>
+    </div>
+    <button id="btn-play" class="ghost" type="button" aria-pressed="false">Watch it move</button>
+  </div>
+</div>
+
+<div class="phone" id="phone" data-state="far">
+
+  <div class="status">
+    <span>10:04</span>
+    <span id="clock-hint">LTE</span>
+  </div>
+
+  <header class="event">
+    <h1>BLACKPINK</h1>
+    <p>Impact Arena, Bangkok · 14 Nov 2026</p>
+  </header>
+
+  <main class="stage">
+    <p class="label" id="pos-label">Your position</p>
+
+    <div class="position" id="position" aria-live="polite" aria-atomic="true">4,182</div>
+
+    <p class="ahead" id="ahead"><b>4,181</b> people are ahead of you</p>
+
+    <div class="track">
+      <span class="fill" id="fill" style="width:62%"></span>
+    </div>
+
+    <div class="wait">
+      <span id="moved">You have moved 2,940 places</span>
+      <span class="est" id="est">about 6 min</span>
+    </div>
+
+    <div class="hold" id="hold">
+      <b>Your place is saved.</b> Keep this page open. When it is your turn you
+      will get 10 minutes to choose your tickets and pay.
+    </div>
+  </main>
+
+  <footer class="live">
+    <span class="beacon" aria-hidden="true"></span>
+    <span id="updated">Updated 2 seconds ago</span>
+  </footer>
+
+</div>
+
+<p class="caption">
+  <b>Nothing happens on this screen for six minutes.</b> That is the design
+  problem. If it does not visibly move, Kenji refreshes, and every refresh
+  makes the spike worse for everyone. So the number moves, the bar moves, and
+  the footer keeps saying when it last heard from the server. There is
+  deliberately no refresh button.
+</p>
+
+<script>
+(function () {
+  "use strict";
+
+  var phone   = document.getElementById("phone");
+  var posEl   = document.getElementById("position");
+  var aheadEl = document.getElementById("ahead");
+  var fillEl  = document.getElementById("fill");
+  var estEl   = document.getElementById("est");
+  var movedEl = document.getElementById("moved");
+  var holdEl  = document.getElementById("hold");
+  var labelEl = document.getElementById("pos-label");
+  var updEl   = document.getElementById("updated");
+
+  var btnFar  = document.getElementById("btn-far");
+  var btnNear = document.getElementById("btn-near");
+  var btnPlay = document.getElementById("btn-play");
+
+  var TOTAL = 7500;            // seats in the sale
+  var START = 11005;           // where this session entered the queue
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var state = { pos: 4182, playing: false, secs: 2 };
+  var moveTimer = null, ageTimer = null;
+
+  function comma(n) { return n.toLocaleString("en-US"); }
+
+  function minutes(pos) {
+    // 12 admitted per second (7,500 seats / a 10 minute hold).
+    // Shown as a rounded estimate, never as a promise.
+    var m = pos / 12 / 60;
+    if (pos <= 40) return "any moment";
+    if (m < 1) return "under a minute";
+    return "about " + Math.round(m) + " min";
+  }
+
+  function render(animate) {
+    var pos = state.pos;
+    var near = pos <= 40;
+
+    phone.setAttribute("data-state", near ? "near" : "far");
+
+    posEl.textContent = comma(pos);
+    aheadEl.innerHTML = "<b>" + comma(Math.max(pos - 1, 0)) + "</b> " +
+      (pos - 1 === 1 ? "person is" : "people are") + " ahead of you";
+
+    var done = Math.min(99, Math.max(2, Math.round((START - pos) / START * 100)));
+    fillEl.style.width = done + "%";
+
+    estEl.textContent = minutes(pos);
+    movedEl.textContent = "You have moved " + comma(Math.max(START - pos, 0)) + " places";
+
+    labelEl.textContent = near ? "Almost your turn" : "Your position";
+
+    holdEl.innerHTML = near
+      ? "<b>Get ready.</b> As soon as you are let in you will have 10 minutes " +
+        "to choose your tickets and pay. Stay on this page."
+      : "<b>Your place is saved.</b> Keep this page open. When it is your turn you " +
+        "will get 10 minutes to choose your tickets and pay.";
+
+    if (animate && !reduce) {
+      posEl.classList.remove("tick");
+      void posEl.offsetWidth;          // restart the animation
+      posEl.classList.add("tick");
+    }
+    state.secs = 0;
+    paintAge();
+  }
+
+  function paintAge() {
+    updEl.textContent = state.secs <= 1
+      ? "Updated just now"
+      : "Updated " + state.secs + " seconds ago";
+  }
+
+  function setPressed(el, on) { el.setAttribute("aria-pressed", on ? "true" : "false"); }
+
+  function goFar()  { stop(); state.pos = 4182; setPressed(btnFar, true);  setPressed(btnNear, false); render(true); }
+  function goNear() { stop(); state.pos = 12;   setPressed(btnFar, false); setPressed(btnNear, true);  render(true); }
+
+  function step() {
+    if (state.pos <= 1) { stop(); return; }
+    // the queue admits in bursts, so the drop is uneven on purpose
+    var drop = Math.max(1, Math.round(state.pos * (0.06 + Math.random() * 0.07)));
+    state.pos = Math.max(1, state.pos - drop);
+    setPressed(btnFar, state.pos > 40);
+    setPressed(btnNear, state.pos <= 40);
+    render(true);
+  }
+
+  function start() {
+    if (state.playing) return;
+    state.playing = true;
+    setPressed(btnPlay, true);
+    btnPlay.textContent = "Pause";
+    moveTimer = setInterval(step, 1800);
+  }
+
+  function stop() {
+    state.playing = false;
+    setPressed(btnPlay, false);
+    btnPlay.textContent = "Watch it move";
+    if (moveTimer) { clearInterval(moveTimer); moveTimer = null; }
+  }
+
+  btnFar.addEventListener("click", goFar);
+  btnNear.addEventListener("click", goNear);
+  btnPlay.addEventListener("click", function () { state.playing ? stop() : start(); });
+
+  // the footer age is the quiet proof that the page is still connected
+  ageTimer = setInterval(function () { state.secs += 1; paintAge(); }, 1000);
+  window.addEventListener("pagehide", function () {
+    if (moveTimer) clearInterval(moveTimer);
+    if (ageTimer) clearInterval(ageTimer);
+  });
+
+  render(false);
+}());
+</script>
+</body>
+</html>

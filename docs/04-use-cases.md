@@ -432,7 +432,7 @@ This table is the real content of this use case.
 ### What Chai sees at 10:06:20
 
 ```
-QUEUE     31,208 waiting          admitting 200 / second
+QUEUE     31,208 waiting          admitting 12 / second
 
 TIER      TOTAL     HELD    SOLD    REMAINING
 VIP         500       12     476           12
@@ -441,6 +441,14 @@ Zone B    5,000       96   2,884        2,020
 
 REVENUE   ฿14,691,600   (confirmed orders only)
 ```
+
+> **Why the admission rate is 12 per second, not a bigger number.**
+> The rate is not "as fast as the servers cope". It is tied to the hold
+> window: 7,500 seats divided by a 10-minute hold is about 12 customers per
+> second. Admit faster and the extra people arrive to find every seat already
+> held by someone still inside their ten minutes, which is the "sold out after
+> I was let in" experience the queue exists to prevent. This is also what makes
+> UC-01's estimate honest: position 4,182 at 12 per second is about 6 minutes.
 
 > **Why "held" is its own column.** Those 12 VIP seats are not sold and not
 > available. They are in somebody's ten minutes. If Chai only saw *sold* and

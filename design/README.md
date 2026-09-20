@@ -6,6 +6,7 @@ Where the UI work lives: screen mockups and the clickable prototype.
 design/
 ├── mockups/      screen images — PNG, one file per screen
 └── prototype/    clickable HTML — the real thing you can tap through
+    └── 01-queue.html   BUILT: the queue screen, two states
 ```
 
 **The brief for every screen is already written.** It is
