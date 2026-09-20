@@ -108,7 +108,8 @@ The full list, with reasons, is in [`docs/03-prd.md`](docs/03-prd.md) §3.5.
 ├── CLAUDE.md           one line, pointing at AGENTS.md
 ├── README.md           this file
 ├── docs/               the seven documents
-├── diagrams/           use case · SSD · activity · UI mockups (to draw)
+├── diagrams/           use case · SSD · activity (built) + UI mockup prompt
+├── design/             screen mockups and the clickable prototype
 ├── src/                empty Java tree, ready for Deliverable 4
 ├── plans/              the plan this documentation set was approved from
 └── SDA Project.pdf     the original brief

@@ -15,7 +15,7 @@ then here.
 | Use case diagram | To draw | — |
 | System Sequence Diagram | **Built** | [`ssd-booking-payment.html`](ssd-booking-payment.html) |
 | Activity diagram | **Built** | [`activity-booking-flow.html`](activity-booking-flow.html) |
-| UI mockups | To draw — prompt ready | [`ui-mockup-prompt.md`](ui-mockup-prompt.md) |
+| UI mockups | To draw — prompt ready | [`ui-mockup-prompt.md`](ui-mockup-prompt.md) → built in [`../design/`](../design/) |
 
 **Presenting?** Plain white PNG/SVG versions of the SSD and the activity
 diagram, sized for a 16:9 slide, are in [`slides/`](slides/). They are cut

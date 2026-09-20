@@ -29,3 +29,7 @@ bin/
 
 # archify visual-check evidence (regenerate with: archify visual-check)
 diagrams/*.visual-check.*
+
+# Agent skills installed with `npx skills add` (re-installable, not project source)
+.agents/
+skills-lock.json
