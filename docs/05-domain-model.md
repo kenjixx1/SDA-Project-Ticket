@@ -31,7 +31,7 @@ each one fields, states and rules.
 | **E-03** | `QueueToken` | A customer's numbered place in the waiting room. |
 | **E-04** | `Reservation` | Seats taken out of the pool for one customer, with a deadline. |
 | **E-05** | `Payment` | One attempt to pay for one reservation. |
-| **E-06** | `DigitalTicket` | The thing Ploy shows at the gate. |
+| **E-06** | `DigitalTicket` | The thing Kenji shows at the gate. |
 
 ### How they connect
 
@@ -158,7 +158,7 @@ It only means something in that bank, on that day, for that person.
 |---|---|---|
 | `tokenId` | id | Unique. Also the identity for the whole purchase — see below. |
 | `eventId` | id | Which sale |
-| `customerId` | id | Ploy |
+| `customerId` | id | Kenji |
 | `issuedAt` | timestamp | Sets the place in line. First issued, first admitted. |
 | `position` | integer | *4,182* — derived from `issuedAt` |
 | `state` | enum | See below |
@@ -237,7 +237,7 @@ prevented.
   at all. This is the single rule that makes NFR-02 achievable.
 - **R-E04-2** — **no partial holds.** A request for 2 gets 2 or gets 0.
 - **R-E04-3** — `expiresAt = heldAt + 10 minutes`, set by the **server's**
-  clock. The countdown Ploy sees is display only. (Locked decision 2)
+  clock. The countdown Kenji sees is display only. (Locked decision 2)
 - **R-E04-4** — on `HELD → CONFIRMED`: `heldQuantity` decreases and
   `soldQuantity` increases by the same amount, in one step.
 - **R-E04-5** — on `HELD → EXPIRED` or `HELD → RELEASED`: `heldQuantity`
@@ -303,7 +303,7 @@ has time left, so there can be several payments against one reservation.
 
 ## E-06 · DigitalTicket
 
-**The thing Ploy shows at the gate.**
+**The thing Kenji shows at the gate.**
 
 ### Attributes
 
@@ -312,7 +312,7 @@ has time left, so there can be several payments against one reservation.
 | `ticketId` | id | Unique |
 | `reservationId` | id | Where it came from |
 | `eventId`, `tierId` | id | Printed on the face |
-| `holderName` | text | *Ploy* |
+| `holderName` | text | *Kenji* |
 | `issuedAt` | timestamp | |
 | `payload` | text | The contents encoded in the QR code |
 | `signature` | text | Proof this system produced it |
@@ -362,11 +362,11 @@ reservations and compares against the stored counters.
 
 ## 5.4 The worked example, end to end
 
-Ploy's purchase, with every entity as it changes. Times are from the story.
+Kenji's purchase, with every entity as it changes. Times are from the story.
 
 | Time | What happens | Entity state |
 |---|---|---|
-| 10:00:03 | Ploy joins | `QueueToken` **WAITING**, position 4,182 |
+| 10:00:03 | Kenji joins | `QueueToken` **WAITING**, position 4,182 |
 | 10:04:12 | Admitted | `QueueToken` **ADMITTED** |
 | 10:04:40 | Picks 2 × VIP; hold taken | `Reservation` **HELD**, expires 10:14:40 · VIP `heldQuantity` 10 → 12 · remaining 16 → 14 |
 | 10:05:02 | Chooses PromptPay | `Payment` **PENDING**, ฿13,000 |
@@ -382,5 +382,5 @@ Ploy's purchase, with every entity as it changes. Times are from the story.
 | 10:14:46 | Authorisation finally arrives | `Payment` **AUTHORISED** |
 | 10:14:46 | R-E04-6 checked: reservation is `EXPIRED` → **fails** | `Payment` **VOIDED** · no ticket issued |
 
-Ploy does not get her seats. **Ploy is not charged.** Both facts are
+Kenji does not get their seats. **Kenji is not charged.** Both facts are
 consequences of one rule, R-E04-6, and both are tested.

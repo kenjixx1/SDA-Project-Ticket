@@ -47,7 +47,7 @@ documents harder to follow, and nothing builds up.
 | VIP tier | ฿6,500 · 500 seats |
 | Zone A tier | ฿3,800 · 2,000 seats |
 | Zone B tier | ฿1,900 · 5,000 seats |
-| The customer | **Ploy** — buying 2 × VIP |
+| The customer | **Kenji** — buying 2 × VIP |
 | The organizer | **Chai** — runs the event |
 | Hold time | **10 minutes** |
 | Per-order limit | **4 tickets** |
@@ -111,7 +111,7 @@ someone whose first language is not English.
   sentence, then bullets.
 - **Give an everyday analogy AND a real example.** The analogy gives the feel,
   the example gives the truth. Both use the story in section 2.
-- **Never use abstract placeholder data.** No "user A buys item X". Use Ploy,
+- **Never use abstract placeholder data.** No "user A buys item X". Use Kenji,
   VIP seats, ฿6,500.
 - **Picture first, meaning second, symbols last.**
 - Do not write about the lecturer as a person. Say "the brief", "the course",

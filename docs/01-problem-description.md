@@ -29,7 +29,7 @@ Every document in this set uses the same story.
 > 7,500 seats. Sale opens at exactly 10:00:00 on 1 October 2026.
 > About **40,000 people** are waiting with the page already open.
 >
-> **Ploy** wants 2 VIP tickets at ฿6,500 each.
+> **Kenji** wants 2 VIP tickets at ฿6,500 each.
 > **Chai** is the organizer. He set up the event and watches the sale happen.
 
 At 10:00:00 everyone presses the button in the same second.
@@ -82,9 +82,9 @@ would have got a ticket.
 
 Here is exactly how it happens, with real numbers.
 
-Ten VIP seats are left. Ploy and Nut both want 2.
+Ten VIP seats are left. Kenji and Nut both want 2.
 
-| Time | Ploy's request | Nut's request | Seats left in the database |
+| Time | Kenji's request | Nut's request | Seats left in the database |
 |---|---|---|---|
 | 10:04:01.000 | reads "10 left" | | 10 |
 | 10:04:01.002 | | reads "10 left" | 10 |
@@ -127,15 +127,15 @@ absorb the spike so the buying engine never feels it.
 walk in. Nobody else can be seated there while you read the menu. You pay at
 the end. If you walk out without ordering, the table is released.
 
-**In the system.** When Ploy picks 2 VIP seats, those 2 seats are **held**
-immediately — before she has typed a single card digit. The count of available
-seats goes down at that moment. She then has **10 minutes** to pay.
+**In the system.** When Kenji picks 2 VIP seats, those 2 seats are **held**
+immediately — before they have typed a single card digit. The count of available
+seats goes down at that moment. They then have **10 minutes** to pay.
 
-- If she pays → the hold becomes a confirmed order.
+- If they pay → the hold becomes a confirmed order.
 - If the 10 minutes run out → the seats go back on sale automatically.
 
 The hold is taken in a single indivisible step, so the race condition in
-section 1.4 cannot happen. Either Ploy gets both seats or she gets none — the
+section 1.4 cannot happen. Either Kenji gets both seats or they get none — the
 system never reads-then-writes in two separate moments.
 
 ---

@@ -9,7 +9,7 @@ English, in alphabetical order.
 
 ### Actor
 Someone **outside** the system who uses it to reach a goal. This system has
-exactly two: the **Customer** (Ploy) and the **Organizer** (Chai).
+exactly two: the **Customer** (Kenji) and the **Organizer** (Chai).
 
 A database, a payment provider and a clock are *not* actors — they are parts
 of the solution, not people with goals.
@@ -44,7 +44,7 @@ did not. There is no halfway state that another request can catch.
 
 *Like a light switch. There is no moment where the light is half on.*
 
-**Why it matters here:** the hold on Ploy's 2 VIP seats is atomic. That is the
+**Why it matters here:** the hold on Kenji's 2 VIP seats is atomic. That is the
 single reason two people cannot both be told "yes" for the same last seat.
 
 ---
@@ -93,7 +93,7 @@ This is "no overselling", written as a rule a computer can check.
 ---
 
 ### Digital ticket
-What Ploy shows at the gate. Carries a QR code with a **signed**,
+What Kenji shows at the gate. Carries a QR code with a **signed**,
 **single-use** payload. Entity **E-06**.
 
 ---
@@ -186,9 +186,9 @@ same effect as sending it once.
 *Like a cheque number. Presenting the same cheque twice does not move money
 twice.*
 
-**Why it matters here:** Ploy double-taps "Pay" on her phone during a
-countdown. That is not an edge case — it is what people do. The key means she
-is charged once (FR-18).
+**Why it matters here:** Kenji double-taps "Pay" on their phone during a
+countdown. That is not an edge case — it is what people do. The key means they
+are charged once (FR-18).
 
 ---
 
@@ -303,9 +303,9 @@ from buying ten places in line.
 Two pieces of work read the same value before either one writes, so one of the
 writes is lost.
 
-**Real example.** Ten VIP seats left. Ploy and Nut both want 2.
+**Real example.** Ten VIP seats left. Kenji and Nut both want 2.
 
-| Time | Ploy | Nut | Seats in database |
+| Time | Kenji | Nut | Seats in database |
 |---|---|---|---|
 | .000 | reads 10 | | 10 |
 | .002 | | reads 10 | 10 |
@@ -410,10 +410,10 @@ Here: `PricingFilter`. It changes the money and nothing else.
 ---
 
 ### TTL — time to live
-How long something stays valid before it expires by itself. Ploy's hold has a
+How long something stays valid before it expires by itself. Kenji's hold has a
 TTL of **10 minutes**.
 
-The clock belongs to the **server**, not to her phone. The countdown she sees
+The clock belongs to the **server**, not to their phone. The countdown they see
 is display only.
 
 ---

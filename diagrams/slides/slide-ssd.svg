@@ -15,11 +15,11 @@
 
   <!-- title -->
   <text x="60" y="62" font-size="32" font-weight="700" fill="#14232E">System Sequence Diagram — Booking &amp; Payment</text>
-  <text x="60" y="94" font-size="18" fill="#64777F">Ploy buys 2 × VIP for BLACKPINK — Bangkok.  The system is drawn as one black box.</text>
+  <text x="60" y="94" font-size="18" fill="#64777F">Kenji buys 2 × VIP for BLACKPINK — Bangkok.  The system is drawn as one black box.</text>
 
   <!-- participant heads -->
   <rect x="270" y="125" width="260" height="62" rx="6" fill="#FFFFFF" stroke="#1F3340" stroke-width="2"/>
-  <text x="400" y="152" font-size="19" font-weight="700" fill="#14232E" text-anchor="middle">Ploy</text>
+  <text x="400" y="152" font-size="19" font-weight="700" fill="#14232E" text-anchor="middle">Kenji</text>
   <text x="400" y="173" font-size="14" fill="#64777F" text-anchor="middle">Customer</text>
 
   <rect x="1030" y="125" width="260" height="62" rx="6" fill="#EAF5F2" stroke="#0B7A63" stroke-width="2"/>
@@ -88,5 +88,5 @@
   <!-- footer takeaway -->
   <line x1="60" y1="886" x2="1540" y2="886" stroke="#DCE3E5" stroke-width="1.5"/>
   <circle cx="70" cy="912" r="5" fill="#B3261E"/>
-  <text x="88" y="918" font-size="17" fill="#3D525E">The last line is the point: if the bank answers after the 10 minutes, Ploy loses the seats — but she is <tspan font-weight="700" fill="#B3261E">never charged for nothing</tspan>.</text>
+  <text x="88" y="918" font-size="17" fill="#3D525E">The last line is the point: if the bank answers after the 10 minutes, Kenji loses the seats — but they are <tspan font-weight="700" fill="#B3261E">never charged for nothing</tspan>.</text>
 </svg>

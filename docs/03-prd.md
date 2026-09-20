@@ -50,14 +50,14 @@ built for 200 per second.
 
 ## 3.3 Who this is for
 
-### Ploy — the fan
+### Kenji — the fan
 
 - Has the page open at 09:59. Phone in hand, not a laptop.
 - Does not care how it works. Cares about two things: **am I getting in**, and
   **how long**.
-- Will refresh the page if she is not told what is happening. Every refresh
+- Will refresh the page if they are not told what is happening. Every refresh
   makes the problem worse for everyone.
-- **Her job to be done:** *"Tell me honestly whether I have a chance, and if I
+- **Their job to be done:** *"Tell me honestly whether I have a chance, and if I
   do, don't lose my place."*
 
 ### Chai — the organizer
@@ -200,7 +200,7 @@ the core booking engine.
 
 Not blocking. Worth deciding before slice 3.
 
-1. **What does Ploy see when her hold expires while she is paying?** FR-17
+1. **What does Kenji see when their hold expires while they are paying?** FR-17
    says the payment is voided. The wording of that screen matters more than
    most of this document — it is the moment a customer decides whether the
    system cheated them.

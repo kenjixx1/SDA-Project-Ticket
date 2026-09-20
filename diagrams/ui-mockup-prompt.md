@@ -22,9 +22,9 @@ try to buy 7,500 seats in the same second, everyone goes through a virtual
 waiting room. Seats are held for exactly 10 minutes while the customer pays.
 
 THE USER
-Ploy. She is standing up, holding a phone with one hand, at 10:00 in the
-morning. She is anxious and will refresh the page if she is not told what is
-happening. She is Thai; prices are in Thai baht (฿).
+Kenji. They are standing up, holding a phone with one hand, at 10:00 in the
+morning. They are anxious and will refresh the page if they are not told what is
+happening. They are Thai; prices are in Thai baht (฿).
 
 DEVICE
 Mobile first. 390 x 844 (iPhone-class). Portrait. One column.
@@ -38,7 +38,7 @@ THE EVENT (use these exact values, never placeholders)
   Tiers          : VIP    ฿6,500 — 16 left
                    Zone A ฿3,800 — 350 left
                    Zone B ฿1,900 — 2,020 left
-  Ploy is buying : 2 x VIP = ฿13,000
+  Kenji is buying : 2 x VIP = ฿13,000
   Per-order limit: 4 tickets
   Hold time      : 10 minutes
   Payment method : PromptPay
@@ -73,26 +73,26 @@ DO NOT
 ```
 SCREEN: Customer Queue
 
-This is the screen Ploy stares at for six minutes. Nothing happens on it.
-That is the design problem: if it does not visibly move, she refreshes, and
+This is the screen Kenji stares at for six minutes. Nothing happens on it.
+That is the design problem: if it does not visibly move, they refresh, and
 every refresh makes the spike worse for everyone.
 
 MUST SHOW
 1. Event header: "BLACKPINK — Bangkok", then "Impact Arena · 14 Nov 2026".
-2. Her position in the queue: 4,182. This is the LARGEST element on the
+2. Their position in the queue: 4,182. This is the LARGEST element on the
    screen. Use tabular figures so the digits do not jump as it counts down.
-3. A progress bar showing how far through the queue she is (about 62%).
+3. A progress bar showing how far through the queue they are (about 62%).
 4. An estimated wait: "about 6 minutes", clearly marked as an estimate.
    Do not present an estimate as a promise.
-5. One line of reassurance: her place is saved, she should keep the tab
-   open, and she will get 10 minutes to choose and pay when it is her turn.
+5. One line of reassurance: their place is saved, they should keep the tab
+   open, and they will get 10 minutes to choose and pay when it is their turn.
 6. A subtle sign that the page is live — a "last updated 2 seconds ago"
    line, or a quiet pulse. Movement is a feature here, not decoration.
 
 MUST NOT SHOW
 - No "Refresh" button. Offering one invites the behaviour that breaks the
   system.
-- No ticket prices yet. She cannot buy anything from this screen.
+- No ticket prices yet. They cannot buy anything from this screen.
 - No countdown timer. The 10 minutes have not started.
 
 STATES TO DRAW (as separate artboards)
@@ -146,7 +146,7 @@ SCREEN: Confirmed
 
 MUST SHOW
 1. A calm success state. A tick, not confetti.
-2. What she bought: 2 x VIP, BLACKPINK — Bangkok, Impact Arena,
+2. What they bought: 2 x VIP, BLACKPINK — Bangkok, Impact Arena,
    14 November 2026.
 3. Total paid: ฿13,000, paid by PromptPay.
 4. TWO SEPARATE TICKETS, not one card saying "x2". Two people walk through
@@ -169,22 +169,22 @@ MUST NOT SHOW
 SCREEN: Hold expired during payment
 
 This is the hardest screen in the product and the reason the design exists.
-Ploy's bank took too long. Her 10 minutes ran out while the payment was in
-flight. The system voided the payment. She has no seats.
+Kenji's bank took too long. Their 10 minutes ran out while the payment was in
+flight. The system voided the payment. They have no seats.
 
-THE ONLY THING THAT MATTERS: she must understand, in under two seconds,
-that she has NOT been charged. If she does not believe that, she calls her
-bank and tells her friends the site stole her money.
+THE ONLY THING THAT MATTERS: they must understand, in under two seconds,
+that they have NOT been charged. If they do not believe that, they call their
+bank and tell their friends the site stole their money.
 
 MUST SHOW, IN THIS ORDER
 1. First, largest, unmissable: "You have not been charged."
 2. Second: what happened, in one plain sentence — "Your 10 minutes ran out
    before the payment finished, so the seats went back on sale."
-3. Third: what she can do now — "Join the queue again" as the primary
-   action, with an honest note that she starts at the back.
+3. Third: what they can do now — "Join the queue again" as the primary
+   action, with an honest note that they start at the back.
 
 TONE
-Apologetic but not grovelling. Factual. No blame on her, no blame on the
+Apologetic but not grovelling. Factual. No blame on them, no blame on the
 bank, no technical words like "timeout", "transaction", "reservation
 expired" or "authorisation voided".
 

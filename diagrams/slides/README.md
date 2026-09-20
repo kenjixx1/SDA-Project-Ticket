@@ -43,10 +43,10 @@ Nothing was changed, only left out. Every number still matches
 
 ## What to say when the slide is up
 
-**Sequence diagram** — "Two lifelines only. Ploy, and the system as one box.
+**Sequence diagram** — "Two lifelines only. Kenji, and the system as one box.
 The last line is the one that matters: if the bank answers after the ten
-minutes, she loses the seats but she is never charged."
+minutes, they lose the seats but they are never charged."
 
 **Activity diagram** — "Follow the green line for the normal path. The two
 orange diamonds are the whole design. The first one stops the same seat being
-sold twice. The second one stops Ploy paying for a seat she no longer has."
+sold twice. The second one stops Kenji paying for a seat they no longer have."

@@ -18,7 +18,7 @@
 
   <!-- title -->
   <text x="60" y="58" font-size="32" font-weight="700" fill="#14232E">Activity Diagram — Queue, Hold and Checkout</text>
-  <text x="60" y="88" font-size="18" fill="#64777F">Ploy buys 2 × VIP.  Follow the green line for the normal path.</text>
+  <text x="60" y="88" font-size="18" fill="#64777F">Kenji buys 2 × VIP.  Follow the green line for the normal path.</text>
 
   <!-- swimlanes -->
   <rect x="60" y="106" width="1480" height="158" fill="#FBFCFC" stroke="#D5DEE1" stroke-width="1.5"/>
@@ -27,7 +27,7 @@
   <line x1="200" y1="106" x2="200" y2="756" stroke="#D5DEE1" stroke-width="1.5"/>
 
   <text x="130" y="134" font-size="17" font-weight="700" fill="#3D525E" text-anchor="middle">Customer</text>
-  <text x="130" y="155" font-size="14" fill="#8496A0" text-anchor="middle">Ploy</text>
+  <text x="130" y="155" font-size="14" fill="#8496A0" text-anchor="middle">Kenji</text>
   <text x="130" y="292" font-size="17" font-weight="700" fill="#3D525E" text-anchor="middle">System</text>
   <text x="130" y="542" font-size="17" font-weight="700" fill="#A85A18" text-anchor="middle">When it</text>
   <text x="130" y="563" font-size="17" font-weight="700" fill="#A85A18" text-anchor="middle">fails</text>
@@ -156,5 +156,5 @@
   <path d="M 84 846 L 112 862 L 84 878 L 56 862 z" fill="#FDF3E7" stroke="#B4741C" stroke-width="2"/>
   <text x="130" y="868" font-size="17" fill="#3D525E"><tspan font-weight="700" fill="#14232E">Got 2 seats?</tspan>  stops the same seat being sold twice.</text>
   <path d="M 700 846 L 728 862 L 700 878 L 672 862 z" fill="#FDF3E7" stroke="#B4741C" stroke-width="2"/>
-  <text x="746" y="868" font-size="17" fill="#3D525E"><tspan font-weight="700" fill="#14232E">Hold still alive?</tspan>  stops Ploy paying for a seat she no longer has.</text>
+  <text x="746" y="868" font-size="17" fill="#3D525E"><tspan font-weight="700" fill="#14232E">Hold still alive?</tspan>  stops Kenji paying for a seat they no longer have.</text>
 </svg>

@@ -92,7 +92,7 @@ for.
                                 ▼
                      ┌─────────────────────┐
                      │   CONSUMER          │
-                     │ RejectionConsumer   │   tells Ploy why · nothing written
+                     │ RejectionConsumer   │   tells Kenji why · nothing written
                      └─────────────────────┘
 ```
 
@@ -401,7 +401,7 @@ An architecture document that lists only benefits has not made any choices.
 | Waiting room in front of everything | NFR-01 without over-provisioning | Every customer waits, including the one who arrives at 10:47 to an empty queue. |
 | **Compile-based** plug-ins | Simple, readable, easy to govern with a build check | Adding a payment method needs a redeploy. Nothing requires otherwise. |
 | Only two plug-in seams | The design stays readable | Anything that is neither a payment method nor a pricing rule means changing the core. |
-| Server-owned 10-minute clock | One clock decides; no client can cheat it | Ploy's countdown and the server can disagree by a second or two at zero. |
+| Server-owned 10-minute clock | One clock decides; no client can cheat it | Kenji's countdown and the server can disagree by a second or two at zero. |
 
 ---
 

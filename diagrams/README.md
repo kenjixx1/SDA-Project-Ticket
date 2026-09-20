@@ -89,7 +89,7 @@ It shows *what* is asked and *what* comes back — never what happens inside.
 ### Participants
 
 ```
-   Ploy : Customer                    : System
+   Kenji : Customer                    : System
 ```
 
 Two lifelines. The system is one box — do not draw filters, services or the
@@ -99,14 +99,14 @@ database. Those are design, and this diagram is requirements.
 
 | # | Direction | Message | Returns |
 |---|---|---|---|
-| 1 | Ploy → System | `joinQueue(customerId, eventId)` | `tokenId, position` |
-| 2 | Ploy → System | `getQueuePosition(tokenId)` *(loop, every 5 s until admitted)* | `position, estimatedWait` |
-| 3 | System → Ploy | `admitted(tokenId)` | — |
-| 4 | Ploy → System | `listTiers(eventId)` | `tiers[ name, price, remaining ]` |
-| 5 | Ploy → System | `holdTickets(tokenId, tierId, quantity)` | `reservationId, expiresAt` |
-| 6 | Ploy → System | `checkout(reservationId, providerKey)` | `totalAmount` |
-| 7 | System → Ploy | `paymentConfirmed(reservationId)` | — |
-| 8 | Ploy → System | `getDigitalTickets(reservationId)` | `tickets[ ticketId, qrPayload ]` |
+| 1 | Kenji → System | `joinQueue(customerId, eventId)` | `tokenId, position` |
+| 2 | Kenji → System | `getQueuePosition(tokenId)` *(loop, every 5 s until admitted)* | `position, estimatedWait` |
+| 3 | System → Kenji | `admitted(tokenId)` | — |
+| 4 | Kenji → System | `listTiers(eventId)` | `tiers[ name, price, remaining ]` |
+| 5 | Kenji → System | `holdTickets(tokenId, tierId, quantity)` | `reservationId, expiresAt` |
+| 6 | Kenji → System | `checkout(reservationId, providerKey)` | `totalAmount` |
+| 7 | System → Kenji | `paymentConfirmed(reservationId)` | — |
+| 8 | Kenji → System | `getDigitalTickets(reservationId)` | `tickets[ ticketId, qrPayload ]` |
 
 ### Fragments to show
 
@@ -230,7 +230,7 @@ A diagram missing either one has missed the design.
 **Files:** `ui-01-queue.png`, `ui-02-selection.png`, `ui-03-confirmation.png`
 **Named in the brief as the UI mockup target:** the Customer Queue screen.
 
-Design for a **phone**. Ploy is standing up with one hand on a phone, not
+Design for a **phone**. Kenji is standing up with one hand on a phone, not
 sitting at a laptop.
 
 ### Screen 1 — Queue *(the required one)*
@@ -238,17 +238,17 @@ sitting at a laptop.
 Must show:
 
 - The event name and date — *BLACKPINK — Bangkok · Impact Arena, 14 Nov 2026*
-- **Her position, as the largest thing on the screen** — *4,182*
+- **Their position, as the largest thing on the screen** — *4,182*
 - A progress bar showing movement
 - An estimated wait — *~6 min* — clearly marked as approximate
-- One line telling her what will happen next, and that her place is safe
+- One line telling them what will happen next, and that their place is safe
 
 A first draft of this screen is in
 [`../plans/sda-project-docs/plan.html`](../plans/sda-project-docs/plan.html)
 (the "Customer Queue screen" figure) and can be used as a starting point.
 
-> **The hardest thing about this screen is that nothing happens on it.** Ploy
-> stares at it for six minutes. If it does not visibly move, she refreshes —
+> **The hardest thing about this screen is that nothing happens on it.** Kenji
+> stares at it for six minutes. If it does not visibly move, they refresh —
 > and every refresh makes the spike worse for everyone. Movement is a feature,
 > not decoration.
 
@@ -268,14 +268,14 @@ after the hold (countdown running).
 
 Must show:
 
-- What she bought, the total paid
+- What they bought, the total paid
 - The QR code
 - **One ticket per seat** — 2 tickets for 2 seats, not one card saying "×2"
   (INV-07, R-E06-1)
 
 ### Worth drawing if there is time — the failure screen
 
-What Ploy sees when her hold expires **while she is paying** (UC-03 ext. 7a).
+What Kenji sees when their hold expires **while they are paying** (UC-03 ext. 7a).
 
 Two facts have to land, in this order:
 

@@ -14,16 +14,16 @@
         "id": "queue",
         "label": "Join the queue",
         "focus": [
-          "ploy",
+          "kenji",
           "system"
         ],
-        "note": "Ploy takes a numbered place and polls it until the system admits her."
+        "note": "Kenji takes a numbered place and polls it until the system admits them."
       },
       {
         "id": "hold",
         "label": "Hold the seats",
         "focus": [
-          "ploy",
+          "kenji",
           "system"
         ],
         "note": "The atomic hold either takes 2 seats or takes none."
@@ -32,7 +32,7 @@
         "id": "pay",
         "label": "Pay, and the race",
         "focus": [
-          "ploy",
+          "kenji",
           "system"
         ],
         "note": "Confirming needs two facts true at once: authorised, and the hold still alive."
@@ -61,9 +61,9 @@
   },
   "participants": [
     {
-      "id": "ploy",
+      "id": "kenji",
       "type": "external",
-      "label": "Ploy",
+      "label": "Kenji",
       "sublabel": "Customer"
     },
     {
@@ -108,7 +108,7 @@
   "messages": [
     {
       "id": "join",
-      "from": "ploy",
+      "from": "kenji",
       "to": "system",
       "y": 188,
       "label": "joinQueue(customerId, eventId)",
@@ -117,14 +117,14 @@
     {
       "id": "token",
       "from": "system",
-      "to": "ploy",
+      "to": "kenji",
       "y": 220,
       "label": "tokenId, position 4,182",
       "variant": "return"
     },
     {
       "id": "poll",
-      "from": "ploy",
+      "from": "kenji",
       "to": "system",
       "y": 272,
       "label": "getQueuePosition(tokenId)",
@@ -134,14 +134,14 @@
     {
       "id": "admitted",
       "from": "system",
-      "to": "ploy",
+      "to": "kenji",
       "y": 324,
       "label": "admitted + tiers: VIP 16 left",
       "variant": "emphasis"
     },
     {
       "id": "hold",
-      "from": "ploy",
+      "from": "kenji",
       "to": "system",
       "y": 376,
       "label": "holdTickets(tokenId, VIP, qty 2)",
@@ -150,7 +150,7 @@
     {
       "id": "held",
       "from": "system",
-      "to": "ploy",
+      "to": "kenji",
       "y": 408,
       "label": "[acquired] reservationId, expires 10:14:40",
       "variant": "return"
@@ -158,14 +158,14 @@
     {
       "id": "refused",
       "from": "system",
-      "to": "ploy",
+      "to": "kenji",
       "y": 440,
       "label": "[refused] holdRefused(reason, remaining)",
       "variant": "dashed"
     },
     {
       "id": "checkout",
-      "from": "ploy",
+      "from": "kenji",
       "to": "system",
       "y": 492,
       "label": "checkout(reservationId, \"promptpay\") = ฿13,000",
@@ -174,7 +174,7 @@
     {
       "id": "confirmed",
       "from": "system",
-      "to": "ploy",
+      "to": "kenji",
       "y": 544,
       "label": "[authorised + still held] paymentConfirmed",
       "variant": "return"
@@ -182,7 +182,7 @@
     {
       "id": "voided",
       "from": "system",
-      "to": "ploy",
+      "to": "kenji",
       "y": 576,
       "label": "[hold expired] paymentVoided — nothing charged",
       "variant": "security"
@@ -201,7 +201,7 @@
       "dot": "emerald",
       "title": "Read it as a black box",
       "items": [
-        "Only two lifelines: Ploy and the system",
+        "Only two lifelines: Kenji and the system",
         "No filters, services or database appear: those are design, not requirements"
       ]
     },
@@ -210,7 +210,7 @@
       "title": "The race the brief never named",
       "items": [
         "Confirming needs two facts at once: payment authorised AND hold still alive",
-        "If the bank answers after the 10 minutes the payment is voided: she is never charged for nothing"
+        "If the bank answers after the 10 minutes the payment is voided: they are never charged for nothing"
       ]
     }
   ]

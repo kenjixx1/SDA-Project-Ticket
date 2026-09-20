@@ -14,7 +14,7 @@ An **actor** is someone outside the system who uses it to reach a goal.
 
 | Actor | Who they are | What they want |
 |---|---|---|
-| **Customer** | A member of the public buying tickets. In this document: **Ploy**. | Get the tickets she wants, fairly, without being told "sold out" after she already paid. |
+| **Customer** | A member of the public buying tickets. In this document: **Kenji**. | Get the tickets they want, fairly, without being told "sold out" after they already paid. |
 | **Organizer** | The person who runs the event and the sale. In this document: **Chai**. | Sell every seat, see what is happening while it happens, and never face a customer holding a fake ticket. |
 
 **Only these two.** The system itself, the payment provider and the database
@@ -51,9 +51,9 @@ from nowhere.
 | FR-05 | Admit tokens to the purchase flow **in the order they were issued**, at a rate the organizer sets. |
 | FR-06 | Refuse to issue new tokens once every tier of the event is sold out. |
 
-> **FR-03 exists because of a real cheat.** Without it, Ploy opens the sale in
-> ten browser tabs, gets ten positions, and uses whichever comes up first. Her
-> neighbour with one tab is now tenth in line behind her. One token per
+> **FR-03 exists because of a real cheat.** Without it, Kenji opens the sale in
+> ten browser tabs, gets ten positions, and uses whichever comes up first. Their
+> neighbour with one tab is now tenth in line behind them. One token per
 > account per event makes the queue mean something.
 
 ### From UC-02 · Select & Hold Tickets
@@ -83,10 +83,10 @@ from nowhere.
 | FR-18 | Treat a repeated submission of the same order as the first one, and charge once. |
 | FR-19 | Keep the hold alive for its remaining time when a payment is declined, so the customer can try again. |
 
-> **FR-16 and FR-17 close the worst race in the system.** Ploy's card takes
-> eight seconds to authorise. During those eight seconds her hold can expire
-> and her seats can be sold to someone else. FR-16 says the order is only
-> confirmed if *both* facts are true. FR-17 says what happens to her money
+> **FR-16 and FR-17 close the worst race in the system.** Kenji's card takes
+> eight seconds to authorise. During those eight seconds their hold can expire
+> and their seats can be sold to someone else. FR-16 says the order is only
+> confirmed if *both* facts are true. FR-17 says what happens to their money
 > when they are not.
 
 ### From UC-04 · View Digital Ticket
@@ -122,7 +122,7 @@ from nowhere.
 | FR-30 | Let an organizer set the queue admission rate. |
 
 > **FR-26 has a hard edge on purpose.** Once the sale is open, the price is
-> frozen. Ploy must not watch ฿6,500 become ฿7,200 while her hold counts down.
+> frozen. Kenji must not watch ฿6,500 become ฿7,200 while their hold counts down.
 
 ### From UC-07 · Monitor Live Queue & Sales
 
@@ -204,7 +204,7 @@ The queue absorbs the spike; the engine stays calm.
 "almost never". Never.
 
 This is the requirement that cannot be fixed by apologising afterwards. A
-refund does not put Ploy in a seat.
+refund does not put Kenji in a seat.
 
 **Precise metric.** For every tier, at every moment:
 
@@ -234,7 +234,7 @@ test ever producing a different answer.
 
 **Plain meaning.** The system answers fast enough that people trust it.
 
-If the queue position takes 30 seconds to update, Ploy refreshes the page,
+If the queue position takes 30 seconds to update, Kenji refreshes the page,
 which makes the load worse, which makes it slower. Slow does not stay slow —
 it becomes collapse.
 

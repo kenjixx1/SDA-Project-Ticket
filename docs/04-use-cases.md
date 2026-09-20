@@ -35,7 +35,7 @@ Each specification below has these parts:
 
 | Actor | Who | In this document |
 |---|---|---|
-| **Customer** | A member of the public buying tickets | **Ploy**, buying 2 × VIP for BLACKPINK — Bangkok |
+| **Customer** | A member of the public buying tickets | **Kenji**, buying 2 × VIP for BLACKPINK — Bangkok |
 | **Organizer** | The person running the event and its sale | **Chai** |
 
 **There are only two actors, and both are people.**
@@ -60,7 +60,7 @@ to invent.
                 │  Event Ticket & Queue Management System  │
                 │                                          │
    Customer ────┼──  UC-01  Join Waiting Room              │
-   (Ploy)       │                                          │
+   (Kenji)       │                                          │
             ────┼──  UC-02  Select & Hold Tickets          │
                 │                                          │
             ────┼──  UC-03  Checkout & Pay                 │
@@ -86,43 +86,43 @@ activity diagram, not in the use case diagram.
 
 | | |
 |---|---|
-| **Actor** | Customer (Ploy) |
+| **Actor** | Customer (Kenji) |
 | **Goal** | *"Get a place in line for the BLACKPINK sale, and know where I stand."* |
-| **Preconditions** | Ploy has an account (ASM-01). The event exists and the sale-open time has passed. |
-| **Trigger** | Ploy opens the event's sale page. |
+| **Preconditions** | Kenji has an account (ASM-01). The event exists and the sale-open time has passed. |
+| **Trigger** | Kenji opens the event's sale page. |
 
 ### Main success scenario
 
-1. Ploy asks to join the sale for **BLACKPINK — Bangkok**.
-2. The system checks she has no active queue token for this event.
+1. Kenji asks to join the sale for **BLACKPINK — Bangkok**.
+2. The system checks they have no active queue token for this event.
 3. The system issues a **queue token** and puts it at the back of the queue.
-4. The system shows her **position 4,182** and an estimated wait of ~6 minutes.
-5. The system refreshes her position at least every 5 seconds while she waits.
-6. Her token reaches the front. The admission rate allows another customer in,
-   so the system admits her. **UC-02 begins.**
+4. The system shows their **position 4,182** and an estimated wait of ~6 minutes.
+5. The system refreshes their position at least every 5 seconds while they wait.
+6. Their token reaches the front. The admission rate allows another customer in,
+   so the system admits them. **UC-02 begins.**
 
 ### Extensions
 
 | # | Situation | What happens |
 |---|---|---|
 | **1a** | The sale has not opened yet | The opening time is shown. No token is issued. |
-| **1b** | Every tier is sold out | She is told so. No token is issued. (FR-06) |
+| **1b** | Every tier is sold out | They are told so. No token is issued. (FR-06) |
 | **1c** | The organizer has closed the sale (FR-29) | No new tokens. Tokens already in the queue continue. |
-| **2a** | She already has an active token for this event | The **existing** token and its current position are returned — not a new one. (FR-03) |
-| **2b** | Her previous token exists but has expired | Treated as new. Continue from step 3. |
-| **5a** | She closes the page and comes back | Extension 2a applies. **Same position.** (FR-04) |
-| **6a** | She is admitted but does nothing | Her token expires. She must rejoin at the back to try again. |
+| **2a** | They already have an active token for this event | The **existing** token and its current position are returned — not a new one. (FR-03) |
+| **2b** | Their previous token exists but has expired | Treated as new. Continue from step 3. |
+| **5a** | They close the page and come back | Extension 2a applies. **Same position.** (FR-04) |
+| **6a** | They are admitted but do nothing | Their token expires. They must rejoin at the back to try again. |
 
-> **Why 2a matters.** Without it, Ploy opens the sale in ten tabs, collects ten
-> positions, and uses whichever comes up first. Her neighbour with one tab is
+> **Why 2a matters.** Without it, Kenji opens the sale in ten tabs, collects ten
+> positions, and uses whichever comes up first. Their neighbour with one tab is
 > now behind all ten. One token per account per event is what makes the queue
 > fair rather than decorative.
 
 ### Postconditions
 
-- **Success:** a `QueueToken` exists for Ploy and this event, in state
+- **Success:** a `QueueToken` exists for Kenji and this event, in state
   `WAITING`, and later `ADMITTED`.
-- **Failure:** no token exists. Ploy has been told the reason.
+- **Failure:** no token exists. Kenji has been told the reason.
 
 ### Traces to
 
@@ -135,25 +135,25 @@ activity diagram, not in the use case diagram.
 
 | | |
 |---|---|
-| **Actor** | Customer (Ploy) |
+| **Actor** | Customer (Kenji) |
 | **Goal** | *"Lock the 2 VIP seats I want, so nobody can take them while I pay."* |
-| **Preconditions** | Ploy holds a queue token in state `ADMITTED`. The sale is open. |
-| **Trigger** | The system admits her token. |
+| **Preconditions** | Kenji holds a queue token in state `ADMITTED`. The sale is open. |
+| **Trigger** | The system admits their token. |
 
 ### Main success scenario
 
 1. The system shows every tier with its price and what is left:
    **VIP ฿6,500 — 16 left** · Zone A ฿3,800 — 350 left · Zone B ฿1,900 — 2,020 left.
-2. Ploy chooses **VIP, quantity 2**.
+2. Kenji chooses **VIP, quantity 2**.
 3. The system checks 2 against the per-order limit of **4**. It passes.
 4. The system attempts an **atomic hold** of 2 seats from VIP.
 5. The hold succeeds. VIP remaining drops **16 → 14 immediately** —
    before any payment is discussed.
 6. The system creates a `Reservation` in state `HELD`, stamped to expire
    **10 minutes** from now **by the server's clock**.
-7. The system shows her selection, the total, and a countdown starting at
+7. The system shows their selection, the total, and a countdown starting at
    **10:00**.
-8. Ploy continues to checkout. **UC-03 begins.**
+8. Kenji continues to checkout. **UC-03 begins.**
 
 > **Step 5 is the whole design.** Inventory goes down at the *hold*, not at the
 > payment. This is why two people racing for the last seats cannot both
@@ -164,11 +164,11 @@ activity diagram, not in the use case diagram.
 
 | # | Situation | What happens |
 |---|---|---|
-| **2a** | She asks for more than remain | Refused. Fresh remaining quantity shown. She may pick a smaller quantity or another tier. (FR-10) |
-| **3a** | The request would take her over 4 tickets | Refused, with the limit stated. (FR-11) |
-| **4a** | The atomic hold fails — the seats went in the milliseconds between showing and choosing | Refused. Fresh numbers shown. Back to step 1. **No partial holds**: she gets 2 or she gets 0, never 1. |
-| **6a** | **The hold expires.** Ten minutes pass with no confirmed payment. | · The seats return to the pool: VIP remaining **14 → 16**.<br>· The reservation moves to `EXPIRED`.<br>· The queue token is spent — she must rejoin to try again.<br>· Nothing is charged. (FR-12) |
-| **7a** | She changes her mind before checkout | She may release the hold. The quantity returns to the tier immediately. |
+| **2a** | They ask for more than remain | Refused. Fresh remaining quantity shown. They may pick a smaller quantity or another tier. (FR-10) |
+| **3a** | The request would take them over 4 tickets | Refused, with the limit stated. (FR-11) |
+| **4a** | The atomic hold fails — the seats went in the milliseconds between showing and choosing | Refused. Fresh numbers shown. Back to step 1. **No partial holds**: they get 2 or they get 0, never 1. |
+| **6a** | **The hold expires.** Ten minutes pass with no confirmed payment. | · The seats return to the pool: VIP remaining **14 → 16**.<br>· The reservation moves to `EXPIRED`.<br>· The queue token is spent — they must rejoin to try again.<br>· Nothing is charged. (FR-12) |
+| **7a** | They change their mind before checkout | They may release the hold. The quantity returns to the tier immediately. |
 
 > **Extension 6a is the requirement the brief left out.**
 >
@@ -199,17 +199,17 @@ E-04 Reservation · **Characteristics** **NFR-02 Data integrity**, NFR-03 Perfor
 
 | | |
 |---|---|
-| **Actor** | Customer (Ploy) |
+| **Actor** | Customer (Kenji) |
 | **Goal** | *"Pay for my held seats and be sure they are mine."* |
 | **Preconditions** | A `Reservation` in state `HELD` that has not expired. |
-| **Trigger** | Ploy starts checkout. |
+| **Trigger** | Kenji starts checkout. |
 
 ### Main success scenario
 
 1. The system calculates the total: 2 × ฿6,500 = **฿13,000**. Every registered
    pricing rule is offered the order. None apply today, so the total stands.
 2. The system shows the total, the tier, the quantity and the time remaining.
-3. Ploy chooses **PromptPay**.
+3. Kenji chooses **PromptPay**.
 4. The system creates a `Payment` in state `PENDING`, with an **idempotency
    key** taken from the reservation.
 5. The system sends the request to the PromptPay plug-in.
@@ -230,15 +230,15 @@ E-04 Reservation · **Characteristics** **NFR-02 Data integrity**, NFR-03 Perfor
 | # | Situation | What happens |
 |---|---|---|
 | **1a** | A pricing rule applies — say Early Bird −10% | Total becomes **฿11,700**. Everything else is unchanged. The core engine does not know the rule's name; see `06-architecture.md`. |
-| **3a** | Ploy submits the same order twice — double tap, or a refresh | The idempotency key matches the existing `Payment`. The second submission returns the first one's result. **Charged once.** (FR-18) |
-| **6a** | Payment is **declined** | The `Payment` becomes `DECLINED`. The reservation **stays `HELD`** for the time it has left. Ploy can try another method. (FR-19) |
+| **3a** | Kenji submits the same order twice — double tap, or a refresh | The idempotency key matches the existing `Payment`. The second submission returns the first one's result. **Charged once.** (FR-18) |
+| **6a** | Payment is **declined** | The `Payment` becomes `DECLINED`. The reservation **stays `HELD`** for the time it has left. Kenji can try another method. (FR-19) |
 | **6b** | The provider does not answer in time | Treated as unknown, not as failure. The system asks for the status again using the **same** idempotency key. If it is still unknown when the hold expires, extension 7a applies. |
-| **7a** | **The hold expired while the payment was in flight** | · The authorisation is **voided** through the provider. (FR-17)<br>· **No ticket is issued.**<br>· Ploy is told plainly: seats released, nothing charged.<br>· The reservation is already `EXPIRED` — UC-02 extension 6a returned the seats when the clock ran out. |
+| **7a** | **The hold expired while the payment was in flight** | · The authorisation is **voided** through the provider. (FR-17)<br>· **No ticket is issued.**<br>· Kenji is told plainly: seats released, nothing charged.<br>· The reservation is already `EXPIRED` — UC-02 extension 6a returned the seats when the clock ran out. |
 
 > **Extension 7a is the race the brief never mentions.**
 >
-> Ploy's bank takes eight seconds. During those eight seconds her ten minutes
-> can run out and her seats can be sold to someone else. Two answers are
+> Kenji's bank takes eight seconds. During those eight seconds their ten minutes
+> can run out and their seats can be sold to someone else. Two answers are
 > possible and only one is acceptable:
 >
 > - *Keep the money, no seat* — the customer has been robbed.
@@ -267,15 +267,15 @@ E-04 Reservation · **Characteristics** **NFR-02 Data integrity**, NFR-03 Perfor
 
 | | |
 |---|---|
-| **Actor** | Customer (Ploy) |
+| **Actor** | Customer (Kenji) |
 | **Goal** | *"Have something at the gate that proves the seat is mine."* |
-| **Preconditions** | Ploy owns at least one `CONFIRMED` reservation. |
-| **Trigger** | Ploy opens her tickets. |
+| **Preconditions** | Kenji owns at least one `CONFIRMED` reservation. |
+| **Trigger** | Kenji opens their tickets. |
 
 ### Main success scenario
 
-1. The system lists every digital ticket Ploy owns.
-2. She opens one.
+1. The system lists every digital ticket Kenji owns.
+2. They open one.
 3. The system shows: event, venue, date, tier, seat count, and a QR code.
 4. The QR code carries a **signed, single-use payload**.
 
@@ -293,7 +293,7 @@ E-04 Reservation · **Characteristics** **NFR-02 Data integrity**, NFR-03 Perfor
 
 | # | Situation | What happens |
 |---|---|---|
-| **1a** | She has no confirmed orders | An empty state explaining she has no tickets yet. |
+| **1a** | They have no confirmed orders | An empty state explaining they have no tickets yet. |
 | **3a** | The organizer cancelled the event | The ticket is shown marked `CANCELLED`. Its signature will not verify. |
 
 ### Postconditions
@@ -393,13 +393,13 @@ This table is the real content of this use case.
 
 | # | Situation | What happens |
 |---|---|---|
-| **3a** | A price change is attempted while `ON_SALE` | Refused. Ploy must not watch ฿6,500 become ฿7,200 while her countdown runs. |
+| **3a** | A price change is attempted while `ON_SALE` | Refused. Kenji must not watch ฿6,500 become ฿7,200 while their countdown runs. |
 | **3b** | A quantity reduction would go below sold + held | Refused, showing the numbers: *"VIP: 476 sold and 12 held. Cannot reduce below 488."* (FR-28) |
 | **4a** | Chai closes the sale | No new admissions. Live holds **keep their remaining time** and may still complete. When the last hold resolves, the event becomes `CLOSED`. |
 
 > **Extension 4a is a kindness with teeth.** Closing a sale must not cancel
-> Ploy's hold three minutes into her ten. She was admitted fairly; she keeps
-> her window.
+> Kenji's hold three minutes into their ten. They were admitted fairly; they keep
+> their window.
 
 ### Postconditions
 
