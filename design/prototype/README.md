@@ -37,6 +37,16 @@ Three tabs with the buying flow running as a full-screen takeover on top.
 | 8 | One ticket, full screen | UC-04 · FR-21 |
 | 12 | Hold expired while paying | UC-03 ext 7a · FR-17 |
 
+### The tab bar
+
+Icons are real **Phosphor** glyphs (music notes, ticket, user), inlined from
+`@phosphor-icons/core`. Nothing is hand-drawn. Each tab carries both the
+outline and the filled weight; the active tab swaps to filled and turns cyan,
+so state is carried twice rather than by colour alone.
+
+The icons are product-specific on purpose. A house glyph for "home" would
+have been the generic choice; music notes says what is being sold.
+
 ### The tab bar disappears during the hold
 
 Queue, select, held and pay have no tab bar. Those ten minutes are a timed

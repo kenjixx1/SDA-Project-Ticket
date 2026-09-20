@@ -448,20 +448,28 @@ body {
 }
 .tab {
   appearance: none; border: 0; background: transparent; cursor: pointer;
-  padding: 15px 4px 11px; position: relative;
-  font-family: var(--display); font-size: 13px; font-weight: 700;
-  letter-spacing: 0.01em; color: var(--bone-3);
-  transition: color 170ms var(--ease);
+  padding: 11px 4px 8px; display: grid; justify-items: center; gap: 5px;
+  font-family: var(--display); font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.005em; color: var(--bone-3);
+  transition: color 180ms var(--ease);
 }
-.tab::after {
-  content: ""; position: absolute; left: 50%; top: 0;
-  width: 26px; height: 2px; border-radius: 0 0 2px 2px;
-  background: var(--amber); transform: translateX(-50%) scaleX(0);
-  transition: transform 220ms var(--ease);
+/* Phosphor icons, outline at rest and filled on the active tab. State is
+   carried twice, by weight and by colour, so it reads at a glance. */
+.tab .ic { position: relative; width: 25px; height: 25px; }
+.tab .ic svg {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  transition: opacity 180ms var(--ease);
 }
+.tab .f { opacity: 0; }
 .tab[aria-current="page"] { color: var(--amber); }
-.tab[aria-current="page"]::after { transform: translateX(-50%) scaleX(1); }
-.tab:focus-visible { outline: 2px solid var(--amber); outline-offset: -3px; }
+.tab[aria-current="page"] .o { opacity: 0; }
+.tab[aria-current="page"] .f { opacity: 1; }
+.tab:hover { color: var(--bone-2); }
+.tab[aria-current="page"]:hover { color: var(--amber); }
+.tab:focus-visible { outline: 2px solid var(--amber); outline-offset: -3px; border-radius: 10px; }
+@media (prefers-reduced-motion: reduce) {
+  .tab, .tab .ic svg { transition: none; }
+}
 
 .screen-title { flex: none; padding: 22px 24px 16px; }
 .screen-title h2 {
@@ -659,9 +667,9 @@ body {
         </div>
       </div>
       <nav class="tabbar" aria-label="Sections">
-        <button class="tab" type="button" data-go="home" aria-current="page">Events</button>
-        <button class="tab" type="button" data-go="tickets">Tickets</button>
-        <button class="tab" type="button" data-go="account">Account</button>
+        <button class="tab" type="button" data-go="home" aria-current="page"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.69a8,8,0,0,0-6.86-1.45l-128,32A8,8,0,0,0,72,56V166.08A36,36,0,1,0,88,196V110.25l112-28v51.83A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.69ZM52,216a20,20,0,1,1,20-20A20,20,0,0,1,52,216ZM88,93.75V62.25l112-28v31.5ZM180,184a20,20,0,1,1,20-20A20,20,0,0,1,180,184Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.71a7.89,7.89,0,0,0-6.86-1.46l-128,32A8,8,0,0,0,72,56V166.1A36,36,0,1,0,88,196V102.25l112-28V134.1A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.71Z"/></svg></span>Events</button>
+        <button class="tab" type="button" data-go="tickets"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Zm192,0V192H104V64H224V88.8a40,40,0,0,0,0,78.4Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Z"/></svg></span>Tickets</button>
+        <button class="tab" type="button" data-go="account"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z"/></svg></span>Account</button>
       </nav>
     </div></div>
   </div>
@@ -925,9 +933,9 @@ body {
         </button>
       </div>
       <nav class="tabbar" aria-label="Sections">
-        <button class="tab" type="button" data-go="home">Events</button>
-        <button class="tab" type="button" data-go="tickets" aria-current="page">Tickets</button>
-        <button class="tab" type="button" data-go="account">Account</button>
+        <button class="tab" type="button" data-go="home"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.69a8,8,0,0,0-6.86-1.45l-128,32A8,8,0,0,0,72,56V166.08A36,36,0,1,0,88,196V110.25l112-28v51.83A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.69ZM52,216a20,20,0,1,1,20-20A20,20,0,0,1,52,216ZM88,93.75V62.25l112-28v31.5ZM180,184a20,20,0,1,1,20-20A20,20,0,0,1,180,184Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.71a7.89,7.89,0,0,0-6.86-1.46l-128,32A8,8,0,0,0,72,56V166.1A36,36,0,1,0,88,196V102.25l112-28V134.1A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.71Z"/></svg></span>Events</button>
+        <button class="tab" type="button" data-go="tickets" aria-current="page"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Zm192,0V192H104V64H224V88.8a40,40,0,0,0,0,78.4Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Z"/></svg></span>Tickets</button>
+        <button class="tab" type="button" data-go="account"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z"/></svg></span>Account</button>
       </nav>
     </div></div>
   </div>
@@ -947,9 +955,9 @@ body {
         </div>
       </div>
       <nav class="tabbar" aria-label="Sections">
-        <button class="tab" type="button" data-go="home">Events</button>
-        <button class="tab" type="button" data-go="tickets" aria-current="page">Tickets</button>
-        <button class="tab" type="button" data-go="account">Account</button>
+        <button class="tab" type="button" data-go="home"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.69a8,8,0,0,0-6.86-1.45l-128,32A8,8,0,0,0,72,56V166.08A36,36,0,1,0,88,196V110.25l112-28v51.83A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.69ZM52,216a20,20,0,1,1,20-20A20,20,0,0,1,52,216ZM88,93.75V62.25l112-28v31.5ZM180,184a20,20,0,1,1,20-20A20,20,0,0,1,180,184Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.71a7.89,7.89,0,0,0-6.86-1.46l-128,32A8,8,0,0,0,72,56V166.1A36,36,0,1,0,88,196V102.25l112-28V134.1A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.71Z"/></svg></span>Events</button>
+        <button class="tab" type="button" data-go="tickets" aria-current="page"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Zm192,0V192H104V64H224V88.8a40,40,0,0,0,0,78.4Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Z"/></svg></span>Tickets</button>
+        <button class="tab" type="button" data-go="account"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z"/></svg></span>Account</button>
       </nav>
     </div></div>
   </div>
@@ -981,9 +989,9 @@ body {
         </div>
       </div>
       <nav class="tabbar" aria-label="Sections">
-        <button class="tab" type="button" data-go="home">Events</button>
-        <button class="tab" type="button" data-go="tickets">Tickets</button>
-        <button class="tab" type="button" data-go="account" aria-current="page">Account</button>
+        <button class="tab" type="button" data-go="home"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.69a8,8,0,0,0-6.86-1.45l-128,32A8,8,0,0,0,72,56V166.08A36,36,0,1,0,88,196V110.25l112-28v51.83A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.69ZM52,216a20,20,0,1,1,20-20A20,20,0,0,1,52,216ZM88,93.75V62.25l112-28v31.5ZM180,184a20,20,0,1,1,20-20A20,20,0,0,1,180,184Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M212.92,17.71a7.89,7.89,0,0,0-6.86-1.46l-128,32A8,8,0,0,0,72,56V166.1A36,36,0,1,0,88,196V102.25l112-28V134.1A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.71Z"/></svg></span>Events</button>
+        <button class="tab" type="button" data-go="tickets"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Zm192,0V192H104V64H224V88.8a40,40,0,0,0,0,78.4Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M232,104a8,8,0,0,0,8-8V64a16,16,0,0,0-16-16H32A16,16,0,0,0,16,64V96a8,8,0,0,0,8,8,24,24,0,0,1,0,48,8,8,0,0,0-8,8v32a16,16,0,0,0,16,16H224a16,16,0,0,0,16-16V160a8,8,0,0,0-8-8,24,24,0,0,1,0-48ZM32,167.2a40,40,0,0,0,0-78.4V64H88V192H32Z"/></svg></span>Tickets</button>
+        <button class="tab" type="button" data-go="account" aria-current="page"><span class="ic" aria-hidden="true"><svg class="o" viewBox="0 0 256 256" fill="currentColor"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg><svg class="f" viewBox="0 0 256 256" fill="currentColor"><path d="M230.93,220a8,8,0,0,1-6.93,4H32a8,8,0,0,1-6.92-12c15.23-26.33,38.7-45.21,66.09-54.16a72,72,0,1,1,73.66,0c27.39,8.95,50.86,27.83,66.09,54.16A8,8,0,0,1,230.93,220Z"/></svg></span>Account</button>
       </nav>
     </div></div>
   </div>
