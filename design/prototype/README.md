@@ -27,8 +27,7 @@ Screen content comes from `../../diagrams/ui-mockup-prompt.md`.
 *Flow* gives you one phone to tap through, like a real app.
 *All screens* lays every screen out on one board, which is what goes on a
 slide or in the report. Exported already as
-[`../mockups/all-screens-light.png`](../mockups/all-screens-light.png) and
-`all-screens-dark.png`.
+[`../mockups/all-screens.png`](../mockups/all-screens.png).
 
 **Two buttons that demonstrate the architecture.**
 *Restart* puts you back at the event page.
@@ -94,7 +93,28 @@ The organizer side: UC-05 create event, UC-06 manage, UC-07 the live sales
 dashboard. UC-07 is the interesting one for a presentation, because it is
 where the held / sold / remaining split becomes visible.
 
-## Notes
+## The visual direction
+
+**A dark, stage-lit ticketing app.** Concerts happen in the dark, so the app
+does too.
+
+- **Theme is locked dark**, not auto. This is one committed visual world. A
+  ticketing app that flips to warm paper in daylight would read as a document,
+  not a product.
+- **One accent: amber `#F0A93B`.** Used at full scale on every primary button,
+  the progress bar and the countdown, not in 6px doses. Red appears only as
+  semantic state on the expired screen, never as a second brand colour.
+- **Archivo variable**, pushed to 900 weight and 118 width for the event
+  poster. **JetBrains Mono** for anything countable.
+- **Tickets are perforated stubs**, with real half-circle notches punched into
+  both edges. It is the one detail only this product has.
+- **Film grain** over the whole stage, on a fixed pointer-events-none layer so
+  it never repaints while scrolling.
+
+### Still needs a real asset
+
+The event poster is a typographic stand-in. It wants **real event artwork at
+780 x 560**. Everything else is final-quality.
 
 QR codes are deterministic placeholder patterns, not scannable codes. They
 carry the finder squares people recognise so the screen reads correctly.

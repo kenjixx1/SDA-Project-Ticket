@@ -6,178 +6,154 @@
 <title>Ticket Queue App Mockup</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap">
 
 <style>
 /* ==========================================================================
-   Event Ticket & Queue Management System - full customer app mockup
+   Event Ticket & Queue Management System - customer app mockup
    Screens trace to UC-01 .. UC-04. Content pinned to
    diagrams/ui-mockup-prompt.md and AGENTS.md section 2.
-   Visual language: minimalist-ui.  Build: design-taste-frontend.
-   Native CSS, one self-contained file, no build step.
+
+   Direction: a dark, stage-lit ticketing app. Concerts happen in the dark,
+   so the app does too. One amber accent, used at full scale rather than in
+   6px doses. Tickets are real perforated stubs. Theme is locked dark on
+   purpose: this is a single committed visual world, not an auto-switching
+   document. Native CSS, one file, no build step.
    ========================================================================== */
 
 :root {
-  --canvas:      #F2F1EE;
-  --surface:     #FFFFFF;
-  --surface-sub: #FAFAF9;
-  --rule:        #E7E5E1;
-  --rule-soft:   #F0EEEA;
+  /* stage */
+  --ink:        #0E0F12;   /* page ground */
+  --shell:      #141519;   /* phone body */
+  --raise:      #1B1D22;   /* cards, rows */
+  --raise-2:    #23262C;   /* pressed / selected */
+  --edge:       #2B2F36;
+  --edge-soft:  #212429;
 
-  --ink:         #23282B;
-  --ink-2:       #5C6367;
-  --ink-3:       #8E9599;
-  --on-ink:      #F7F7F6;
+  /* light on the stage */
+  --bone:       #F3F1EC;
+  --bone-2:     #A8AAB0;
+  --bone-3:     #71757D;
 
-  --accent:      #1F6B57;
-  --accent-wash: #E8F0ED;
-  --accent-ink:  #1A5847;
+  /* one accent, locked across every screen */
+  --amber:      #F0A93B;
+  --amber-deep: #C9821C;
+  --amber-wash: #2A2013;
+  --on-amber:   #17130A;
 
-  --warn:        #A8620F;
-  --warn-wash:   #FBF1E3;
+  --stop:       #F2705E;
+  --stop-wash:  #2B1714;
 
-  --stop:        #A52E24;
-  --stop-wash:   #FBECEA;
+  --r:    18px;
+  --r-sm: 11px;
 
-  --radius:   14px;
-  --radius-sm: 9px;
-
-  --font: 'Outfit', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+  --display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
   --mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --canvas:      #131619;
-    --surface:     #1B1F22;
-    --surface-sub: #21262A;
-    --rule:        #2D3337;
-    --rule-soft:   #252A2E;
-    --ink:         #E8EAEA;
-    --ink-2:       #A3ACB0;
-    --ink-3:       #757F84;
-    --on-ink:      #14171A;
-    --accent:      #57B79B;
-    --accent-wash: #1A2D28;
-    --accent-ink:  #7FCCB4;
-    --warn:        #D79C55;
-    --warn-wash:   #2E2418;
-    --stop:        #E08379;
-    --stop-wash:   #2F1D1B;
-  }
-}
-:root[data-theme="dark"] {
-  --canvas:#131619; --surface:#1B1F22; --surface-sub:#21262A;
-  --rule:#2D3337; --rule-soft:#252A2E;
-  --ink:#E8EAEA; --ink-2:#A3ACB0; --ink-3:#757F84; --on-ink:#14171A;
-  --accent:#57B79B; --accent-wash:#1A2D28; --accent-ink:#7FCCB4;
-  --warn:#D79C55; --warn-wash:#2E2418; --stop:#E08379; --stop-wash:#2F1D1B;
-}
-
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+
 body {
   margin: 0;
-  background: var(--canvas);
-  color: var(--ink);
-  font-family: var(--font);
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--display);
+  font-variation-settings: 'wdth' 100;
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   padding: 0 20px 56px;
 }
 
-/* ============================ prototype chrome ============================ */
+/* film grain over the whole stage. fixed layer, never on a scroller. */
+body::after {
+  content: "";
+  position: fixed; inset: 0; z-index: 90; pointer-events: none;
+  opacity: 0.16;
+  background-image: repeating-radial-gradient(circle at 17% 29%, rgba(255,255,255,0.10) 0 1px, transparent 1px 3px),
+                    repeating-radial-gradient(circle at 71% 63%, rgba(255,255,255,0.08) 0 1px, transparent 1px 4px);
+  background-size: 140px 140px, 190px 190px;
+}
+
+/* ============================= prototype chrome ========================== */
 
 .chrome {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding-block: 26px 18px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px 24px;
-  align-items: flex-end;
-  justify-content: space-between;
+  max-width: 1280px; margin: 0 auto;
+  padding-block: 28px 20px;
+  display: flex; flex-wrap: wrap; gap: 16px 24px;
+  align-items: flex-end; justify-content: space-between;
 }
 .chrome h1 {
-  font-size: 17px; font-weight: 600; letter-spacing: -0.015em; margin: 0 0 3px;
+  font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 3px;
+  font-variation-settings: 'wdth' 112;
 }
 .chrome .meta {
-  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+  font-family: var(--mono); font-size: 11px; color: var(--bone-3);
   letter-spacing: 0.05em; margin: 0;
 }
 .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
-.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface); }
+.seg { display: inline-flex; border: 1px solid var(--edge); border-radius: var(--r-sm); overflow: hidden; background: var(--raise); }
 .seg button {
   appearance: none; border: 0; background: transparent;
-  font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--ink-2);
-  padding: 9px 15px; cursor: pointer;
+  font-family: var(--display); font-size: 13px; font-weight: 600; color: var(--bone-2);
+  padding: 9px 16px; cursor: pointer;
   transition: background 170ms var(--ease), color 170ms var(--ease);
 }
-.seg button + button { border-left: 1px solid var(--rule); }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.seg button + button { border-left: 1px solid var(--edge); }
+.seg button[aria-pressed="true"] { background: var(--amber); color: var(--on-amber); }
 .seg button:active { transform: scale(0.98); }
-.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.seg button:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
 
 .ghost {
-  appearance: none; border: 1px solid var(--rule); border-radius: var(--radius-sm);
-  background: var(--surface); font-family: var(--font); font-size: 13px;
-  font-weight: 500; color: var(--ink-2); padding: 9px 15px; cursor: pointer;
+  appearance: none; border: 1px solid var(--edge); border-radius: var(--r-sm);
+  background: var(--raise); font-family: var(--display); font-size: 13px;
+  font-weight: 600; color: var(--bone-2); padding: 9px 16px; cursor: pointer;
   transition: background 170ms var(--ease), color 170ms var(--ease), border-color 170ms var(--ease);
 }
-.ghost:hover { background: var(--surface-sub); }
+.ghost:hover { background: var(--raise-2); color: var(--bone); }
 .ghost:active { transform: scale(0.98); }
-.ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.ghost.danger { color: var(--stop); border-color: var(--stop); background: var(--stop-wash); }
+.ghost:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.ghost.danger { color: var(--stop); border-color: #4A2722; background: var(--stop-wash); }
 
-/* ============================== stage modes =============================== */
+/* ================================ stage ================================== */
 
 .stage { max-width: 1280px; margin: 0 auto; }
-
-/* flow: one phone, full size */
 .stage[data-mode="flow"] { display: flex; justify-content: center; }
 .stage[data-mode="flow"] .card { display: none; }
 .stage[data-mode="flow"] .card.is-active { display: block; }
 .stage[data-mode="flow"] .card-label { display: none; }
 
-/* board: every screen at once */
 .stage[data-mode="board"] {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 36px 24px;
-  justify-items: center;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 38px 24px; justify-items: center;
 }
 .stage[data-mode="board"] .card { width: 250px; }
-.stage[data-mode="board"] .frame {
-  width: 390px; height: 844px;
-  transform: scale(0.641);
-  transform-origin: top left;
-}
+.stage[data-mode="board"] .frame { transform: scale(0.641); transform-origin: top left; }
 .stage[data-mode="board"] .frame-wrap { width: 250px; height: 541px; overflow: hidden; }
 
 .card-label {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.09em;
-  text-transform: uppercase; color: var(--ink-3);
-  margin-bottom: 9px; display: flex; gap: 8px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--bone-3);
+  margin-bottom: 10px; display: flex; gap: 8px;
 }
-.card-label .uc { color: var(--accent); }
+.card-label .uc { color: var(--amber); }
 
-/* ================================= phone ================================== */
+/* ================================ phone ================================== */
 
 .frame {
   width: 390px; height: 844px;
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: 34px;
-  overflow: hidden;
+  background: var(--shell);
+  border: 1px solid var(--edge);
+  border-radius: 38px; overflow: hidden;
   display: flex; flex-direction: column;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02), 0 18px 48px rgba(24,28,30,0.07);
+  box-shadow: 0 30px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 @media (max-width: 430px) {
-  body { padding-inline: 0 0; }
+  body { padding-inline: 0; }
   .chrome { padding-inline: 16px; }
   .stage[data-mode="flow"] .frame {
     width: 100%; height: auto; min-height: 100dvh;
@@ -186,241 +162,284 @@ body {
   .stage[data-mode="board"] { grid-template-columns: 1fr; }
 }
 
-/* status bar */
 .sb {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 24px 0;
+  padding: 15px 24px 0; flex: none;
   font-family: var(--mono); font-size: 11px; font-weight: 500;
-  color: var(--ink-3); letter-spacing: 0.02em; flex: none;
+  color: var(--bone-3); letter-spacing: 0.02em;
 }
 
-/* app top bar */
-.top {
-  padding: 18px 24px 16px;
-  border-bottom: 1px solid var(--rule-soft);
-  flex: none;
-}
-.top .ev { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; margin: 0 0 3px; }
-.top .vn { margin: 0; font-size: 13px; color: var(--ink-2); }
-.top.compact .ev { font-size: 15px; font-weight: 500; }
-.top.compact .vn { font-size: 12px; }
+/* --------------------------- event poster panel -------------------------- */
+/* TODO: replace with real event artwork, 780 x 560, art direction from the
+   promoter. The typographic poster below is a stand-in, not the final asset. */
 
-/* body */
+.poster {
+  position: relative; flex: none;
+  padding: 30px 24px 26px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% -18%, rgba(240,169,59,0.30) 0%, rgba(240,169,59,0.06) 42%, transparent 72%),
+    linear-gradient(180deg, #1A1C21 0%, #131418 100%);
+  border-bottom: 1px solid var(--edge-soft);
+}
+.poster::after {           /* stage haze */
+  content: ""; position: absolute; left: 50%; top: -60px;
+  width: 320px; height: 220px; transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(255,255,255,0.10), transparent 70%);
+  pointer-events: none;
+}
+.poster .act-name {
+  position: relative; z-index: 1;
+  font-size: 44px; font-weight: 900; line-height: 0.88;
+  letter-spacing: -0.035em; font-variation-settings: 'wdth' 118;
+  text-transform: uppercase; margin: 0 0 10px;
+}
+.poster .act-meta {
+  position: relative; z-index: 1;
+  font-family: var(--mono); font-size: 11.5px; color: var(--bone-2);
+  letter-spacing: 0.06em; text-transform: uppercase; margin: 0;
+}
+.poster.slim { padding: 18px 24px 16px; }
+.poster.slim .act-name { font-size: 22px; margin-bottom: 5px; }
+
+/* app top bar for non poster screens */
+.top { padding: 20px 24px 16px; border-bottom: 1px solid var(--edge-soft); flex: none; }
+.top .ev { font-size: 21px; font-weight: 800; letter-spacing: -0.025em; margin: 0 0 3px; font-variation-settings: 'wdth' 110; }
+.top .vn { margin: 0; font-size: 13.5px; color: var(--bone-2); }
+
 .body { flex: 1; overflow: hidden; padding: 0 24px; display: flex; flex-direction: column; }
 .body.center { justify-content: center; text-align: center; }
 .body.scroll { overflow-y: auto; padding-block: 20px; }
 
-/* footer action area */
 .act {
-  flex: none;
-  padding: 16px 24px calc(22px + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid var(--rule-soft);
-  display: grid; gap: 10px;
+  flex: none; padding: 16px 24px calc(22px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--edge-soft); display: grid; gap: 10px;
 }
-.act.plain { border-top: 0; }
+
+/* ------------------------------- buttons --------------------------------- */
 
 .btn {
   appearance: none; border: 0; width: 100%;
-  background: var(--ink); color: var(--on-ink);
-  font-family: var(--font); font-size: 16px; font-weight: 500;
-  padding: 16px; border-radius: var(--radius-sm); cursor: pointer;
+  background: var(--amber); color: var(--on-amber);
+  font-family: var(--display); font-size: 16.5px; font-weight: 700;
+  letter-spacing: -0.005em;
+  padding: 17px; border-radius: var(--r-sm); cursor: pointer;
   transition: transform 140ms var(--ease), background 170ms var(--ease);
 }
-.btn:active { transform: scale(0.985); }
-.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btn[disabled] { background: var(--rule); color: var(--ink-3); cursor: not-allowed; }
-.btn.go { background: var(--accent); color: #FFFFFF; }
-:root[data-theme="dark"] .btn.go, :root:not([data-theme="light"]) .btn.go { color: #0E1F1A; }
-.btn.quiet { background: transparent; color: var(--ink-2); border: 1px solid var(--rule); }
+.btn:hover { background: #F7B855; }
+.btn:active { transform: translateY(1px) scale(0.99); }
+.btn:focus-visible { outline: 2px solid var(--bone); outline-offset: 3px; }
+.btn.quiet { background: transparent; color: var(--bone-2); border: 1px solid var(--edge); }
+.btn.quiet:hover { background: var(--raise); color: var(--bone); }
 
-.hint { font-size: 12.5px; color: var(--ink-3); text-align: center; margin: 0; }
+.hint { font-size: 12.5px; color: var(--bone-3); text-align: center; margin: 0; }
 
-/* ---------- shared bits ---------- */
+/* ------------------------------ shared bits ------------------------------ */
 
 .eyebrow {
   font-family: var(--mono); font-size: 10.5px; font-weight: 500;
-  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3);
-  margin-bottom: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--amber);
+  margin-bottom: 12px;
 }
 .big {
-  font-size: 88px; font-weight: 300; line-height: 0.92; letter-spacing: -0.045em;
-  font-variant-numeric: tabular-nums; margin-bottom: 6px;
+  font-size: 96px; font-weight: 800; line-height: 0.86; letter-spacing: -0.055em;
+  font-variation-settings: 'wdth' 108;
+  font-variant-numeric: tabular-nums; margin-bottom: 8px;
 }
-.sub { font-size: 14px; color: var(--ink-2); margin: 0 0 30px; }
-.sub b { font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sub { font-size: 14px; color: var(--bone-2); margin: 0 0 30px; }
+.sub b { font-weight: 600; color: var(--bone); font-variant-numeric: tabular-nums; }
 
-.track { height: 6px; border-radius: 3px; background: var(--rule); overflow: hidden; margin-bottom: 14px; }
+.track { height: 8px; border-radius: 4px; background: var(--raise-2); overflow: hidden; margin-bottom: 14px; }
 .fill {
-  display: block; height: 100%; width: 100%; background: var(--accent);
-  border-radius: 3px; transform: scaleX(0.62); transform-origin: left center;
+  display: block; height: 100%; width: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--amber-deep), var(--amber));
+  transform: scaleX(0.62); transform-origin: left center;
   transition: transform 900ms var(--ease);
 }
 @media (prefers-reduced-motion: reduce) { .fill { transition: none; } }
 
 .meta-row {
   display: flex; justify-content: space-between; align-items: baseline;
-  font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
-  letter-spacing: 0.02em; margin-bottom: 34px;
+  font-family: var(--mono); font-size: 11.5px; color: var(--bone-3);
+  letter-spacing: 0.03em; margin-bottom: 32px;
 }
-.meta-row .r { color: var(--ink-2); }
+.meta-row .r { color: var(--amber); }
 
 .panel {
-  background: var(--surface-sub); border: 1px solid var(--rule-soft);
-  border-radius: var(--radius); padding: 16px 18px;
-  text-align: left; font-size: 14px; line-height: 1.55; color: var(--ink-2);
+  background: var(--raise); border: 1px solid var(--edge-soft);
+  border-radius: var(--r); padding: 17px 19px;
+  text-align: left; font-size: 14px; line-height: 1.55; color: var(--bone-2);
 }
-.panel b { color: var(--ink); font-weight: 500; }
-.panel.go { background: var(--accent-wash); border-color: var(--accent); }
-.panel.go b { color: var(--accent-ink); }
+.panel b { color: var(--bone); font-weight: 600; }
+.panel.go { background: var(--amber-wash); border-color: var(--amber-deep); }
+.panel.go b { color: var(--amber); }
 
 .live-bar {
-  flex: none; border-top: 1px solid var(--rule-soft);
+  flex: none; border-top: 1px solid var(--edge-soft);
   padding: 15px 24px calc(19px + env(safe-area-inset-bottom, 0px));
-  display: flex; align-items: center; gap: 9px;
-  font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.02em;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; color: var(--bone-3); letter-spacing: 0.03em;
 }
-.beacon { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; position: relative; }
-.beacon::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid var(--accent); opacity: 0; }
+.beacon { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); flex: none; position: relative; }
+.beacon::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid var(--amber); opacity: 0; }
 @media (prefers-reduced-motion: no-preference) { .beacon::after { animation: ring 2.6s var(--ease) infinite; } }
-@keyframes ring { 0% { opacity: .55; transform: scale(.6);} 70%,100% { opacity: 0; transform: scale(1.5);} }
+@keyframes ring { 0% { opacity: .6; transform: scale(.6);} 70%,100% { opacity: 0; transform: scale(1.6);} }
 
-/* ---------- tier rows (UC-02) ---------- */
+/* ------------------------------ tier rows -------------------------------- */
 
-.tiers { display: grid; gap: 10px; margin-bottom: 22px; }
+.tiers { display: grid; gap: 10px; margin-bottom: 20px; }
 .tier {
-  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px;
-  border: 1px solid var(--rule); border-radius: var(--radius);
-  padding: 15px 16px; background: var(--surface); cursor: pointer;
-  text-align: left; font-family: var(--font);
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3px 12px;
+  border: 1px solid var(--edge); border-radius: var(--r);
+  padding: 16px 17px; background: var(--raise); cursor: pointer;
+  text-align: left; font-family: var(--display);
   transition: border-color 170ms var(--ease), background 170ms var(--ease);
 }
-.tier[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-wash); }
-.tier:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.tier .nm { font-size: 16px; font-weight: 500; color: var(--ink); }
-.tier .pr { font-size: 16px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
-.tier .lf { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.02em; }
-.tier .lf.low { color: var(--warn); }
-.tier[disabled] { opacity: 0.45; cursor: not-allowed; }
+.tier[aria-pressed="true"] { border-color: var(--amber); background: var(--amber-wash); }
+.tier:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.tier .nm { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; }
+.tier .pr { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.tier .lf { font-family: var(--mono); font-size: 11px; color: var(--bone-3); letter-spacing: 0.03em; }
+.tier .lf.low { color: var(--stop); }
 
 .qty {
   display: flex; align-items: center; justify-content: space-between;
-  border: 1px solid var(--rule); border-radius: var(--radius);
-  padding: 12px 14px; margin-bottom: 10px;
+  border: 1px solid var(--edge); border-radius: var(--r);
+  padding: 12px 14px; margin-bottom: 10px; background: var(--raise);
 }
-.qty .lab { font-size: 14px; color: var(--ink-2); }
-.qty .ctl { display: flex; align-items: center; gap: 14px; }
+.qty .lab { font-size: 14px; color: var(--bone-2); }
+.qty .ctl { display: flex; align-items: center; gap: 16px; }
 .step {
-  appearance: none; width: 34px; height: 34px; border-radius: var(--radius-sm);
-  border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
-  font-family: var(--font); font-size: 18px; line-height: 1; cursor: pointer;
+  appearance: none; width: 36px; height: 36px; border-radius: var(--r-sm);
+  border: 1px solid var(--edge); background: var(--raise-2); color: var(--bone);
+  font-family: var(--display); font-size: 19px; font-weight: 600; line-height: 1; cursor: pointer;
 }
-.step[disabled] { color: var(--ink-3); cursor: not-allowed; }
-.step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.qty .n { font-size: 20px; font-weight: 500; min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; }
+.step[disabled] { color: var(--bone-3); cursor: not-allowed; opacity: 0.5; }
+.step:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.qty .n { font-size: 22px; font-weight: 700; min-width: 24px; text-align: center; font-variant-numeric: tabular-nums; }
 
 .total {
   display: flex; justify-content: space-between; align-items: baseline;
-  padding-top: 14px; border-top: 1px solid var(--rule-soft);
+  padding-top: 16px; border-top: 1px solid var(--edge-soft);
 }
-.total .l { font-size: 14px; color: var(--ink-2); }
-.total .v { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.total .l { font-size: 14px; color: var(--bone-2); }
+.total .v {
+  font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em; font-variation-settings: 'wdth' 106;
+}
 
-/* ---------- countdown (UC-02 / UC-03) ---------- */
+/* ------------------------------ countdown -------------------------------- */
 
 .count {
-  display: flex; align-items: baseline; justify-content: space-between;
-  background: var(--warn-wash); border: 1px solid var(--warn);
-  border-radius: var(--radius); padding: 13px 16px; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--amber-wash); border: 1px solid var(--amber-deep);
+  border-radius: var(--r); padding: 14px 18px; margin-bottom: 18px;
 }
-.count .cl { font-size: 13px; color: var(--warn); }
+.count .cl { font-size: 13px; color: var(--amber); font-weight: 600; }
 .count .cv {
-  font-family: var(--mono); font-size: 22px; font-weight: 700;
-  color: var(--warn); font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+  font-family: var(--mono); font-size: 27px; font-weight: 700;
+  color: var(--amber); font-variant-numeric: tabular-nums; letter-spacing: 0.005em;
 }
 
-/* ---------- order summary rows ---------- */
-
-.rows { display: grid; gap: 0; margin-bottom: 18px; }
+.rows { display: grid; margin-bottom: 18px; }
 .rows .r {
   display: flex; justify-content: space-between; align-items: baseline;
-  padding: 11px 0; font-size: 14.5px; color: var(--ink-2);
+  padding: 12px 0; font-size: 14.5px; color: var(--bone-2);
 }
-.rows .r + .r { border-top: 1px solid var(--rule-soft); }
-.rows .r b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.rows .r + .r { border-top: 1px solid var(--edge-soft); }
+.rows .r b { color: var(--bone); font-weight: 600; font-variant-numeric: tabular-nums; }
 
-/* ---------- payment ---------- */
+/* ------------------------------- payment --------------------------------- */
 
 .pay-method {
-  display: flex; align-items: center; gap: 12px;
-  border: 1px solid var(--accent); background: var(--accent-wash);
-  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 13px;
+  border: 1px solid var(--amber-deep); background: var(--amber-wash);
+  border-radius: var(--r); padding: 15px 17px; margin-bottom: 18px;
 }
-.pay-method .pm-n { font-size: 15px; font-weight: 500; color: var(--accent-ink); }
-.pay-method .pm-d { font-size: 12.5px; color: var(--ink-2); }
+.pay-method .pm-n { font-size: 15.5px; font-weight: 700; color: var(--amber); }
+.pay-method .pm-d { font-size: 12.5px; color: var(--bone-2); }
 .pm-mark {
-  width: 34px; height: 34px; border-radius: var(--radius-sm); flex: none;
-  background: var(--accent); color: #FFF;
+  width: 38px; height: 38px; border-radius: var(--r-sm); flex: none;
+  background: var(--amber); color: var(--on-amber);
   display: grid; place-items: center;
   font-family: var(--mono); font-size: 12px; font-weight: 700;
 }
-:root[data-theme="dark"] .pm-mark, :root:not([data-theme="light"]) .pm-mark { color: #0E1F1A; }
 
 /* QR placeholder: a deterministic matrix, not a scannable code */
 .qr {
-  width: 172px; height: 172px; margin: 0 auto 14px;
+  width: 180px; height: 180px; margin: 0 auto 16px;
   display: grid; grid-template-columns: repeat(21, 1fr); grid-template-rows: repeat(21, 1fr);
-  gap: 0; padding: 10px; background: #FFFFFF; border-radius: var(--radius-sm);
-  border: 1px solid var(--rule);
+  padding: 11px; background: var(--bone); border-radius: var(--r-sm);
 }
 .qr i { background: transparent; }
-.qr i.on { background: #17191A; }
-.qr.sm { width: 104px; height: 104px; padding: 7px; }
+.qr i.on { background: #0E0F12; }
+.qr.sm { width: 100px; height: 100px; padding: 6px; border-radius: 8px; }
 
-/* ---------- ticket card (UC-04) ---------- */
+/* ----------------------------- ticket stub ------------------------------- */
+/* the one detail only this product has: a stub with real notches */
 
-.ticket {
-  border: 1px solid var(--rule); border-radius: var(--radius);
-  background: var(--surface); overflow: hidden; margin-bottom: 12px;
+.stub {
+  position: relative; background: var(--raise);
+  border: 1px solid var(--edge); border-radius: var(--r);
+  margin-bottom: 14px; overflow: hidden;
 }
-.ticket .th {
-  padding: 13px 16px; border-bottom: 1px dashed var(--rule);
+.stub .sh {
+  padding: 14px 17px 13px;
   display: flex; justify-content: space-between; align-items: baseline;
 }
-.ticket .tn { font-size: 14.5px; font-weight: 500; }
-.ticket .tid { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: 0.04em; }
-.ticket .tb { padding: 16px; display: flex; gap: 16px; align-items: center; }
-.ticket .tinfo { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
-.ticket .tinfo b { display: block; color: var(--ink); font-weight: 500; font-size: 13.5px; margin-bottom: 2px; }
-.single-use { font-family: var(--mono); font-size: 10px; color: var(--ink-3); letter-spacing: 0.05em; margin-top: 6px; }
+.stub .st { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; }
+.stub .sid { font-family: var(--mono); font-size: 10.5px; color: var(--bone-3); letter-spacing: 0.06em; }
+.stub .perf {
+  position: relative; height: 1px;
+  background-image: linear-gradient(90deg, var(--edge) 0 5px, transparent 5px 10px);
+  background-size: 10px 1px;
+}
+.stub .perf::before, .stub .perf::after {
+  content: ""; position: absolute; top: -9px; width: 18px; height: 18px;
+  border-radius: 50%; background: var(--shell);
+  box-shadow: inset 0 0 0 1px var(--edge);
+}
+.stub .perf::before { left: -9px; }
+.stub .perf::after  { right: -9px; }
+.stub .sbd { padding: 16px 17px; display: flex; gap: 16px; align-items: center; }
+.stub .sinfo { font-size: 12.5px; color: var(--bone-2); line-height: 1.5; }
+.stub .sinfo b {
+  display: block; color: var(--amber); font-weight: 800; font-size: 16px;
+  letter-spacing: -0.02em; margin-bottom: 3px; text-transform: uppercase;
+}
+.once {
+  font-family: var(--mono); font-size: 9.5px; color: var(--bone-3);
+  letter-spacing: 0.1em; margin-top: 7px;
+}
 
-/* ---------- outcome screens ---------- */
+/* ----------------------------- outcome ----------------------------------- */
 
 .mark {
-  width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 20px;
-  display: grid; place-items: center;
-  font-family: var(--font); font-size: 26px; font-weight: 400; line-height: 1;
+  width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 22px;
+  display: grid; place-items: center; font-size: 27px; line-height: 1;
 }
-.mark.ok   { background: var(--accent-wash); color: var(--accent-ink); border: 1px solid var(--accent); }
-.mark.stop { background: var(--stop-wash);   color: var(--stop);       border: 1px solid var(--stop); }
+.mark.ok   { background: var(--amber); color: var(--on-amber); }
+.mark.stop { background: var(--stop-wash); color: var(--stop); border: 1px solid var(--stop); }
 
-.headline { font-size: 27px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.2; margin: 0 0 12px; }
+.headline {
+  font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.08;
+  font-variation-settings: 'wdth' 106; margin: 0 0 14px;
+}
 .headline.stop { color: var(--stop); }
-.explain { font-size: 15px; color: var(--ink-2); margin: 0 0 26px; line-height: 1.6; }
+.explain { font-size: 15px; color: var(--bone-2); margin: 0 0 26px; line-height: 1.6; }
 
-/* screen transition, motivated: it signals a step forward in the flow */
 @media (prefers-reduced-motion: no-preference) {
-  .stage[data-mode="flow"] .card.is-active .frame { animation: enter 380ms var(--ease); }
+  .stage[data-mode="flow"] .card.is-active .frame { animation: enter 400ms var(--ease); }
 }
-@keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-/* ---------- footnote ---------- */
 .note {
-  max-width: 1280px; margin: 34px auto 0;
-  font-size: 13.5px; line-height: 1.65; color: var(--ink-2);
-  border-top: 1px solid var(--rule); padding-top: 18px;
+  max-width: 1280px; margin: 38px auto 0;
+  font-size: 13.5px; line-height: 1.65; color: var(--bone-2);
+  border-top: 1px solid var(--edge); padding-top: 20px;
 }
-.note b { color: var(--ink); font-weight: 500; }
-.note p { margin: 0 0 8px; max-width: 78ch; }
+.note b { color: var(--bone); font-weight: 600; }
+.note p { margin: 0 0 9px; max-width: 78ch; }
 .note p:last-child { margin: 0; }
 </style>
 </head>
@@ -448,13 +467,14 @@ body {
     <div class="card-label"><span class="uc">UC-01</span><span>Event</span></div>
     <div class="frame-wrap"><div class="frame">
       <div class="sb"><span>09:59</span><span>LTE</span></div>
-      <div class="top">
-        <p class="ev">BLACKPINK</p>
-        <p class="vn">Impact Arena, Bangkok · 14 Nov 2026</p>
+      <!-- TODO: real event artwork, 780 x 560 -->
+      <div class="poster">
+        <p class="act-name">Blackpink<br>Bangkok</p>
+        <p class="act-meta">Impact Arena · 14 Nov 2026</p>
       </div>
       <div class="body center">
         <p class="eyebrow">Sale opens</p>
-        <div class="big" style="font-size:62px">10:00</div>
+        <div class="big" style="font-size:68px">10:00</div>
         <p class="sub">Saturday 1 October</p>
         <div class="rows">
           <div class="r"><span>VIP</span><b>฿6,500</b></div>
@@ -463,12 +483,11 @@ body {
         </div>
         <div class="panel">
           <b>Everyone waits in the same line.</b> Joining early does not help.
-          Your place is set by the moment you tap, not by how long you have had
-          the page open.
+          Your place is set by the moment you tap.
         </div>
       </div>
       <div class="act">
-        <button class="btn go" data-go="queue" type="button">Join the queue</button>
+        <button class="btn" data-go="queue" type="button">Join the queue</button>
         <p class="hint">Maximum 4 tickets per person</p>
       </div>
     </div></div>
@@ -479,9 +498,9 @@ body {
     <div class="card-label"><span class="uc">UC-01</span><span>Queue</span></div>
     <div class="frame-wrap"><div class="frame">
       <div class="sb"><span>10:04</span><span>LTE</span></div>
-      <div class="top">
-        <p class="ev">BLACKPINK</p>
-        <p class="vn">Impact Arena, Bangkok · 14 Nov 2026</p>
+      <div class="poster slim">
+        <p class="act-name">Blackpink</p>
+        <p class="act-meta">Impact Arena · 14 Nov 2026</p>
       </div>
       <div class="body center">
         <p class="eyebrow" id="q-label">Your position</p>
@@ -489,12 +508,12 @@ body {
         <p class="sub" id="q-ahead"><b>4,181</b> people are ahead of you</p>
         <div class="track"><span class="fill" id="q-fill" style="transform:scaleX(0.62)"></span></div>
         <div class="meta-row">
-          <span id="q-moved">You have moved 6,823 places</span>
+          <span id="q-moved">Moved 6,823 places</span>
           <span class="r" id="q-est">about 6 min</span>
         </div>
         <div class="panel" id="q-panel">
           <b>Your place is saved.</b> Keep this page open. When it is your turn
-          you will get 10 minutes to choose your tickets and pay.
+          you get 10 minutes to choose and pay.
         </div>
       </div>
       <div class="live-bar">
@@ -509,7 +528,7 @@ body {
     <div class="card-label"><span class="uc">UC-02</span><span>Select</span></div>
     <div class="frame-wrap"><div class="frame">
       <div class="sb"><span>10:10</span><span>LTE</span></div>
-      <div class="top compact">
+      <div class="top">
         <p class="ev">You are in</p>
         <p class="vn">Choose your tickets. Nothing is reserved yet.</p>
       </div>
@@ -517,7 +536,7 @@ body {
         <div class="tiers">
           <button class="tier" type="button" data-tier="vip" aria-pressed="true">
             <span class="nm">VIP</span><span class="pr">฿6,500</span>
-            <span class="lf low">16 left</span><span></span>
+            <span class="lf low">only 16 left</span><span></span>
           </button>
           <button class="tier" type="button" data-tier="a" aria-pressed="false">
             <span class="nm">Zone A</span><span class="pr">฿3,800</span>
@@ -536,11 +555,11 @@ body {
             <button class="step" id="q-plus" type="button" aria-label="One more ticket">+</button>
           </span>
         </div>
-        <p class="hint" style="text-align:left;margin-bottom:18px">Maximum 4 per person</p>
+        <p class="hint" style="text-align:left;margin-bottom:20px">Maximum 4 per person</p>
         <div class="total"><span class="l" id="sel-line">2 × VIP</span><span class="v" id="sel-total">฿13,000</span></div>
       </div>
       <div class="act">
-        <button class="btn go" data-go="hold" type="button">Hold these seats</button>
+        <button class="btn" data-go="hold" type="button">Hold these seats</button>
         <p class="hint">Holding takes them out of the sale for 10 minutes</p>
       </div>
     </div></div>
@@ -551,9 +570,9 @@ body {
     <div class="card-label"><span class="uc">UC-02</span><span>Held</span></div>
     <div class="frame-wrap"><div class="frame">
       <div class="sb"><span>10:11</span><span>LTE</span></div>
-      <div class="top compact">
+      <div class="top">
         <p class="ev">Seats held</p>
-        <p class="vn">They are yours until the timer runs out.</p>
+        <p class="vn">Yours until the timer runs out.</p>
       </div>
       <div class="body scroll">
         <div class="count">
@@ -565,14 +584,14 @@ body {
           <div class="r"><span>Tickets</span><b>2</b></div>
           <div class="r"><span>Price each</span><b>฿6,500</b></div>
         </div>
-        <div class="total" style="margin-bottom:18px"><span class="l">Total</span><span class="v">฿13,000</span></div>
-        <div class="panel">
+        <div class="total" style="margin-bottom:20px"><span class="l">Total</span><span class="v">฿13,000</span></div>
+        <div class="panel go">
           <b>VIP just dropped from 16 to 14.</b> Your two seats left the sale the
           moment you held them, so nobody else can buy them while you pay.
         </div>
       </div>
       <div class="act">
-        <button class="btn go" data-go="pay" type="button">Continue to payment</button>
+        <button class="btn" data-go="pay" type="button">Continue to payment</button>
         <button class="btn quiet" data-go="select" type="button">Release and choose again</button>
       </div>
     </div></div>
@@ -583,9 +602,9 @@ body {
     <div class="card-label"><span class="uc">UC-03</span><span>Pay</span></div>
     <div class="frame-wrap"><div class="frame">
       <div class="sb"><span>10:12</span><span>LTE</span></div>
-      <div class="top compact">
+      <div class="top">
         <p class="ev">Pay ฿13,000</p>
-        <p class="vn">2 × VIP · BLACKPINK, 14 Nov 2026</p>
+        <p class="vn">2 × VIP for Blackpink, 14 Nov 2026</p>
       </div>
       <div class="body scroll" style="text-align:center">
         <div class="count">
@@ -600,14 +619,14 @@ body {
           </span>
         </div>
         <div class="qr" id="qr-pay" aria-label="PromptPay code, placeholder" role="img"></div>
-        <p class="hint" style="margin-bottom:16px">Code expires with your hold</p>
+        <p class="hint" style="margin-bottom:18px">This code expires with your hold</p>
         <div class="panel" style="text-align:left">
           <b>Do not close this page.</b> We confirm your tickets as soon as the
           bank answers, and only if your hold is still running.
         </div>
       </div>
       <div class="act">
-        <button class="btn go" data-go="done" type="button">I have paid</button>
+        <button class="btn" data-go="done" type="button">I have paid</button>
       </div>
     </div></div>
   </div>
@@ -623,23 +642,25 @@ body {
         <p class="explain" style="text-align:center">
           Paid ฿13,000 by PromptPay. Two tickets, one for each seat.
         </p>
-        <div class="ticket">
-          <div class="th"><span class="tn">Ticket 1 of 2</span><span class="tid">TKT-9F42-01</span></div>
-          <div class="tb">
+        <div class="stub">
+          <div class="sh"><span class="st">Ticket 1 of 2</span><span class="sid">TKT-9F42-01</span></div>
+          <div class="perf"></div>
+          <div class="sbd">
             <div class="qr sm" data-qr="TKT-9F42-01" role="img" aria-label="Entry code, placeholder"></div>
-            <div class="tinfo">
-              <b>VIP</b>BLACKPINK<br>Impact Arena, Bangkok<br>14 Nov 2026, 19:00
-              <div class="single-use">SINGLE USE</div>
+            <div class="sinfo">
+              <b>VIP</b>Blackpink, Bangkok<br>Impact Arena<br>14 Nov 2026, 19:00
+              <div class="once">SINGLE USE</div>
             </div>
           </div>
         </div>
-        <div class="ticket">
-          <div class="th"><span class="tn">Ticket 2 of 2</span><span class="tid">TKT-9F42-02</span></div>
-          <div class="tb">
+        <div class="stub">
+          <div class="sh"><span class="st">Ticket 2 of 2</span><span class="sid">TKT-9F42-02</span></div>
+          <div class="perf"></div>
+          <div class="sbd">
             <div class="qr sm" data-qr="TKT-9F42-02" role="img" aria-label="Entry code, placeholder"></div>
-            <div class="tinfo">
-              <b>VIP</b>BLACKPINK<br>Impact Arena, Bangkok<br>14 Nov 2026, 19:00
-              <div class="single-use">SINGLE USE</div>
+            <div class="sinfo">
+              <b>VIP</b>Blackpink, Bangkok<br>Impact Arena<br>14 Nov 2026, 19:00
+              <div class="once">SINGLE USE</div>
             </div>
           </div>
         </div>
@@ -655,19 +676,18 @@ body {
     <div class="card-label"><span class="uc">UC-04</span><span>Ticket</span></div>
     <div class="frame-wrap"><div class="frame">
       <div class="sb"><span>19:02</span><span>LTE</span></div>
-      <div class="top compact">
-        <p class="ev">Ticket 1 of 2</p>
-        <p class="vn">Show this at the gate</p>
+      <div class="poster slim">
+        <p class="act-name">Blackpink</p>
+        <p class="act-meta">Ticket 1 of 2 · VIP</p>
       </div>
       <div class="body center">
         <div class="qr" id="qr-ticket" data-qr="TKT-9F42-01" role="img" aria-label="Entry code, placeholder"></div>
-        <p class="eyebrow" style="margin-top:6px">TKT-9F42-01</p>
-        <div class="rows" style="text-align:left;margin-top:14px">
-          <div class="r"><span>Tier</span><b>VIP</b></div>
+        <p class="eyebrow" style="margin-top:4px">TKT-9F42-01</p>
+        <div class="rows" style="text-align:left;margin-top:10px">
           <div class="r"><span>Holder</span><b>Kenji</b></div>
           <div class="r"><span>Doors</span><b>18:00</b></div>
         </div>
-        <div class="panel" style="margin-top:6px">
+        <div class="panel" style="margin-top:4px">
           <b>Single use.</b> This code works once. If you send a screenshot to a
           friend, whoever arrives second is turned away.
         </div>
@@ -705,13 +725,14 @@ body {
 </div>
 
 <div class="note">
-  <p><b>This is the whole customer journey, UC-01 to UC-04.</b> Tap through it
-  in Flow, or switch to All screens for one board you can put on a slide.</p>
+  <p><b>The whole customer journey, UC-01 to UC-04.</b> Tap through it in Flow,
+  or switch to All screens for one board you can put on a slide.</p>
   <p>Two moments carry the architecture. On <b>Held</b>, VIP drops from 16 to 14
   before any money is discussed, which is why the same seat cannot be sold
   twice. On <b>Hold expired</b>, the first and largest thing on the screen is
   that no money was taken. Press <b>Let the hold expire</b> to see it.</p>
-  <p>QR codes are placeholder patterns, not scannable codes.</p>
+  <p>The event poster is a typographic stand-in. It needs real artwork at
+  780 x 560. QR codes are placeholder patterns, not scannable codes.</p>
 </div>
 
 <script>
@@ -722,14 +743,11 @@ body {
   var cards = Array.prototype.slice.call(stage.querySelectorAll(".card"));
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------------- navigation ---------------- */
-
   function show(name) {
     cards.forEach(function (c) {
       c.classList.toggle("is-active", c.getAttribute("data-screen") === name);
     });
-    if (name === "hold" || name === "pay") startClock();
-    else stopClock();
+    if (name === "hold" || name === "pay") startClock(); else stopClock();
     if (name === "queue") startQueue(); else stopQueue();
     window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
   }
@@ -740,8 +758,6 @@ body {
     if (t.getAttribute("data-go") === "hold") resetClock();
     show(t.getAttribute("data-go"));
   });
-
-  /* ---------------- view mode ---------------- */
 
   var mFlow = document.getElementById("m-flow");
   var mBoard = document.getElementById("m-board");
@@ -779,7 +795,7 @@ body {
     stopClock(); left = 0; paintClock(); show("expired");
   });
   document.getElementById("b-restart").addEventListener("click", function () {
-    resetClock(); qpos = 4182; paintQueue(false); show("event");
+    resetClock(); qpos = 4182; paintQueue(); show("event");
   });
 
   /* ---------------- the queue ---------------- */
@@ -802,21 +818,21 @@ body {
     return m < 1 ? "under a minute" : "about " + Math.round(m) + " min";
   }
 
-  function paintQueue(animate) {
+  function paintQueue() {
     var near = qpos <= 40;
     qPos.textContent = comma(qpos);
-    qPos.style.color = near ? "var(--accent-ink)" : "var(--ink)";
+    qPos.style.color = near ? "var(--amber)" : "var(--bone)";
     qAhead.innerHTML = "<b>" + comma(Math.max(qpos - 1, 0)) + "</b> " +
       (qpos - 1 === 1 ? "person is" : "people are") + " ahead of you";
     qFill.style.transform = "scaleX(" +
       Math.min(0.99, Math.max(0.02, (START - qpos) / START)).toFixed(3) + ")";
     qEst.textContent = est(qpos);
-    qMoved.textContent = "You have moved " + comma(Math.max(START - qpos, 0)) + " places";
+    qMoved.textContent = "Moved " + comma(Math.max(START - qpos, 0)) + " places";
     qLabel.textContent = near ? "Almost your turn" : "Your position";
     qPanel.classList.toggle("go", near);
     qPanel.innerHTML = near
-      ? "<b>Get ready.</b> As soon as you are let in you will have 10 minutes to choose and pay. Stay on this page."
-      : "<b>Your place is saved.</b> Keep this page open. When it is your turn you will get 10 minutes to choose your tickets and pay.";
+      ? "<b>Get ready.</b> As soon as you are let in you get 10 minutes to choose and pay. Stay on this page."
+      : "<b>Your place is saved.</b> Keep this page open. When it is your turn you get 10 minutes to choose and pay.";
     qsecs = 0; paintAge();
   }
   function paintAge() {
@@ -827,7 +843,7 @@ body {
     qTimer = setInterval(function () {
       if (qpos <= 1) { show("select"); return; }
       qpos = Math.max(1, qpos - Math.max(1, Math.round(qpos * (0.10 + Math.random() * 0.10))));
-      paintQueue(true);
+      paintQueue();
     }, 1600);
     if (!qAge) qAge = setInterval(function () { qsecs += 1; paintAge(); }, 1000);
   }
@@ -869,24 +885,17 @@ body {
     var h = 0, i;
     for (i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
     var html = "", N = 21;
-    function finder(r, c) {
-      // three corner squares, the part of a QR everyone recognises
-      return (r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7);
-    }
+    function finder(r, c) { return (r < 7 && c < 7) || (r < 7 && c > 13) || (r > 13 && c < 7); }
     function finderOn(r, c) {
       var lr = r > 13 ? r - 14 : r, lc = c > 13 ? c - 14 : c;
-      var edge = lr === 0 || lr === 6 || lc === 0 || lc === 6;
-      var core = lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4;
-      return edge || core;
+      return lr === 0 || lr === 6 || lc === 0 || lc === 6 ||
+             (lr >= 2 && lr <= 4 && lc >= 2 && lc <= 4);
     }
     for (var r = 0; r < N; r++) {
       for (var c = 0; c < N; c++) {
         var on;
         if (finder(r, c)) on = finderOn(r, c);
-        else {
-          h = (h * 1103515245 + 12345) >>> 0;
-          on = ((h >>> 16) & 1) === 1;
-        }
+        else { h = (h * 1103515245 + 12345) >>> 0; on = ((h >>> 16) & 1) === 1; }
         html += '<i class="' + (on ? "on" : "") + '"></i>';
       }
     }
@@ -901,7 +910,7 @@ body {
     stopClock(); stopQueue(); if (qAge) clearInterval(qAge);
   });
 
-  paintQueue(false); paintSel(); paintClock();
+  paintQueue(); paintSel(); paintClock();
 }());
 </script>
 </body>
