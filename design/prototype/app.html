@@ -435,6 +435,150 @@ body {
   letter-spacing: 0.1em; margin-top: 7px;
 }
 
+/* ------------------------------ app shell -------------------------------- */
+/* The tab bar exists on Events, Tickets and Account. It is deliberately
+   absent during queue, hold and payment: those are a timed takeover and
+   wandering off mid-hold loses the seats. */
+
+.tabbar {
+  flex: none; display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--edge-soft);
+  padding: 0 8px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: var(--shell);
+}
+.tab {
+  appearance: none; border: 0; background: transparent; cursor: pointer;
+  padding: 15px 4px 11px; position: relative;
+  font-family: var(--display); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.01em; color: var(--bone-3);
+  transition: color 170ms var(--ease);
+}
+.tab::after {
+  content: ""; position: absolute; left: 50%; top: 0;
+  width: 26px; height: 2px; border-radius: 0 0 2px 2px;
+  background: var(--amber); transform: translateX(-50%) scaleX(0);
+  transition: transform 220ms var(--ease);
+}
+.tab[aria-current="page"] { color: var(--amber); }
+.tab[aria-current="page"]::after { transform: translateX(-50%) scaleX(1); }
+.tab:focus-visible { outline: 2px solid var(--amber); outline-offset: -3px; }
+
+.screen-title { flex: none; padding: 22px 24px 16px; }
+.screen-title h2 {
+  font-size: 32px; font-weight: 800; letter-spacing: -0.038em;
+  font-variation-settings: 'wdth' 108; margin: 0; color: var(--bone); line-height: 1;
+}
+.screen-title p { margin: 6px 0 0; font-size: 13.5px; color: var(--bone-2); }
+
+/* ---------- discover ---------- */
+
+.feature {
+  position: relative; border-radius: var(--r); overflow: hidden;
+  border: 1px solid var(--edge); margin-bottom: 26px; cursor: pointer;
+  text-align: left; width: 100%; font-family: var(--display); color: var(--bone);
+  background:
+    radial-gradient(80% 120% at 14% -10%, rgba(53,227,245,0.32) 0%, transparent 62%),
+    radial-gradient(80% 120% at 88% -6%, rgba(255,92,168,0.24) 0%, transparent 60%),
+    linear-gradient(180deg, #1B1633 0%, #100D1F 100%);
+  padding: 22px 20px 20px;
+}
+.feature:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.feature .badge {
+  display: inline-block; font-family: var(--mono); font-size: 9.5px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--on-amber); background: var(--amber);
+  padding: 4px 9px; border-radius: 5px; margin-bottom: 16px;
+}
+.feature .fact {
+  font-size: 36px; font-weight: 900; line-height: 0.88; letter-spacing: -0.038em;
+  font-variation-settings: 'wdth' 116; text-transform: uppercase; margin: 0 0 10px;
+  color: var(--bone);
+}
+.feature .fmeta { font-family: var(--mono); font-size: 11px; color: var(--bone-2); letter-spacing: 0.05em; margin: 0 0 16px; }
+.feature .fopen { font-size: 13.5px; color: var(--amber); font-weight: 600; margin: 0; }
+
+.grouphead {
+  font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--bone-3); margin: 0 0 6px;
+}
+.rowlist { display: grid; }
+.rowitem {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3px 14px;
+  padding: 16px 2px; background: transparent; border: 0; cursor: pointer;
+  text-align: left; font-family: var(--display); color: var(--bone);
+  border-bottom: 1px solid var(--edge-soft);
+}
+.rowitem:last-child { border-bottom: 0; }
+.rowitem .rn { font-size: 16.5px; font-weight: 700; letter-spacing: -0.02em; color: var(--bone); }
+.rowitem .rm { font-family: var(--mono); font-size: 11px; color: var(--bone-2); letter-spacing: 0.04em; }
+.rowitem .rp { font-size: 14px; font-weight: 600; color: var(--bone-2); font-variant-numeric: tabular-nums; }
+.rowitem:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* ---------- my tickets ---------- */
+
+.tcard {
+  display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 4px 15px;
+  border: 1px solid var(--edge); border-radius: var(--r);
+  background:
+    linear-gradient(158deg, rgba(53,227,245,0.09) 0%, transparent 42%),
+    var(--raise);
+  padding: 16px 16px; margin-bottom: 10px; width: 100%; cursor: pointer;
+  text-align: left; font-family: var(--display); color: var(--bone);
+}
+.tcard .tdate {
+  grid-row: 1 / 3; text-align: center; border-right: 1px solid var(--edge-soft); padding-right: 13px;
+}
+.tcard .tdate .d { display: block; font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: var(--bone); }
+.tcard .tdate .m { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; color: var(--bone-3); text-transform: uppercase; margin-top: 4px; }
+.tcard .tn { grid-column: 2; font-size: 17px; font-weight: 700; letter-spacing: -0.022em; color: var(--bone); }
+.tcard .tv { grid-column: 2; font-family: var(--mono); font-size: 10.5px; color: var(--bone-2); letter-spacing: 0.04em; }
+.tcard .tq {
+  grid-row: 1 / 3; grid-column: 3;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--amber);
+  border: 1px solid var(--amber-deep); background: var(--amber-wash);
+  padding: 6px 9px; border-radius: 6px; white-space: nowrap;
+}
+.tcard.past { opacity: 0.5; }
+.tcard.past .tq { color: var(--bone-3); border-color: var(--edge); background: transparent; }
+.tcard:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+.empty { text-align: center; padding: 10px 6px; }
+.empty .ering {
+  width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 22px;
+  border: 1px dashed var(--edge); display: grid; place-items: center;
+  font-family: var(--mono); font-size: 22px; color: var(--bone-3);
+}
+.empty h3 { font-size: 22px; font-weight: 700; letter-spacing: -0.028em; margin: 0 0 9px; color: var(--bone); }
+.empty p { font-size: 14px; color: var(--bone-2); margin: 0 0 24px; }
+
+/* ---------- account ---------- */
+
+.who { display: flex; align-items: center; gap: 15px; margin-bottom: 28px; }
+.who .init {
+  width: 58px; height: 58px; border-radius: 50%; flex: none;
+  background: var(--amber); color: var(--on-amber);
+  display: grid; place-items: center;
+  font-size: 24px; font-weight: 800; letter-spacing: -0.02em;
+}
+.who .wn { font-size: 19px; font-weight: 700; letter-spacing: -0.022em; color: var(--bone); }
+.who .we { font-family: var(--mono); font-size: 11.5px; color: var(--bone-2); letter-spacing: 0.03em; }
+
+.settinggroup {
+  border: 1px solid var(--edge); border-radius: var(--r);
+  background: var(--raise); margin-bottom: 14px; overflow: hidden;
+}
+.setrow {
+  display: flex; justify-content: space-between; align-items: center; gap: 14px;
+  padding: 16px; width: 100%; background: transparent; border: 0;
+  border-bottom: 1px solid var(--edge-soft); cursor: pointer;
+  font-family: var(--display); font-size: 15px; font-weight: 500;
+  color: var(--bone); text-align: left;
+}
+.setrow:last-child { border-bottom: 0; }
+.setrow .sv { font-family: var(--mono); font-size: 11.5px; color: var(--bone-2); letter-spacing: 0.03em; }
+.setrow:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+
 /* ----------------------------- outcome ----------------------------------- */
 
 .mark {
@@ -471,7 +615,7 @@ body {
 <div class="chrome">
   <div>
     <h1>Event Ticket &amp; Queue System</h1>
-    <p class="meta">Customer app · 8 screens · UC-01 to UC-04 · prototype, not final</p>
+    <p class="meta">Customer app · 12 screens · UC-01 to UC-04 + shell · prototype, not final</p>
   </div>
   <div class="tools">
     <div class="seg" role="group" aria-label="View">
@@ -485,8 +629,45 @@ body {
 
 <div class="stage" id="stage" data-mode="flow">
 
+  <!-- ================= 0. EVENTS (home) ================= -->
+  <div class="card is-active" data-screen="home">
+    <div class="card-label"><span class="uc">shell</span><span>Events</span></div>
+    <div class="frame-wrap"><div class="frame">
+      <div class="sb"><span>09:41</span><span>LTE</span></div>
+      <div class="screen-title"><h2>Events</h2><p>Bangkok</p></div>
+      <div class="body scroll">
+        <button class="feature" type="button" data-go="event">
+          <span class="badge">On sale today</span>
+          <p class="fact">Blackpink<br>Bangkok</p>
+          <p class="fmeta">Impact Arena · 14 Nov 2026</p>
+          <p class="fopen">Sale opens 10:00, from ฿1,900</p>
+        </button>
+        <p class="grouphead">Also on sale</p>
+        <div class="rowlist">
+          <button class="rowitem" type="button">
+            <span class="rn">Bodyslam</span><span class="rp">฿1,200</span>
+            <span class="rm">Thunder Dome · 22 Nov</span><span></span>
+          </button>
+          <button class="rowitem" type="button">
+            <span class="rn">Tame Impala</span><span class="rp">฿2,400</span>
+            <span class="rm">UOB Live · 5 Dec</span><span></span>
+          </button>
+          <button class="rowitem" type="button">
+            <span class="rn">Phum Viphurit</span><span class="rp">฿1,500</span>
+            <span class="rm">Moonstar Studio · 18 Dec</span><span></span>
+          </button>
+        </div>
+      </div>
+      <nav class="tabbar" aria-label="Sections">
+        <button class="tab" type="button" data-go="home" aria-current="page">Events</button>
+        <button class="tab" type="button" data-go="tickets">Tickets</button>
+        <button class="tab" type="button" data-go="account">Account</button>
+      </nav>
+    </div></div>
+  </div>
+
   <!-- ================= 1. EVENT ================= -->
-  <div class="card is-active" data-screen="event">
+  <div class="card" data-screen="event">
     <div class="card-label"><span class="uc">UC-01</span><span>Event</span></div>
     <div class="frame-wrap"><div class="frame">
       <div class="sb"><span>09:59</span><span>LTE</span></div>
@@ -716,8 +897,94 @@ body {
         </div>
       </div>
       <div class="act">
-        <button class="btn quiet" data-go="done" type="button">Back to my tickets</button>
+        <button class="btn quiet" data-go="tickets" type="button">Back to my tickets</button>
       </div>
+    </div></div>
+  </div>
+
+  <!-- ================= 9. MY TICKETS ================= -->
+  <div class="card" data-screen="tickets">
+    <div class="card-label"><span class="uc">UC-04</span><span>My tickets</span></div>
+    <div class="frame-wrap"><div class="frame">
+      <div class="sb"><span>09:41</span><span>LTE</span></div>
+      <div class="screen-title"><h2>Tickets</h2><p>Two upcoming</p></div>
+      <div class="body scroll">
+        <p class="grouphead">Upcoming</p>
+        <button class="tcard" type="button" data-go="ticket">
+          <span class="tdate"><span class="d">14</span><span class="m">Nov</span></span>
+          <span class="tn">Blackpink</span>
+          <span class="tq">2 · VIP</span>
+          <span class="tv">Impact Arena · 19:00</span>
+        </button>
+        <p class="grouphead" style="margin-top:22px">Past</p>
+        <button class="tcard past" type="button">
+          <span class="tdate"><span class="d">02</span><span class="m">Aug</span></span>
+          <span class="tn">Bodyslam</span>
+          <span class="tq">Used</span>
+          <span class="tv">Thunder Dome · 20:00</span>
+        </button>
+      </div>
+      <nav class="tabbar" aria-label="Sections">
+        <button class="tab" type="button" data-go="home">Events</button>
+        <button class="tab" type="button" data-go="tickets" aria-current="page">Tickets</button>
+        <button class="tab" type="button" data-go="account">Account</button>
+      </nav>
+    </div></div>
+  </div>
+
+  <!-- ================= 10. NO TICKETS (UC-04 ext 1a) ================= -->
+  <div class="card" data-screen="tickets-empty">
+    <div class="card-label"><span class="uc">UC-04</span><span>No tickets</span></div>
+    <div class="frame-wrap"><div class="frame">
+      <div class="sb"><span>09:41</span><span>LTE</span></div>
+      <div class="screen-title"><h2>Tickets</h2></div>
+      <div class="body center">
+        <div class="empty">
+          <div class="ering" aria-hidden="true">&#9675;</div>
+          <h3>No tickets yet</h3>
+          <p>Tickets you buy show up here, ready to scan at the gate.</p>
+          <button class="btn" data-go="home" type="button" style="width:auto;padding-inline:26px">Browse events</button>
+        </div>
+      </div>
+      <nav class="tabbar" aria-label="Sections">
+        <button class="tab" type="button" data-go="home">Events</button>
+        <button class="tab" type="button" data-go="tickets" aria-current="page">Tickets</button>
+        <button class="tab" type="button" data-go="account">Account</button>
+      </nav>
+    </div></div>
+  </div>
+
+  <!-- ================= 11. ACCOUNT ================= -->
+  <div class="card" data-screen="account">
+    <div class="card-label"><span class="uc">shell</span><span>Account</span></div>
+    <div class="frame-wrap"><div class="frame">
+      <div class="sb"><span>09:41</span><span>LTE</span></div>
+      <div class="screen-title"><h2>Account</h2></div>
+      <div class="body scroll">
+        <div class="who">
+          <span class="init" aria-hidden="true">K</span>
+          <span>
+            <span class="wn">Kenji</span><br>
+            <span class="we">k&bull;&bull;&bull;&bull;&bull;@gmail.com</span>
+          </span>
+        </div>
+        <div class="settinggroup">
+          <button class="setrow" type="button"><span>Payment methods</span><span class="sv">PromptPay</span></button>
+          <button class="setrow" type="button"><span>Order history</span><span class="sv">2 orders</span></button>
+        </div>
+        <div class="settinggroup">
+          <button class="setrow" type="button"><span>Notifications</span><span class="sv">On</span></button>
+          <button class="setrow" type="button"><span>Help</span><span class="sv"></span></button>
+        </div>
+        <div class="settinggroup">
+          <button class="setrow" type="button"><span style="color:var(--stop)">Sign out</span><span class="sv"></span></button>
+        </div>
+      </div>
+      <nav class="tabbar" aria-label="Sections">
+        <button class="tab" type="button" data-go="home">Events</button>
+        <button class="tab" type="button" data-go="tickets">Tickets</button>
+        <button class="tab" type="button" data-go="account" aria-current="page">Account</button>
+      </nav>
     </div></div>
   </div>
 
@@ -740,7 +1007,7 @@ body {
       </div>
       <div class="act">
         <button class="btn" data-go="queue" type="button">Join the queue again</button>
-        <button class="btn quiet" data-go="event" type="button">Back to the event</button>
+        <button class="btn quiet" data-go="home" type="button">Back to events</button>
       </div>
     </div></div>
   </div>
@@ -748,8 +1015,13 @@ body {
 </div>
 
 <div class="note">
-  <p><b>The whole customer journey, UC-01 to UC-04.</b> Tap through it in Flow,
-  or switch to All screens for one board you can put on a slide.</p>
+  <p><b>The whole app: a shell plus the purchase journey.</b> Three tabs,
+  Events, Tickets and Account, with the buying flow running as a full-screen
+  takeover on top. Tap through it in Flow, or switch to All screens for one
+  board you can put on a slide.</p>
+  <p><b>The tab bar disappears during queue, hold and payment on purpose.</b>
+  Those ten minutes are a timed takeover. Wandering off to another tab is how
+  you lose the seats, so the app does not offer it.</p>
   <p>Two moments carry the architecture. On <b>Held</b>, VIP drops from 16 to 14
   before any money is discussed, which is why the same seat cannot be sold
   twice. On <b>Hold expired</b>, the first and largest thing on the screen is
@@ -829,7 +1101,7 @@ body {
     stopClock(); left = 0; paintClock(); show("expired");
   });
   document.getElementById("b-restart").addEventListener("click", function () {
-    resetClock(); qpos = 4182; paintQueue(); show("event");
+    resetClock(); qpos = 4182; paintQueue(); show("home");
   });
 
   /* ---------------- the queue ---------------- */

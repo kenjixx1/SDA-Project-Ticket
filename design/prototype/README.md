@@ -11,18 +11,54 @@ Real HTML screens. Open a file in a browser, or on your phone.
 Visual language: `minimalist-ui`. Build: `design-taste-frontend`.
 Screen content comes from `../../diagrams/ui-mockup-prompt.md`.
 
-## app.html - the eight screens
+## app.html - twelve screens
+
+Three tabs with the buying flow running as a full-screen takeover on top.
+
+**Shell (tab bar visible)**
 
 | # | Screen | Traces to |
 |---|---|---|
-| 1 | Event, before the sale opens | UC-01 |
-| 2 | Queue, position and progress | UC-01 · FR-02, FR-04 |
-| 3 | Select tier and quantity | UC-02 · FR-07, FR-11 |
-| 4 | Seats held, countdown running | UC-02 · FR-09, FR-13 |
-| 5 | Pay by PromptPay | UC-03 · FR-14, FR-15 |
-| 6 | Confirmed, two tickets | UC-03 · FR-20 · INV-07 |
-| 7 | One ticket, full screen | UC-04 · FR-21 |
-| 8 | Hold expired while paying | UC-03 ext 7a · FR-17 |
+| 1 | Events, browse what is on sale | no use case, see below |
+| 9 | Tickets, the list of what you own | **UC-04 step 1 · FR-22** |
+| 10 | Tickets, empty state | **UC-04 extension 1a** |
+| 11 | Account | no use case, see below |
+
+**Purchase takeover (tab bar hidden on purpose)**
+
+| # | Screen | Traces to |
+|---|---|---|
+| 2 | Event, before the sale opens | UC-01 |
+| 3 | Queue, position and progress | UC-01 · FR-02, FR-04 |
+| 4 | Select tier and quantity | UC-02 · FR-07, FR-11 |
+| 5 | Seats held, countdown running | UC-02 · FR-09, FR-13 |
+| 6 | Pay by PromptPay | UC-03 · FR-14, FR-15 |
+| 7 | Confirmed, two tickets | UC-03 · FR-20 · INV-07 |
+| 8 | One ticket, full screen | UC-04 · FR-21 |
+| 12 | Hold expired while paying | UC-03 ext 7a · FR-17 |
+
+### The tab bar disappears during the hold
+
+Queue, select, held and pay have no tab bar. Those ten minutes are a timed
+takeover, and wandering off to another tab is how you lose the seats, so the
+app does not offer the option. The tabs come back once the purchase resolves
+one way or the other.
+
+### Two screens have no use case
+
+**Events** and **Account** are supporting screens. A real ticketing app needs
+a way to find an event and a place to keep your payment method, but neither
+appears in the brief's six core use cases and neither is in
+`docs/04-use-cases.md`.
+
+Two honest options, neither taken yet:
+
+1. Add **UC-08 Browse Events** to the requirements, which takes the set to
+   eight and past the brief's stated range of five to seven.
+2. Leave them as supporting screens and say so in `docs/03-prd.md` under
+   scope, the same way gate scanning and refunds are handled.
+
+Option 2 is the smaller change and keeps the use case count inside the brief.
 
 **Two view modes.**
 *Flow* gives you one phone to tap through, like a real app.
