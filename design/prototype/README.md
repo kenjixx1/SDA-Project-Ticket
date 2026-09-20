@@ -137,7 +137,7 @@ so the only variable is the design.
 | 3 | Swiss Poster | Loud and flat. White, 2px black rules, condensed 900 weight, vermilion. |
 | 4 | Mint Consumer | Calm and friendly. Soft green, very round, light weights. |
 | 5 | Dark Terminal | Monospace everywhere. Phosphor green on near-black, 3px corners. |
-| 6 | Sunset Pop | Warm and bold. Deep plum with coral, Space Grotesk. |
+| 6 | Sunset Pop | Warm and bold. Deep plum with coral, Bricolage Grotesque. |
 
 Each direction is one block of CSS custom properties under `[data-dir="..."]`.
 The components are shared, so applying a direction to the full app is a token
