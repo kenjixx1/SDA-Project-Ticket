@@ -70,8 +70,9 @@ body {
 /* ============================= prototype chrome ========================== */
 
 .chrome {
+  position: sticky; top: 0; z-index: 20; background: var(--ink);
   max-width: 1280px; margin: 0 auto;
-  padding-block: 28px 20px;
+  padding-block: 22px 16px;
   display: flex; flex-wrap: wrap; gap: 16px 24px;
   align-items: flex-end; justify-content: space-between;
 }
@@ -111,7 +112,13 @@ body {
 /* ================================ stage ================================== */
 
 .stage { max-width: 1280px; margin: 0 auto; }
-.stage[data-mode="flow"] { display: flex; justify-content: center; }
+/* --fit is set from the real viewport height so the footer action is never
+   pushed below the fold. */
+.stage[data-mode="flow"] { display: flex; justify-content: center; --fit: 1; }
+.stage[data-mode="flow"] .frame-wrap {
+  width: calc(390px * var(--fit)); height: calc(844px * var(--fit));
+}
+.stage[data-mode="flow"] .frame { transform: scale(var(--fit)); transform-origin: top left; }
 .stage[data-mode="flow"] .card { display: none; }
 .stage[data-mode="flow"] .card.is-active { display: block; }
 .stage[data-mode="flow"] .card-label { display: none; }
@@ -145,9 +152,11 @@ body {
 @media (max-width: 430px) {
   body { padding-inline: 0; }
   .chrome { padding-inline: 16px; }
+  .stage[data-mode="flow"] { --fit: 1; }
+  .stage[data-mode="flow"] .frame-wrap { width: 100%; height: auto; }
   .stage[data-mode="flow"] .frame {
     width: 100%; height: auto; min-height: 100dvh;
-    border: 0; border-radius: 0; box-shadow: none;
+    transform: none; border: 0; border-radius: 0; box-shadow: none;
   }
   .stage[data-mode="board"] { grid-template-columns: 1fr; }
 }
@@ -279,18 +288,33 @@ body {
 
 .tiers { display: grid; gap: 10px; margin-bottom: 20px; }
 .tier {
-  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3px 12px;
+  position: relative;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 14px;
   border: 1px solid var(--edge); border-radius: var(--r);
-  padding: 16px 17px; background: var(--raise); cursor: pointer;
+  padding: 17px 18px; background: var(--raise); cursor: pointer;
   text-align: left; font-family: var(--display);
+  color: var(--bone);                 /* buttons do not inherit this */
   transition: border-color 170ms var(--ease), background 170ms var(--ease);
 }
+.tier:hover { border-color: #3A4049; }
 .tier[aria-pressed="true"] { border-color: var(--amber); background: var(--amber-wash); }
 .tier:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-.tier .nm { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; }
-.tier .pr { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
-.tier .lf { font-family: var(--mono); font-size: 11px; color: var(--bone-3); letter-spacing: 0.03em; }
+.tier .nm { font-size: 17.5px; font-weight: 700; letter-spacing: -0.015em; color: var(--bone); }
+.tier .pr {
+  font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em; color: var(--bone);
+}
+.tier[aria-pressed="true"] .pr { color: var(--amber); }
+.tier .lf { font-family: var(--mono); font-size: 11.5px; color: var(--bone-2); letter-spacing: 0.03em; }
 .tier .lf.low { color: var(--stop); }
+/* the selected row says so twice: colour and a mark */
+.tier .tick {
+  grid-column: 2; justify-self: end;
+  width: 19px; height: 19px; border-radius: 50%;
+  background: var(--amber); color: var(--on-amber);
+  display: none; place-items: center; font-size: 12px; font-weight: 800; line-height: 1;
+}
+.tier[aria-pressed="true"] .tick { display: grid; }
 
 .qty {
   display: flex; align-items: center; justify-content: space-between;
@@ -300,7 +324,7 @@ body {
 .qty .lab { font-size: 14px; color: var(--bone-2); }
 .qty .ctl { display: flex; align-items: center; gap: 16px; }
 .step {
-  appearance: none; width: 36px; height: 36px; border-radius: var(--r-sm);
+  appearance: none; width: 44px; height: 44px; border-radius: var(--r-sm);
   border: 1px solid var(--edge); background: var(--raise-2); color: var(--bone);
   font-family: var(--display); font-size: 19px; font-weight: 600; line-height: 1; cursor: pointer;
 }
@@ -310,7 +334,7 @@ body {
 
 .total {
   display: flex; justify-content: space-between; align-items: baseline;
-  padding-top: 16px; border-top: 1px solid var(--edge-soft);
+  padding-top: 18px; margin-top: auto; border-top: 1px solid var(--edge-soft);
 }
 .total .l { font-size: 14px; color: var(--bone-2); }
 .total .v {
@@ -380,9 +404,8 @@ body {
 .stub .st { font-size: 15px; font-weight: 700; letter-spacing: -0.015em; }
 .stub .sid { font-family: var(--mono); font-size: 10.5px; color: var(--bone-3); letter-spacing: 0.06em; }
 .stub .perf {
-  position: relative; height: 1px;
-  background-image: linear-gradient(90deg, var(--edge) 0 5px, transparent 5px 10px);
-  background-size: 10px 1px;
+  position: relative; height: 0;
+  border-top: 1px dashed var(--edge);
 }
 .stub .perf::before, .stub .perf::after {
   content: ""; position: absolute; top: -9px; width: 18px; height: 18px;
@@ -526,15 +549,15 @@ body {
         <div class="tiers">
           <button class="tier" type="button" data-tier="vip" aria-pressed="true">
             <span class="nm">VIP</span><span class="pr">฿6,500</span>
-            <span class="lf low">only 16 left</span><span></span>
+            <span class="lf low">only 16 left</span><span class="tick" aria-hidden="true">&#10003;</span>
           </button>
           <button class="tier" type="button" data-tier="a" aria-pressed="false">
             <span class="nm">Zone A</span><span class="pr">฿3,800</span>
-            <span class="lf">350 left</span><span></span>
+            <span class="lf">350 left</span><span class="tick" aria-hidden="true">&#10003;</span>
           </button>
           <button class="tier" type="button" data-tier="b" aria-pressed="false">
             <span class="nm">Zone B</span><span class="pr">฿1,900</span>
-            <span class="lf">2,020 left</span><span></span>
+            <span class="lf">2,020 left</span><span class="tick" aria-hidden="true">&#10003;</span>
           </button>
         </div>
         <div class="qty">
@@ -749,6 +772,16 @@ body {
     show(t.getAttribute("data-go"));
   });
 
+  function fit() {
+    if (stage.getAttribute("data-mode") !== "flow" || window.innerWidth <= 430) {
+      stage.style.removeProperty("--fit"); return;
+    }
+    var top = stage.getBoundingClientRect().top + window.scrollY;
+    var room = window.innerHeight - top - 22;
+    stage.style.setProperty("--fit", Math.min(1, Math.max(0.46, room / 844)).toFixed(3));
+  }
+  window.addEventListener("resize", fit);
+
   var mFlow = document.getElementById("m-flow");
   var mBoard = document.getElementById("m-board");
   function mode(m) {
@@ -756,6 +789,7 @@ body {
     mFlow.setAttribute("aria-pressed", m === "flow" ? "true" : "false");
     mBoard.setAttribute("aria-pressed", m === "board" ? "true" : "false");
     if (m === "board") { startClock(); startQueue(); }
+    fit();
   }
   mFlow.addEventListener("click", function () { mode("flow"); });
   mBoard.addEventListener("click", function () { mode("board"); });
@@ -900,7 +934,7 @@ body {
     stopClock(); stopQueue(); if (qAge) clearInterval(qAge);
   });
 
-  paintQueue(); paintSel(); paintClock();
+  paintQueue(); paintSel(); paintClock(); fit();
 }());
 </script>
 </body>
