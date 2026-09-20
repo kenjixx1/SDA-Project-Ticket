@@ -39,13 +39,15 @@ Three tabs with the buying flow running as a full-screen takeover on top.
 
 ### The tab bar
 
-Icons are real **Phosphor** glyphs (music notes, ticket, user), inlined from
+Icons are real **Phosphor** glyphs (stage microphone, ticket, user), inlined from
 `@phosphor-icons/core`. Nothing is hand-drawn. Each tab carries both the
 outline and the filled weight; the active tab swaps to filled and turns cyan,
 so state is carried twice rather than by colour alone.
 
 The icons are product-specific on purpose. A house glyph for "home" would
-have been the generic choice; music notes says what is being sold.
+have been the generic choice and a calendar the safe one; a stage microphone
+says live event. Alternatives considered: `calendar-dots`, `compass`,
+`confetti`, `music-notes`.
 
 ### The tab bar disappears during the hold
 

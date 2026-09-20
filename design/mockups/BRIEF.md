@@ -1,15 +1,16 @@
-# Art direction brief: Event Ticket & Queue app, 8 screen images
+# Art direction brief: Event Ticket & Queue app, 12 screen images
 
-Generate **8 separate images**, one per screen. Do not combine them into a
+Generate **12 separate images**, one per screen. Do not combine them into a
 board. Do not crop one image out of another. Each image is generated fresh.
 
 Save them into `design/mockups/` with exactly these names:
 
 ```
-app-01-event.png      app-05-pay.png
-app-02-queue.png      app-06-confirmed.png
-app-03-select.png     app-07-ticket.png
-app-04-held.png       app-08-expired.png
+app-00-home.png       app-05-pay.png          app-09-tickets.png
+app-01-event.png      app-06-confirmed.png    app-10-tickets-empty.png
+app-02-queue.png      app-07-ticket.png       app-11-account.png
+app-03-select.png     app-08-expired.png
+app-04-held.png
 ```
 
 ---
@@ -27,7 +28,7 @@ these images are the polished art-directed version of the same screens, so
 **iOS-native premium.** Safe-area aware, calm chrome, elegant spacing.
 Content area 390 x 844. Show each screen inside a **clean, subtle iPhone
 mockup with a visible thin frame**, centred, with even margins on all four
-sides. Same device style and same scale in all 8 images. The frame supports
+sides. Same device style and same scale in all 12 images. The frame supports
 the screen; the UI content is the hero.
 
 ---
@@ -87,9 +88,46 @@ composition only.
 
 ---
 
-## The 8 screens
+## The app shell
+
+Four screens carry a **bottom tab bar**: Events, Tickets and Account.
+Eight do not.
+
+The tab bar has three items, each an icon above a short label:
+
+| Tab | Icon | Label |
+|---|---|---|
+| Events | a stage microphone on a stand | Events |
+| Tickets | a ticket stub | Tickets |
+| Account | a person | Account |
+
+The **active** tab is a filled icon in cyan with a cyan label. The other two
+are outline icons in `#837AAD` with a matching label. Icons sit above the
+label, about 25px, and the bar sits above the home indicator.
+
+**The purchase flow has no tab bar, on purpose.** Queue, select, held, pay,
+confirmed, ticket and expired are a full-screen takeover: the customer has ten
+minutes and wandering off to another tab loses the seats. Do not draw a tab
+bar on those screens.
+
+---
+
+## The 12 screens
 
 Copy is final. Use it exactly. Do not add marketing lines.
+
+### 00 · Home, the Events tab
+Title block at the top left: **Events** large, `Bangkok` under it.
+A large feature card, stage-lit with the two rigs, containing: a small cyan
+pill reading `ON SALE TODAY`, then **BLACKPINK BANGKOK** in heavy uppercase
+across two lines, then `Impact Arena · 14 Nov 2026`, then a cyan line
+`Sale opens 10:00, from ฿1,900`.
+Below it a small label `ALSO ON SALE` and three quiet rows, each with the act
+on the left, the price on the right, and venue and date beneath in mono:
+- `Bodyslam` ฿1,200, `Thunder Dome · 22 Nov`
+- `Tame Impala` ฿2,400, `UOB Live · 5 Dec`
+- `Phum Viphurit` ฿1,500, `Moonstar Studio · 18 Dec`
+**Tab bar visible, Events active.**
 
 ### 01 · Event
 Header: full-bleed stage-lit panel, two rigs, act name **BLACKPINK BANGKOK**
@@ -173,6 +211,34 @@ A card: **You can try again.** Joining the queue again puts you at the back.
 Bottom: cyan **Join the queue again**, and quiet outlined
 **Back to the event**.
 
+### 09 · Tickets
+Title block: **Tickets** large, `Two upcoming` under it.
+Label `UPCOMING`, then a card: a date block on the left reading **14** over
+`NOV`, a divider, then **Blackpink** with `Impact Arena · 19:00` in mono
+beneath, and a small cyan outlined pill on the right reading `2 · VIP`.
+Label `PAST`, then the same card shape, dimmed to about half opacity:
+**02 AUG**, **Bodyslam**, `Thunder Dome · 20:00`, pill reading `USED` in grey.
+**Tab bar visible, Tickets active.**
+
+### 10 · Tickets, empty
+Title block: **Tickets**.
+Centred in the empty space: a dashed circle outline about 64px, then
+**No tickets yet**, then `Tickets you buy show up here, ready to scan at the
+gate.`, then a cyan button **Browse events** sized to its text rather than
+full width.
+**Tab bar visible, Tickets active.**
+
+### 11 · Account
+Title block: **Account**.
+A row with a 58px cyan circle containing a dark **K**, beside **Kenji** and a
+masked email `k•••••@gmail.com` in mono.
+Two grouped cards of rows, each row a label on the left and a quiet mono value
+on the right:
+- `Payment methods` → `PromptPay`, `Order history` → `2 orders`
+- `Notifications` → `On`, `Help` → (no value)
+A third single-row card: **Sign out** in magenta.
+**Tab bar visible, Account active.**
+
 ---
 
 ## Avoid
@@ -190,7 +256,8 @@ Bottom: cyan **Join the queue again**, and quiet outlined
 
 ## Check before finishing
 
-All 8 exist as separate files. Same device, same scale, same margins. Copy is
+All 12 exist as separate files. The four shell screens have a tab bar with
+the right one active; the eight purchase screens have none. Same device, same scale, same margins. Copy is
 exactly as written. Only cyan and magenta carry colour, each meaning one
 thing. Text is comfortably readable at normal size. The two stubs have real
 notches. Nothing glows except the progress bar and the live dot.
