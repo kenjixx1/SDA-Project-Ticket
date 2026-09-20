@@ -5,7 +5,10 @@ Where the UI work lives: screen mockups and the clickable prototype.
 ```
 design/
 ├── mockups/      screen images
-│   └── all-screens.png   BUILT
+│   ├── BRIEF.md              the art direction brief the images were made from
+│   ├── app-01-event.png ...  BUILT: 8 rendered screens
+│   ├── app-all-screens.png   BUILT: all 8 on one sheet
+│   └── all-screens.png       BUILT: screenshot of the live prototype
 └── prototype/
     ├── app.html        BUILT: the whole customer app, 8 screens
     └── 01-queue.html   BUILT: the queue screen on its own
@@ -58,22 +61,25 @@ demo, and it doubles as the start of the front end.
 | `image-to-code` | Generate an image, then build it | Partly — no image step |
 | `brandkit`, `industrial-brutalist-ui`, `gpt-taste`, `stitch-design-taste` | Not this project | — |
 
-### The honest catch about the image skills
+### Generating images: summon Codex
 
-`imagegen-frontend-mobile` is instructions for an art director. It assumes
-the agent can **make images**. Claude Code here has no text-to-image tool, so
-asking me to run it will not produce pictures.
+Claude Code here has no text-to-image tool. **Codex does** (`image_gen__imagegen`),
+so image work is handed to it:
 
-Three ways around it:
+```
+codex exec --skip-git-repo-check -s workspace-write \
+  "Read design/mockups/BRIEF.md and follow it exactly. Generate all 8 screen
+   images, one per screen, fresh. Save into design/mockups/."
+```
 
-1. **Use the prompt file in a tool that does make images.** Open
-   `../diagrams/ui-mockup-prompt.md`, paste Block A, then one screen block,
-   into ChatGPT, Gemini, or Midjourney. Save the result into `mockups/`.
-2. **Use Codex or Cursor.** The same 13 skills were installed there. If that
-   tool has image generation, `imagegen-frontend-mobile` works properly.
-3. **Skip images. Build the HTML instead** (Route B). For a phone UI this is
-   often better anyway — you can actually tap it, and it cannot drift from
-   the requirements the way a generated picture can.
+`mockups/BRIEF.md` is the art direction brief. It pins every hex value, the
+two-light colour rule, the type weights and the exact copy per screen, so the
+images match the built app instead of drifting into Codex's taste.
+
+**Image generation does not control framing.** The eight came back on seven
+different canvas sizes with different device scales. They are normalised
+afterwards to one device height on one ground; the raw output is kept in
+`mockups/raw/` and is not tracked.
 
 ---
 

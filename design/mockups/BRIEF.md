@@ -1,0 +1,196 @@
+# Art direction brief: Event Ticket & Queue app, 8 screen images
+
+Generate **8 separate images**, one per screen. Do not combine them into a
+board. Do not crop one image out of another. Each image is generated fresh.
+
+Save them into `design/mockups/` with exactly these names:
+
+```
+app-01-event.png      app-05-pay.png
+app-02-queue.png      app-06-confirmed.png
+app-03-select.png     app-07-ticket.png
+app-04-held.png       app-08-expired.png
+```
+
+---
+
+## The product
+
+A ticketing app for concerts where demand massively exceeds supply. Everyone
+waits in a virtual queue, then gets exactly 10 minutes to choose seats and pay
+before the hold expires. The app already exists as a working HTML prototype;
+these images are the polished art-directed version of the same screens, so
+**they must match the design system below exactly.**
+
+## Platform mode
+
+**iOS-native premium.** Safe-area aware, calm chrome, elegant spacing.
+Content area 390 x 844. Show each screen inside a **clean, subtle iPhone
+mockup with a visible thin frame**, centred, with even margins on all four
+sides. Same device style and same scale in all 8 images. The frame supports
+the screen; the UI content is the hero.
+
+---
+
+## Design bible: lock this and do not drift
+
+**Theme paradigm:** deep dark. This is an arena, lit in the dark.
+
+**Palette.** Exactly these. No other colours anywhere.
+
+| Role | Hex |
+|---|---|
+| Page ground | `#07060D` |
+| Phone body / screen base | `#0C0A16` |
+| Cards, rows | `#151226` |
+| Pressed surface | `#1E1A33` |
+| Hairlines | `#2A2545` |
+| Primary text | `#F2F0FF` |
+| Secondary text | `#A49CC8` |
+| Tertiary text | `#837AAD` |
+| **Cyan** | `#35E3F5` |
+| Text on cyan | `#021419` |
+| **Magenta** | `#FF5CA8` |
+
+**The colour rule, and it is the whole idea.** The arena has two lighting
+rigs and each one means something.
+
+- **Cyan is the light you move toward.** Every primary button, the queue
+  progress bar, the countdown, the live indicator, the selected ticket tier.
+- **Magenta is the light that stops you.** Low stock on a tier, and the
+  expired-hold screen.
+- Nothing else on any screen carries colour. If you are tempted to colour
+  something a third way, leave it in `#F2F0FF` or `#A49CC8`.
+
+**Typography.** A wide grotesk with real weight range, Archivo-like.
+- Act name: 900 weight, extra wide, uppercase, very tight tracking, huge.
+- Queue position number: ~104px, 800 weight, tabular figures.
+- Body: 14 to 16px, comfortably readable. Never small or decorative.
+- Data, IDs, timers and counts: a clean monospace.
+
+**Shape.** Cards 18px radius, buttons 12px, phone frame ~38px. One system.
+
+**Texture and atmosphere.** Concert stage lighting. On the event header, two
+rigs: cyan from the upper left, magenta from the upper right, both falling off
+into black with visible haze in the beam. Soft film grain across dark
+surfaces. Restrained. Never let atmosphere reduce text contrast.
+
+**Glow.** Exactly two things glow: the queue progress bar and the small live
+dot. Buttons do not glow. Cards do not glow. Text does not glow.
+
+**Signature components:** a large hero metric block (the queue position), a
+framed card stack (ticket tiers and ticket stubs), a checkout summary card,
+and a bottom action area docked above the home indicator.
+
+**Motion implied:** sheet rise, staggered list reveal. Suggest it through
+composition only.
+
+---
+
+## The 8 screens
+
+Copy is final. Use it exactly. Do not add marketing lines.
+
+### 01 · Event
+Header: full-bleed stage-lit panel, two rigs, act name **BLACKPINK BANGKOK**
+in huge uppercase, under it `IMPACT ARENA · 14 NOV 2026`.
+Body, centred: small cyan label `SALE OPENS`, then **10:00** very large, then
+`Saturday 1 October`. Below, three quiet price rows: `VIP ฿6,500`,
+`Zone A ฿3,800`, `Zone B ฿1,900`. Then a card: **Everyone waits in the same
+line.** Joining early does not help.
+Bottom: full-width cyan button **Join the queue**, tiny line under it
+`Maximum 4 tickets per person`.
+
+### 02 · Queue
+Slim stage-lit header with **BLACKPINK** and the venue line.
+Centre of screen, the hero moment: cyan label `YOUR POSITION`, then
+**4,182** enormous, then `4,181 people are ahead of you`.
+Below: a thin cyan progress bar about 62% full, gently glowing, with
+`Moved 6,823 places` on the left and `about 6 min` in cyan on the right.
+Then a card: **Your place is saved.** Keep this page open.
+Bottom strip: a small cyan dot and `Updated just now`. **No refresh button.**
+
+### 03 · Select
+Plain header: **You are in** / `Choose your tickets. Nothing is reserved yet.`
+Three tier cards stacked:
+- **VIP ฿6,500**, selected: cyan border, faint cyan wash, cyan price, small
+  cyan check at the right, and `only 16 left` in magenta.
+- **Zone A ฿3,800**, `350 left`.
+- **Zone B ฿1,900**, `2,020 left`.
+A quantity row: `How many` with minus, **2**, plus. Under it
+`Maximum 4 per person`.
+Anchored at the bottom of the content, above the button: `2 × VIP` on the
+left and **฿13,000** large on the right.
+Bottom: cyan button **Hold these seats**.
+
+### 04 · Held
+Header: **Seats held** / `Yours until the timer runs out.`
+A prominent cyan-bordered countdown block: `Time to pay` and **10:00** in
+large mono.
+Rows: `Tier VIP`, `Tickets 2`, `Price each ฿6,500`, then `Total` **฿13,000**.
+A cyan-tinted card: **VIP just dropped from 16 to 14.** Your two seats left
+the sale the moment you held them.
+Bottom: cyan **Continue to payment**, and a quiet outlined
+**Release and choose again**.
+
+### 05 · Pay
+Header: **Pay ฿13,000** / `2 × VIP for Blackpink, 14 Nov 2026`.
+Countdown block again, **10:00**.
+A payment row: small cyan tile marked `PP`, then **PromptPay** and
+`Scan with your banking app`.
+A large QR code on a light panel, centred. Under it
+`This code expires with your hold`.
+A card: **Do not close this page.** We confirm your tickets as soon as the
+bank answers.
+Bottom: cyan **I have paid**.
+
+### 06 · Confirmed
+A cyan circle with a check, centred. Then **You are going** large.
+Then `Paid ฿13,000 by PromptPay. Two tickets, one for each seat.`
+Two ticket stubs stacked, each: `Ticket 1 of 2` with id `TKT-9F42-01` on the
+right, a dashed perforation line with **a real half-circle notch punched into
+the left and right edge**, then a QR on a light panel beside `VIP` in cyan,
+`Blackpink, Bangkok`, `Impact Arena`, `14 Nov 2026, 19:00`, `SINGLE USE`.
+Second stub is `Ticket 2 of 2`, `TKT-9F42-02`.
+Stubs look like laminated passes catching the rigs above them.
+Bottom: cyan **Open ticket 1**.
+
+### 07 · Ticket
+Slim stage-lit header: **BLACKPINK** and `TICKET 1 OF 2 · VIP`.
+A large QR on a light panel, centred, dominant. Under it the id
+`TKT-9F42-01` in cyan mono.
+Two rows: `Holder Kenji`, `Doors 18:00`.
+A card: **Single use.** This code works once.
+Bottom: quiet outlined **Back to my tickets**.
+
+### 08 · Expired
+Centred. A magenta ring with a slash inside it.
+Then, the largest thing on the screen, in magenta:
+**You have not been charged**
+Then `Your 10 minutes ran out before the payment finished, so the two VIP
+seats went back on sale. No money left your account.`
+A card: **You can try again.** Joining the queue again puts you at the back.
+Bottom: cyan **Join the queue again**, and quiet outlined
+**Back to the event**.
+
+---
+
+## Avoid
+
+- Purple-to-blue startup gradients. The violet is the unlit room, not a brand
+  gradient.
+- Glass cards, floating blobs, fake charts, stat-card spam.
+- A third accent colour of any kind.
+- Glow on buttons, cards or text.
+- Small or decorative text. If something does not fit, remove content, do not
+  shrink type.
+- Generic line-icon library look.
+- A website laid out inside a phone frame. These are app screens.
+- Any device frame that is heavier or more interesting than the screen.
+
+## Check before finishing
+
+All 8 exist as separate files. Same device, same scale, same margins. Copy is
+exactly as written. Only cyan and magenta carry colour, each meaning one
+thing. Text is comfortably readable at normal size. The two stubs have real
+notches. Nothing glows except the progress bar and the live dot.
