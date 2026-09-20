@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#1F3340"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#B3261E"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#0B7A63"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="940" fill="#FFFFFF"/>
+
+  <!-- title -->
+  <text x="60" y="62" font-size="32" font-weight="700" fill="#14232E">System Sequence Diagram — Booking &amp; Payment</text>
+  <text x="60" y="94" font-size="18" fill="#64777F">Ploy buys 2 × VIP for BLACKPINK — Bangkok.  The system is drawn as one black box.</text>
+
+  <!-- participant heads -->
+  <rect x="270" y="125" width="260" height="62" rx="6" fill="#FFFFFF" stroke="#1F3340" stroke-width="2"/>
+  <text x="400" y="152" font-size="19" font-weight="700" fill="#14232E" text-anchor="middle">Ploy</text>
+  <text x="400" y="173" font-size="14" fill="#64777F" text-anchor="middle">Customer</text>
+
+  <rect x="1030" y="125" width="260" height="62" rx="6" fill="#EAF5F2" stroke="#0B7A63" stroke-width="2"/>
+  <text x="1160" y="152" font-size="19" font-weight="700" fill="#0A5949" text-anchor="middle">Ticket &amp; Queue System</text>
+  <text x="1160" y="173" font-size="14" fill="#3E7D6E" text-anchor="middle">black box</text>
+
+  <!-- lifelines -->
+  <line x1="400" y1="187" x2="400" y2="866" stroke="#A9B8BF" stroke-width="2" stroke-dasharray="7 7"/>
+  <line x1="1160" y1="187" x2="1160" y2="866" stroke="#A9B8BF" stroke-width="2" stroke-dasharray="7 7"/>
+
+  <!-- activation bar on the system -->
+  <rect x="1152" y="222" width="16" height="624" fill="#DCEFE9" stroke="#0B7A63" stroke-width="1.5"/>
+
+  <!-- 1. joinQueue -->
+  <text x="780" y="228" font-size="17" fill="#14232E" text-anchor="middle">joinQueue(customerId, eventId)</text>
+  <line x1="400" y1="240" x2="1148" y2="240" stroke="#0B7A63" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- 2. token -->
+  <text x="780" y="286" font-size="17" fill="#3D525E" text-anchor="middle">tokenId,  position 4,182</text>
+  <line x1="1152" y1="298" x2="404" y2="298" stroke="#6C818C" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#arrow)"/>
+
+  <!-- loop frame -->
+  <rect x="250" y="326" width="1030" height="86" fill="none" stroke="#9BAAB2" stroke-width="1.6"/>
+  <path d="M 250 326 L 322 326 L 322 344 L 308 356 L 250 356 z" fill="#F0F3F4" stroke="#9BAAB2" stroke-width="1.6"/>
+  <text x="262" y="345" font-size="14" font-weight="700" fill="#4A5D66">loop</text>
+  <text x="342" y="345" font-size="14" fill="#64777F">[ every 5 s until admitted ]</text>
+  <text x="780" y="382" font-size="17" fill="#14232E" text-anchor="middle">getQueuePosition(tokenId)</text>
+  <line x1="400" y1="394" x2="1148" y2="394" stroke="#1F3340" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 3. admitted -->
+  <text x="780" y="440" font-size="17" font-weight="600" fill="#0A5949" text-anchor="middle">admitted   —   tiers:  VIP ฿6,500,  16 left</text>
+  <line x1="1152" y1="452" x2="404" y2="452" stroke="#0B7A63" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- 4. holdTickets -->
+  <text x="780" y="498" font-size="17" font-weight="600" fill="#14232E" text-anchor="middle">holdTickets(tokenId, VIP, qty 2)</text>
+  <line x1="400" y1="510" x2="1148" y2="510" stroke="#0B7A63" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- alt frame 1 : hold -->
+  <rect x="250" y="532" width="1030" height="126" fill="none" stroke="#9BAAB2" stroke-width="1.6"/>
+  <path d="M 250 532 L 310 532 L 310 550 L 296 562 L 250 562 z" fill="#F0F3F4" stroke="#9BAAB2" stroke-width="1.6"/>
+  <text x="262" y="551" font-size="14" font-weight="700" fill="#4A5D66">alt</text>
+  <text x="330" y="551" font-size="14" fill="#64777F">[ hold acquired ]</text>
+  <text x="780" y="588" font-size="17" fill="#3D525E" text-anchor="middle">reservationId,  expires 10:14:40</text>
+  <line x1="1152" y1="600" x2="404" y2="600" stroke="#6C818C" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#arrow)"/>
+  <line x1="250" y1="614" x2="1280" y2="614" stroke="#9BAAB2" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <text x="262" y="632" font-size="14" fill="#64777F">[ refused ]</text>
+  <text x="820" y="632" font-size="17" fill="#8A5A1F" text-anchor="middle">holdRefused(reason, remaining)</text>
+  <line x1="1152" y1="646" x2="404" y2="646" stroke="#B4741C" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#arrow)"/>
+
+  <!-- 5. checkout -->
+  <text x="780" y="692" font-size="17" font-weight="600" fill="#14232E" text-anchor="middle">checkout(reservationId, "promptpay")   =   ฿13,000</text>
+  <line x1="400" y1="704" x2="1148" y2="704" stroke="#0B7A63" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- alt frame 2 : payment -->
+  <rect x="250" y="726" width="1030" height="132" fill="none" stroke="#9BAAB2" stroke-width="1.6"/>
+  <path d="M 250 726 L 310 726 L 310 744 L 296 756 L 250 756 z" fill="#F0F3F4" stroke="#9BAAB2" stroke-width="1.6"/>
+  <text x="262" y="745" font-size="14" font-weight="700" fill="#4A5D66">alt</text>
+  <text x="330" y="745" font-size="14" fill="#64777F">[ authorised  AND  hold still alive ]</text>
+  <text x="780" y="782" font-size="17" font-weight="600" fill="#0A5949" text-anchor="middle">paymentConfirmed  —  2 digital tickets issued</text>
+  <line x1="1152" y1="794" x2="404" y2="794" stroke="#0B7A63" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+  <line x1="250" y1="808" x2="1280" y2="808" stroke="#9BAAB2" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <text x="262" y="826" font-size="14" fill="#64777F">[ hold expired ]</text>
+  <text x="830" y="826" font-size="17" font-weight="600" fill="#B3261E" text-anchor="middle">paymentVoided  —  nothing charged</text>
+  <line x1="1152" y1="840" x2="404" y2="840" stroke="#B3261E" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#arrowRed)"/>
+
+  <!-- footer takeaway -->
+  <line x1="60" y1="886" x2="1540" y2="886" stroke="#DCE3E5" stroke-width="1.5"/>
+  <circle cx="70" cy="912" r="5" fill="#B3261E"/>
+  <text x="88" y="918" font-size="17" fill="#3D525E">The last line is the point: if the bank answers after the 10 minutes, Ploy loses the seats — but she is <tspan font-weight="700" fill="#B3261E">never charged for nothing</tspan>.</text>
+</svg>

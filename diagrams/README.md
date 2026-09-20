@@ -17,6 +17,10 @@ then here.
 | Activity diagram | **Built** | [`activity-booking-flow.html`](activity-booking-flow.html) |
 | UI mockups | To draw — prompt ready | [`ui-mockup-prompt.md`](ui-mockup-prompt.md) |
 
+**Presenting?** Plain white PNG/SVG versions of the SSD and the activity
+diagram, sized for a 16:9 slide, are in [`slides/`](slides/). They are cut
+down on purpose — the full detail stays in the interactive HTML above.
+
 The two built diagrams are interactive standalone HTML: open the file in a
 browser. They carry light/dark themes, pan and zoom, guided views, and a
 PNG / SVG export button for dropping into the report.
