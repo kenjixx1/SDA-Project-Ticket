@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "System Sequence Diagram — Booking and Payment",
+    "quality_profile": "showcase",
+    "column_fit": "spread",
+    "viewBox": [
+      1000,
+      680
+    ],
+    "views": [
+      {
+        "id": "queue",
+        "label": "Join the queue",
+        "focus": [
+          "ploy",
+          "system"
+        ],
+        "note": "Ploy takes a numbered place and polls it until the system admits her."
+      },
+      {
+        "id": "hold",
+        "label": "Hold the seats",
+        "focus": [
+          "ploy",
+          "system"
+        ],
+        "note": "The atomic hold either takes 2 seats or takes none."
+      },
+      {
+        "id": "pay",
+        "label": "Pay, and the race",
+        "focus": [
+          "ploy",
+          "system"
+        ],
+        "note": "Confirming needs two facts true at once: authorised, and the hold still alive."
+      }
+    ],
+    "legend": {
+      "mode": "all",
+      "entries": {
+        "emphasis": {
+          "label": "customer request"
+        },
+        "default": {
+          "label": "poll"
+        },
+        "return": {
+          "label": "system reply"
+        },
+        "dashed": {
+          "label": "refused branch"
+        },
+        "security": {
+          "label": "expired branch"
+        }
+      }
+    }
+  },
+  "participants": [
+    {
+      "id": "ploy",
+      "type": "external",
+      "label": "Ploy",
+      "sublabel": "Customer"
+    },
+    {
+      "id": "system",
+      "type": "backend",
+      "label": "Ticket & Queue System",
+      "sublabel": "black box"
+    }
+  ],
+  "segments": [
+    {
+      "from": 166,
+      "to": 236,
+      "label": "UC-01 · Join waiting room"
+    },
+    {
+      "from": 254,
+      "to": 292,
+      "label": "loop · every 5 s"
+    },
+    {
+      "from": 306,
+      "to": 344,
+      "label": "UC-02 · Admitted"
+    },
+    {
+      "from": 358,
+      "to": 458,
+      "label": "alt · hold acquired / refused"
+    },
+    {
+      "from": 474,
+      "to": 510,
+      "label": "UC-03 · Checkout"
+    },
+    {
+      "from": 526,
+      "to": 596,
+      "label": "alt · hold alive / hold expired"
+    }
+  ],
+  "messages": [
+    {
+      "id": "join",
+      "from": "ploy",
+      "to": "system",
+      "y": 188,
+      "label": "joinQueue(customerId, eventId)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "token",
+      "from": "system",
+      "to": "ploy",
+      "y": 220,
+      "label": "tokenId, position 4,182",
+      "variant": "return"
+    },
+    {
+      "id": "poll",
+      "from": "ploy",
+      "to": "system",
+      "y": 272,
+      "label": "getQueuePosition(tokenId)",
+      "variant": "default",
+      "note": "repeats every 5 s until admitted"
+    },
+    {
+      "id": "admitted",
+      "from": "system",
+      "to": "ploy",
+      "y": 324,
+      "label": "admitted + tiers: VIP 16 left",
+      "variant": "emphasis"
+    },
+    {
+      "id": "hold",
+      "from": "ploy",
+      "to": "system",
+      "y": 376,
+      "label": "holdTickets(tokenId, VIP, qty 2)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "held",
+      "from": "system",
+      "to": "ploy",
+      "y": 408,
+      "label": "[acquired] reservationId, expires 10:14:40",
+      "variant": "return"
+    },
+    {
+      "id": "refused",
+      "from": "system",
+      "to": "ploy",
+      "y": 440,
+      "label": "[refused] holdRefused(reason, remaining)",
+      "variant": "dashed"
+    },
+    {
+      "id": "checkout",
+      "from": "ploy",
+      "to": "system",
+      "y": 492,
+      "label": "checkout(reservationId, \"promptpay\") = ฿13,000",
+      "variant": "emphasis"
+    },
+    {
+      "id": "confirmed",
+      "from": "system",
+      "to": "ploy",
+      "y": 544,
+      "label": "[authorised + still held] paymentConfirmed",
+      "variant": "return"
+    },
+    {
+      "id": "voided",
+      "from": "system",
+      "to": "ploy",
+      "y": 576,
+      "label": "[hold expired] paymentVoided — nothing charged",
+      "variant": "security"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "system",
+      "from": 182,
+      "to": 590,
+      "type": "backend"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Read it as a black box",
+      "items": [
+        "Only two lifelines: Ploy and the system",
+        "No filters, services or database appear: those are design, not requirements"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "The race the brief never named",
+      "items": [
+        "Confirming needs two facts at once: payment authorised AND hold still alive",
+        "If the bank answers after the 10 minutes the payment is voided: she is never charged for nothing"
+      ]
+    }
+  ]
+}

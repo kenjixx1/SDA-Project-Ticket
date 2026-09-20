@@ -8,7 +8,39 @@ below, taken from `docs/04-use-cases.md` and `docs/05-domain-model.md`. Draw
 what is written; if something is missing, it belongs in the document first,
 then here.
 
-Files go in this folder. Suggested names are given with each spec.
+## Status
+
+| Diagram | Status | File |
+|---|---|---|
+| Use case diagram | To draw | — |
+| System Sequence Diagram | **Built** | [`ssd-booking-payment.html`](ssd-booking-payment.html) |
+| Activity diagram | **Built** | [`activity-booking-flow.html`](activity-booking-flow.html) |
+| UI mockups | To draw | — |
+
+The two built diagrams are interactive standalone HTML: open the file in a
+browser. They carry light/dark themes, pan and zoom, guided views, and a
+PNG / SVG export button for dropping into the report.
+
+Each one is generated from a small JSON source next to it
+(`*.sequence.json`, `*.workflow.json`). **Edit the JSON and regenerate** —
+never hand-edit the HTML. To regenerate:
+
+```
+node ~/.claude/skills/archify/bin/archify.mjs deliver sequence \
+  ssd-booking-payment.sequence.json ssd-booking-payment.html --quality showcase
+
+node ~/.claude/skills/archify/bin/archify.mjs deliver workflow \
+  activity-booking-flow.workflow.json activity-booking-flow.html --quality showcase
+```
+
+### One known limitation
+
+The activity diagram does **not** draw the two return arrows (hold refused →
+choose again, payment declined → retry). The renderer could not route them
+without crossing other edges. Both loops are stated on the nodes themselves
+("fresh numbers, choose again" / "hold keeps its time, retry") and in the
+cards below the diagram. If the report needs the arrows drawn, they have to
+be added by hand afterwards.
 
 ---
 
@@ -94,6 +126,22 @@ A third lifeline `: PaymentProvider` may be added for messages 6–7 if the
 external call should be visible. **Recommended: leave it out.** An SSD is
 about the boundary between the actor and the system; the provider is behind
 that boundary, and `docs/06-architecture.md` already shows it.
+
+### What the built version does
+
+`ssd-booking-payment.html` shows 10 messages rather than the 16 the table
+above implies, because the brief asks for the **core booking and payment
+flow**. Two compressions were made so the whole diagram stays readable on one
+screen:
+
+- `listTiers` and its reply are folded into one message: *admitted + tiers:
+  VIP 16 left*.
+- `getDigitalTickets` (UC-04) is left out. The flow ends at the payment
+  outcome, which is where "booking and payment" ends.
+
+Both `alt` fragments and the `loop` are present. If the report needs the two
+dropped messages, add them back in `ssd-booking-payment.sequence.json` and
+raise `meta.viewBox` height.
 
 ---
 

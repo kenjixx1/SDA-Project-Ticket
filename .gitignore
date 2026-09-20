@@ -26,3 +26,6 @@ bin/
 
 # impeccable design-hook state
 .impeccable/
+
+# archify visual-check evidence (regenerate with: archify visual-check)
+diagrams/*.visual-check.*

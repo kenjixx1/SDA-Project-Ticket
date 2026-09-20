@@ -1,0 +1,372 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Activity Diagram — Queue, Hold and Checkout",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "queue",
+        "label": "Join the queue",
+        "focus": [
+          "open",
+          "token",
+          "position",
+          "admit"
+        ],
+        "note": "The waiting room absorbs the spike so the booking engine never feels it."
+      },
+      {
+        "id": "hold",
+        "label": "The atomic hold",
+        "focus": [
+          "choose",
+          "hold",
+          "refused"
+        ],
+        "note": "Two seats or none. This decision is where overselling is prevented."
+      },
+      {
+        "id": "timeout",
+        "label": "The 10-minute timeout",
+        "focus": [
+          "hold",
+          "expired",
+          "alive",
+          "voided"
+        ],
+        "note": "The timer can fire at any moment during the countdown, from outside the flow."
+      }
+    ],
+    "legend": {
+      "mode": "all",
+      "entries": {
+        "external": {
+          "label": "Customer action"
+        },
+        "frontend": {
+          "label": "Customer sees"
+        },
+        "backend": {
+          "label": "System step"
+        },
+        "security": {
+          "label": "Guard / timeout"
+        },
+        "messagebus": {
+          "label": "Branch outcome"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "customer",
+      "label": "Customer — Ploy"
+    },
+    {
+      "id": "system",
+      "label": "System"
+    },
+    {
+      "id": "retry",
+      "label": "Refused + declined",
+      "variant": "exception"
+    },
+    {
+      "id": "timeout",
+      "label": "10-minute timeout",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "queueing",
+      "label": "Waiting room",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "holding",
+      "label": "Select + hold",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "paying",
+      "label": "Pay + confirm",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "mainPath": [
+    "open",
+    "token",
+    "position",
+    "admit",
+    "choose",
+    "hold",
+    "pay",
+    "authorise",
+    "alive",
+    "tickets"
+  ],
+  "nodes": [
+    {
+      "id": "open",
+      "lane": "customer",
+      "col": 0,
+      "type": "external",
+      "label": "Open sale page",
+      "sublabel": "10:00:00, with 40,000 others",
+      "width": 138
+    },
+    {
+      "id": "choose",
+      "lane": "customer",
+      "col": 2,
+      "type": "external",
+      "label": "Choose tickets",
+      "sublabel": "VIP x 2",
+      "width": 138
+    },
+    {
+      "id": "pay",
+      "lane": "customer",
+      "col": 4,
+      "type": "external",
+      "label": "Enter payment details",
+      "sublabel": "PromptPay",
+      "width": 138
+    },
+    {
+      "id": "tickets",
+      "lane": "customer",
+      "col": 5,
+      "type": "frontend",
+      "label": "Receives 2 tickets",
+      "sublabel": "signed, single-use QR",
+      "width": 138
+    },
+    {
+      "id": "token",
+      "lane": "system",
+      "col": 0,
+      "type": "backend",
+      "label": "Issue queue token",
+      "sublabel": "one per account, per event",
+      "width": 138
+    },
+    {
+      "id": "position",
+      "lane": "system",
+      "col": 1,
+      "type": "backend",
+      "label": "Show queue position",
+      "sublabel": "4,182 · ~6 min",
+      "tag": "loop: refresh every 5 s",
+      "width": 138
+    },
+    {
+      "id": "admit",
+      "lane": "system",
+      "col": 2,
+      "type": "backend",
+      "label": "Admit + list tiers",
+      "sublabel": "VIP 16 left",
+      "width": 138
+    },
+    {
+      "id": "hold",
+      "lane": "system",
+      "col": 3,
+      "type": "security",
+      "label": "Atomic hold",
+      "sublabel": "remaining 16 to 14",
+      "tag": "2 seats or 0",
+      "width": 138
+    },
+    {
+      "id": "authorise",
+      "lane": "system",
+      "col": 4,
+      "type": "backend",
+      "label": "Request authorisation",
+      "sublabel": "payment plug-in",
+      "width": 138
+    },
+    {
+      "id": "alive",
+      "lane": "system",
+      "col": 5,
+      "type": "security",
+      "label": "Hold still alive?",
+      "sublabel": "yes: confirm + capture",
+      "tag": "the critical check",
+      "width": 138
+    },
+    {
+      "id": "refused",
+      "lane": "retry",
+      "col": 2,
+      "type": "messagebus",
+      "label": "Hold refused",
+      "sublabel": "fresh numbers, choose again",
+      "width": 138
+    },
+    {
+      "id": "declined",
+      "lane": "retry",
+      "col": 4,
+      "type": "messagebus",
+      "label": "Payment declined",
+      "sublabel": "hold keeps its time, retry",
+      "width": 138
+    },
+    {
+      "id": "expired",
+      "lane": "timeout",
+      "col": 2,
+      "type": "security",
+      "label": "10 minutes elapse",
+      "sublabel": "seats returned to the tier",
+      "tag": "interrupting event",
+      "width": 138
+    },
+    {
+      "id": "voided",
+      "lane": "timeout",
+      "col": 4,
+      "type": "security",
+      "label": "Payment voided",
+      "sublabel": "no ticket, nothing charged",
+      "width": 138
+    }
+  ],
+  "edges": [
+    {
+      "id": "join",
+      "from": "open",
+      "to": "token",
+      "label": "join the sale",
+      "variant": "default"
+    },
+    {
+      "id": "placed",
+      "from": "token",
+      "to": "position",
+      "variant": "default"
+    },
+    {
+      "id": "admitted",
+      "from": "position",
+      "to": "admit",
+      "label": "token reaches the front",
+      "variant": "emphasis"
+    },
+    {
+      "id": "browse",
+      "from": "admit",
+      "to": "choose",
+      "variant": "default"
+    },
+    {
+      "id": "request-hold",
+      "from": "choose",
+      "to": "hold",
+      "label": "hold 2 seats",
+      "variant": "emphasis"
+    },
+    {
+      "id": "acquired",
+      "from": "hold",
+      "to": "pay",
+      "label": "acquired: countdown starts",
+      "variant": "emphasis"
+    },
+    {
+      "id": "no-seats",
+      "from": "hold",
+      "to": "refused",
+      "label": "no seats left",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "submit",
+      "from": "pay",
+      "to": "authorise",
+      "variant": "default"
+    },
+    {
+      "id": "authorised",
+      "from": "authorise",
+      "to": "alive",
+      "label": "authorised",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "card-declined",
+      "from": "authorise",
+      "to": "declined",
+      "label": "declined",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "timer-fires",
+      "from": "hold",
+      "to": "expired",
+      "label": "10 min elapse",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "late-auth",
+      "from": "expired",
+      "to": "voided",
+      "label": "authorisation arrives late",
+      "variant": "security"
+    },
+    {
+      "id": "confirmed",
+      "from": "alive",
+      "to": "tickets",
+      "label": "yes: issue tickets",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "void",
+      "from": "alive",
+      "to": "voided",
+      "label": "no",
+      "variant": "security",
+      "role": "error",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Two decisions carry the design",
+      "items": [
+        "Atomic hold: did the seats get taken? This is where overselling is prevented",
+        "Hold still alive? This is where the customer is protected from paying for nothing"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "The timer is not a step",
+      "items": [
+        "The 10 minutes can run out at any moment during the countdown, from outside the flow",
+        "When it fires the seats go back on sale before any payment result arrives"
+      ]
+    }
+  ]
+}
