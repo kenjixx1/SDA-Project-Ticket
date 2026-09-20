@@ -144,37 +144,22 @@ where the held / sold / remaining split becomes visible.
 
 ## The visual direction
 
-**Printed matter.** A ticket is a document, so the app is set like one.
+**Neon Arena.** An arena lit by two rigs.
 
-The rule is structural, and it is the point:
-
-- **Almost nothing is a card.** Content is grouped by hairlines, indents and
-  space. Tier rows, settings, ticket lists and notes are all divided lists
-  with no fill and no border around them.
-- **Three filled objects exist**: the action button, the event block, and the
-  ticket stub. The stub keeps its edges because it is the one thing here that
-  is genuinely a physical object.
-- **Type carries the hierarchy**, not containers. Archivo condensed at 800 to
-  900 weight for the numbers that matter, mono for anything countable, four
-  clear scale steps.
-- **Corners are 4px.** Nothing is pill-shaped.
-- **One accent, vermilion.** It does real work: the action, the countdown, the
-  progress rule, the selected tier, the low-stock warning.
-- **Nothing glows.** No gradient panels, no tinted washes.
-
-Both colour schemes are built and structurally identical; the light one reads
-as ink on paper, the dark one as a poster pasted on a wall.
-
-### Why the two previous attempts were wrong
-
-The first was too timid: small type, a 6px accent, everything centred and
-evenly spaced, so it read as a banking app. The second over-corrected into
-neon cyan on near-black with a glow, which is the single most generated
-"cool app" look there is.
-
-Both shared the real fault, which was not colour. **Every piece of content sat
-in the same rounded card on the same raised fill.** That repetition is what
-reads as machine-made, and removing it did more than any palette would have.
+- **Cyan `#35E3F5` is the light you move toward.** Every action, the queue
+  progress, the countdown, the live signal.
+- **Magenta `#FF5CA8` is the light that stops you.** Scarcity on a tier, and
+  the expired screen. Nothing else on any screen is coloured, so both lights
+  always mean something.
+- **The poster is lit by both**, cyan from the left rig and magenta from the
+  right, falling off into black with haze in the beam.
+- **Ticket stubs are laminated passes** that catch the rigs above them, with
+  real notches punched into both edges.
+- **Archivo at 900 weight and width 121** for the act name, 104px for the
+  queue position.
+- **Glow appears exactly twice:** the queue progress bar and the live dot.
+  Both are literally light sources in the fiction. Nothing else glows, which
+  is what keeps it from reading as generic neon.
 
 ### Still needs a real asset
 
