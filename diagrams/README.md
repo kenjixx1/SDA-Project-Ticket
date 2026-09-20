@@ -14,16 +14,18 @@ then here.
 |---|---|---|
 | Use case diagram | To draw | — |
 | System Sequence Diagram | **Built** | [`ssd-booking-payment.html`](ssd-booking-payment.html) |
-| Sequence Diagram, boundary / control / entity | **Built** | [`sequence-bce.html`](sequence-bce.html) |
+| Robustness diagram (boundary / control / entity) | **Built** | [`slides/slide-robustness.png`](slides/slide-robustness.png) |
 | Activity diagram | **Built** | [`activity-booking-flow.html`](activity-booking-flow.html) |
 | UI mockups | To draw — prompt ready | [`ui-mockup-prompt.md`](ui-mockup-prompt.md) → built in [`../design/`](../design/) |
 
-**Presenting?** Plain white PNG/SVG versions of the SSD and the activity
-diagram, sized for a 16:9 slide, are in [`slides/`](slides/). They are cut
-down on purpose — the full detail stays in the interactive HTML above.
+**Presenting?** Plain white PNG/SVG versions of the SSD, the activity
+diagram and the robustness diagram, sized for a 16:9 slide, are in
+[`slides/`](slides/). The SSD and activity slides are cut down on purpose —
+the full detail stays in the interactive HTML above. The robustness diagram
+exists **only** as a slide picture; there is no interactive version.
 
-The two built diagrams are interactive standalone HTML: open the file in a
-browser. They carry light/dark themes, pan and zoom, guided views, and a
+The SSD and the activity diagram are interactive standalone HTML: open the
+file in a browser. They carry light/dark themes, pan and zoom, guided views, and a
 PNG / SVG export button for dropping into the report.
 
 Each one is generated from a small JSON source next to it
@@ -132,14 +134,15 @@ external call should be visible. **Recommended: leave it out.** An SSD is
 about the boundary between the actor and the system; the provider is behind
 that boundary, and `docs/06-architecture.md` already shows it.
 
-### Two sequence diagrams, and why both
+### The SSD and the robustness diagram, and why both
 
 They answer different questions, so neither replaces the other.
 
-| | `ssd-booking-payment.html` | `sequence-bce.html` |
+| | `ssd-booking-payment.html` | `slides/slide-robustness.png` |
 |---|---|---|
-| Kind | System Sequence Diagram | Sequence Diagram |
-| Lifelines | 2: the customer and the system | 7: actor, boundary, control, three entities, one plug-in |
+| Kind | System Sequence Diagram | Robustness diagram |
+| Shape | Lifelines and messages, top to bottom | Three columns of circles, left to right |
+| Parts | 2: the customer and the system | Actor, 5 boundaries, 5 controls, 7 entities |
 | Shows | What the customer asks for and what comes back | Which object does which part of the work |
 | Belongs in | Requirements Model | Design |
 | Question it answers | What must the system do? | How does the system do it? |
@@ -149,27 +152,44 @@ artefact: it says nothing about how the system is built, so it cannot be
 wrong about a design that has not been decided yet. The brief asks for this
 one by name.
 
-**The BCE diagram opens the box** using the three analysis stereotypes:
+**The robustness diagram opens the box** using the three classic analysis
+stereotypes. Each one is a circle with a different mark on it:
 
-- **Boundary** `:TicketUI` is what the customer touches. It never reaches an
-  entity directly; it only ever calls the control.
-- **Control** `:Booking` coordinates. Every rule and every ordering decision
-  lives here.
-- **Entity** `:QueueToken`, `:TicketTier`, `:Reservation` are the stored
-  things. They know their own state and nothing about screens.
+| Stereotype | Shape | Plain meaning | In this system |
+|---|---|---|---|
+| **Boundary** | circle with a bar on its left | what the customer touches | Event, Queue, Selection, Payment and Ticket screens |
+| **Control** | circle with an arrow on top | the logic that coordinates | Join queue, Admit customer, Hold seats, Take payment, Issue ticket |
+| **Entity** | circle with a line under it | the stored object classes | User, Event, QueueToken, TicketTier, Reservation, Payment, DigitalTicket |
 
-`:Payment` sits outside the three as the plug-in seam from
-`docs/06-architecture.md`.
+The one rule the picture enforces: **a boundary never touches an entity.**
+A screen only ever talks to a control, and only a control reaches the stored
+data. If a line ever runs straight from the left column to the right column,
+the design is wrong.
 
-Two moments are worth pointing at while presenting it:
+The seven entities are the **object classes**, with the same names and
+attributes used in the object-class table on the slides.
 
-1. **`reserveAtomic(qty)` on `:TicketTier`.** That entity is the only lifeline
-   in the whole diagram that changes a seat count. One owner, one indivisible
+> **One mismatch to fix before submitting.** The diagram shows **User**
+> (`userId, name, email, role`) because the object-class table does. That
+> class is **not** in `docs/05-domain-model.md`, which lists E-01 to E-06
+> without it. Either add User to the domain model or drop it from the table —
+> the two must agree.
+
+Two relationships are drawn in red because they carry the whole design:
+
+1. **`Hold seats → TicketTier`, marked *atomic hold*.** TicketTier is the only
+   object in the diagram that changes a seat count. One owner, one indivisible
    step, which is why the same seat cannot be sold twice.
-2. **`stillHeld()` on `:Reservation`, after the provider has already
-   authorised.** Control asks before it captures. A yes confirms the order, a
-   no voids the authorisation, and that is the difference between losing a
-   seat and being charged for nothing.
+2. **`Take payment → Reservation`, marked *still held?*.** After the provider
+   has already authorised, the control asks the reservation whether the hold
+   is still alive. A yes confirms the order, a no voids the authorisation, and
+   that is the difference between losing a seat and being charged for nothing.
+
+To rebuild it after editing:
+
+```
+python3 diagrams/slides/src/slide-robustness.py
+```
 
 ### What the built version does
 
@@ -268,8 +288,7 @@ because they are part of the behaviour being described.
 
 The worked example, Kenji buying 2 x VIP for 13,000 baht, lives in the use
 case text in `docs/04-use-cases.md`, which is where a concrete walkthrough
-helps. The **SSD is deliberately left specific**: a system sequence diagram
-conventionally traces one scenario, and a generic one would say very little.
+helps. Say it out loud while the slide is up; do not write it on the slide.
 
 ### Two decisions that must both be visible
 
@@ -352,6 +371,8 @@ reason.
 - [ ] Activity diagram — the 10-minute timeout is an **interrupting** event,
       not a step in the sequence
 - [ ] Activity diagram — both critical decisions visible
+- [ ] Robustness diagram — no line runs from a boundary straight to an entity
+- [ ] Robustness diagram — its entity names match the object-class table
 - [ ] Queue screen — position is the largest element
 - [ ] Selection screen — countdown visible, quantity capped at 4
 - [ ] Confirmation — one ticket per seat
