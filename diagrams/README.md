@@ -14,14 +14,14 @@ then here.
 |---|---|---|
 | Use case diagram | To draw | — |
 | System Sequence Diagram | **Built** | [`ssd-booking-payment.html`](ssd-booking-payment.html) |
-| Robustness diagram (boundary / control / entity) | **Built** | [`slides/slide-robustness.png`](slides/slide-robustness.png) |
+| Sequence diagram, boundary / control / entity | **Built** | [`slides/slide-bce-sequence.png`](slides/slide-bce-sequence.png) |
 | Activity diagram | **Built** | [`activity-booking-flow.html`](activity-booking-flow.html) |
 | UI mockups | To draw — prompt ready | [`ui-mockup-prompt.md`](ui-mockup-prompt.md) → built in [`../design/`](../design/) |
 
 **Presenting?** Plain white PNG/SVG versions of the SSD, the activity
-diagram and the robustness diagram, sized for a 16:9 slide, are in
+diagram and the boundary/control/entity sequence diagram are in
 [`slides/`](slides/). The SSD and activity slides are cut down on purpose —
-the full detail stays in the interactive HTML above. The robustness diagram
+the full detail stays in the interactive HTML above. The BCE sequence diagram
 exists **only** as a slide picture; there is no interactive version.
 
 The SSD and the activity diagram are interactive standalone HTML: open the
@@ -134,15 +134,16 @@ external call should be visible. **Recommended: leave it out.** An SSD is
 about the boundary between the actor and the system; the provider is behind
 that boundary, and `docs/06-architecture.md` already shows it.
 
-### The SSD and the robustness diagram, and why both
+### The two sequence diagrams, and why both
 
-They answer different questions, so neither replaces the other.
+Same shape, same reading direction: lifelines across the top, time running
+down. They differ in **how many lifelines** and therefore in what they say.
 
-| | `ssd-booking-payment.html` | `slides/slide-robustness.png` |
+| | `ssd-booking-payment.html` | `slides/slide-bce-sequence.png` |
 |---|---|---|
-| Kind | System Sequence Diagram | Robustness diagram |
-| Shape | Lifelines and messages, top to bottom | Three columns of circles, left to right |
-| Parts | 2: the customer and the system | Actor, 5 boundaries, 5 controls, 7 entities |
+| Kind | System Sequence Diagram | Sequence diagram |
+| Lifeline heads | rectangles | **circles**, one shape per stereotype |
+| Lifelines | 2: the customer and the system | 7: actor, 1 boundary, 1 control, 4 entities, 1 plug-in |
 | Shows | What the customer asks for and what comes back | Which object does which part of the work |
 | Belongs in | Requirements Model | Design |
 | Question it answers | What must the system do? | How does the system do it? |
@@ -152,43 +153,45 @@ artefact: it says nothing about how the system is built, so it cannot be
 wrong about a design that has not been decided yet. The brief asks for this
 one by name.
 
-**The robustness diagram opens the box** using the three classic analysis
-stereotypes. Each one is a circle with a different mark on it:
+**The BCE version opens the box.** It is the same flow, but the single
+"System" lifeline is split into the three classic analysis stereotypes. Each
+one is a **circle with a different mark on it**:
 
-| Stereotype | Shape | Plain meaning | In this system |
+| Stereotype | Shape | Plain meaning | On this diagram |
 |---|---|---|---|
-| **Boundary** | circle with a bar on its left | what the customer touches | Event, Queue, Selection, Payment and Ticket screens |
-| **Control** | circle with an arrow on top | the logic that coordinates | Join queue, Admit customer, Hold seats, Take payment, Issue ticket |
-| **Entity** | circle with a line under it | the stored object classes | User, Event, QueueToken, TicketTier, Reservation, Payment, DigitalTicket |
+| **Boundary** | circle with a bar on its left | what the customer touches | `:TicketUI`, and `:Payment` as the seam to the outside |
+| **Control** | circle with an arrow on top | the logic that coordinates | `:Booking` |
+| **Entity** | circle with a line under it | the stored object classes | `:QueueToken`, `:TicketTier`, `:Reservation` |
 
-The one rule the picture enforces: **a boundary never touches an entity.**
-A screen only ever talks to a control, and only a control reaches the stored
-data. If a line ever runs straight from the left column to the right column,
-the design is wrong.
+The one rule the picture enforces: **a boundary never talks to an entity.**
+Every arrow that leaves `:TicketUI` lands on `:Booking`, and only `:Booking`
+reaches the stored data. If you can find an arrow running straight from the
+boundary column to an entity column, the design is wrong.
 
-The seven entities are the **object classes**, with the same names and
-attributes used in the object-class table on the slides.
+The entity names are the **object classes**, the same names used in the
+object-class table on the slides.
 
-> **One mismatch to fix before submitting.** The diagram shows **User**
-> (`userId, name, email, role`) because the object-class table does. That
-> class is **not** in `docs/05-domain-model.md`, which lists E-01 to E-06
-> without it. Either add User to the domain model or drop it from the table —
-> the two must agree.
+> **One mismatch to fix before submitting.** The object-class table on the
+> slides has a **User** class (`userId, name, email, role`). That class is
+> **not** in `docs/05-domain-model.md`, which lists E-01 to E-06 without it.
+> Either add User to the domain model or drop it from the table — the two
+> must agree. It is left off this diagram because the booking flow never
+> calls it.
 
-Two relationships are drawn in red because they carry the whole design:
+Two arrows are drawn in red because they carry the whole design:
 
-1. **`Hold seats → TicketTier`, marked *atomic hold*.** TicketTier is the only
-   object in the diagram that changes a seat count. One owner, one indivisible
-   step, which is why the same seat cannot be sold twice.
-2. **`Take payment → Reservation`, marked *still held?*.** After the provider
-   has already authorised, the control asks the reservation whether the hold
-   is still alive. A yes confirms the order, a no voids the authorisation, and
-   that is the difference between losing a seat and being charged for nothing.
+1. **`reserveAtomic(qty)` on `:TicketTier`.** That entity is the only lifeline
+   in the diagram that changes a seat count. One owner, one indivisible step,
+   which is why the same seat cannot be sold twice.
+2. **`stillHeld()` on `:Reservation`, after the provider has already
+   authorised.** Control asks before it captures. A yes confirms the order, a
+   no voids the authorisation, and that is the difference between losing a
+   seat and being charged for nothing.
 
 To rebuild it after editing:
 
 ```
-python3 diagrams/slides/src/slide-robustness.py
+python3 diagrams/slides/src/slide-bce-sequence.py
 ```
 
 ### What the built version does
@@ -371,8 +374,8 @@ reason.
 - [ ] Activity diagram — the 10-minute timeout is an **interrupting** event,
       not a step in the sequence
 - [ ] Activity diagram — both critical decisions visible
-- [ ] Robustness diagram — no line runs from a boundary straight to an entity
-- [ ] Robustness diagram — its entity names match the object-class table
+- [ ] BCE sequence — no arrow runs from the boundary straight to an entity
+- [ ] BCE sequence — its entity names match the object-class table
 - [ ] Queue screen — position is the largest element
 - [ ] Selection screen — countdown visible, quantity capped at 4
 - [ ] Confirmation — one ticket per seat

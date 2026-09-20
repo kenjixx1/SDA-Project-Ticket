@@ -7,7 +7,7 @@ reading on screen.
 |---|---|
 | `slide-ssd.png` / `.svg` | System Sequence Diagram |
 | `slide-activity.png` / `.svg` | Activity Diagram |
-| `slide-robustness.png` / `.svg` | Robustness diagram (boundary / control / entity) |
+| `slide-bce-sequence.png` / `.svg` | Sequence diagram with boundary / control / entity |
 
 ## How to use them
 
@@ -28,11 +28,12 @@ python3 -c "import cairosvg; cairosvg.svg2png(url='slide-ssd.svg', \
   write_to='slide-ssd.png', scale=2, background_color='white')"
 ```
 
-**`slide-robustness`** — the SVG here is a **generated file** and says so in
-its first line. The source is the Python script in `src/`. Edit that, then:
+**`slide-bce-sequence`** — the SVG here is a **generated file** and says so
+in its first line. The source is the Python script in `src/`. Edit that,
+then:
 
 ```
-python3 diagrams/slides/src/slide-robustness.py
+python3 diagrams/slides/src/slide-bce-sequence.py
 ```
 
 It writes both the `.svg` and the `.png`.
@@ -42,7 +43,7 @@ It writes both the `.svg` and the `.png`.
 The files one folder up (`../ssd-booking-payment.html`,
 `../activity-booking-flow.html`) are the full, detailed diagrams. Those two
 slide versions are **cut down on purpose**, because an audience reads a slide
-for about ten seconds. The robustness diagram has no fuller version — the
+for about ten seconds. The BCE sequence diagram has no fuller version — the
 slide *is* the diagram.
 
 | Cut from the slide version | Still in the full version |
@@ -65,9 +66,9 @@ minutes, they lose the seats but they are never charged."
 orange diamonds are the whole design. The first one stops the same seat being
 sold twice. The second one stops Kenji paying for a seat they no longer have."
 
-**Robustness diagram** — "Three kinds of circle. A bar on the left means a
+**BCE sequence diagram** — "Same diagram as the first one, but the system is
+no longer one box. Three kinds of circle on top. A bar on the left means a
 screen. An arrow on top means logic. A line underneath means stored data. The
-rule is that a screen never touches stored data directly — it always goes
-through the middle column. The two red lines are the two places the design
-can go wrong: one seat count owner, and one last check before we take the
-money.""
+rule is that a screen never touches stored data — every arrow goes through
+the middle. The two red arrows are the two places the design can go wrong:
+one owner of the seat count, and one last check before we take the money.""
