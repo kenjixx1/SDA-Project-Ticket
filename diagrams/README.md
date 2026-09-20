@@ -15,7 +15,7 @@ then here.
 | Use case diagram | To draw | — |
 | System Sequence Diagram | **Built** | [`ssd-booking-payment.html`](ssd-booking-payment.html) |
 | Activity diagram | **Built** | [`activity-booking-flow.html`](activity-booking-flow.html) |
-| UI mockups | To draw | — |
+| UI mockups | To draw — prompt ready | [`ui-mockup-prompt.md`](ui-mockup-prompt.md) |
 
 The two built diagrams are interactive standalone HTML: open the file in a
 browser. They carry light/dark themes, pan and zoom, guided views, and a
