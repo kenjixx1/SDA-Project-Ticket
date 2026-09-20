@@ -24,7 +24,7 @@
           "hold",
           "refused"
         ],
-        "note": "Two seats or none. This decision is where overselling is prevented."
+        "note": "All or nothing. This decision is where overselling is prevented."
       },
       {
         "id": "timeout",
@@ -62,7 +62,7 @@
   "lanes": [
     {
       "id": "customer",
-      "label": "Customer — Kenji"
+      "label": "Customer"
     },
     {
       "id": "system",
@@ -119,7 +119,7 @@
       "col": 0,
       "type": "external",
       "label": "Open sale page",
-      "sublabel": "10:00:00, with 40,000 others",
+      "sublabel": "once the sale is open",
       "width": 138
     },
     {
@@ -128,7 +128,7 @@
       "col": 2,
       "type": "external",
       "label": "Choose tickets",
-      "sublabel": "VIP x 2",
+      "sublabel": "tier and quantity",
       "width": 138
     },
     {
@@ -137,7 +137,7 @@
       "col": 4,
       "type": "external",
       "label": "Enter payment details",
-      "sublabel": "PromptPay",
+      "sublabel": "chosen payment method",
       "width": 138
     },
     {
@@ -145,8 +145,8 @@
       "lane": "customer",
       "col": 5,
       "type": "frontend",
-      "label": "Receives 2 tickets",
-      "sublabel": "signed, single-use QR",
+      "label": "Receives tickets",
+      "sublabel": "one per seat, signed",
       "width": 138
     },
     {
@@ -164,8 +164,8 @@
       "col": 1,
       "type": "backend",
       "label": "Show queue position",
-      "sublabel": "4,182 · ~6 min",
-      "tag": "loop: refresh every 5 s",
+      "sublabel": "position and estimated wait",
+      "tag": "loop: refresh while waiting",
       "width": 138
     },
     {
@@ -174,7 +174,7 @@
       "col": 2,
       "type": "backend",
       "label": "Admit + list tiers",
-      "sublabel": "VIP 16 left",
+      "sublabel": "price and remaining per tier",
       "width": 138
     },
     {
@@ -183,8 +183,8 @@
       "col": 3,
       "type": "security",
       "label": "Atomic hold",
-      "sublabel": "remaining 16 to 14",
-      "tag": "2 seats or 0",
+      "sublabel": "remaining count drops now",
+      "tag": "all or nothing",
       "width": 138
     },
     {
@@ -229,7 +229,7 @@
       "lane": "timeout",
       "col": 2,
       "type": "security",
-      "label": "10 minutes elapse",
+      "label": "Hold time elapses",
       "sublabel": "seats returned to the tier",
       "tag": "interrupting event",
       "width": 138
@@ -275,14 +275,14 @@
       "id": "request-hold",
       "from": "choose",
       "to": "hold",
-      "label": "hold 2 seats",
+      "label": "request hold",
       "variant": "emphasis"
     },
     {
       "id": "acquired",
       "from": "hold",
       "to": "pay",
-      "label": "acquired: countdown starts",
+      "label": "acquired, countdown starts",
       "variant": "emphasis"
     },
     {
@@ -320,7 +320,7 @@
       "id": "timer-fires",
       "from": "hold",
       "to": "expired",
-      "label": "10 min elapse",
+      "label": "hold time elapses",
       "variant": "security",
       "role": "error"
     },
@@ -356,7 +356,7 @@
       "dot": "emerald",
       "title": "Two decisions carry the design",
       "items": [
-        "Atomic hold: did the seats get taken? This is where overselling is prevented",
+        "Atomic hold: were the seats secured? This is where overselling is prevented",
         "Hold still alive? This is where the customer is protected from paying for nothing"
       ]
     },

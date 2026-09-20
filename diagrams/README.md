@@ -215,6 +215,22 @@ Attach a **timer event** to the region that covers *Show countdown* through
 > it as a normal decision node in the sequence would say something false about
 > how it works.
 
+### Wording is generic on purpose
+
+The activity diagram describes the workflow for **any customer buying any
+event**, so it carries no artist, no customer name, no tier name, no
+quantities and no payment brand. "Choose tier and quantity", not "Choose
+VIP x 2".
+
+The only numbers on it are system rules rather than example data: the refresh
+interval (FR-13) and the ten minute hold (FR-12). Those belong on the diagram
+because they are part of the behaviour being described.
+
+The worked example, Kenji buying 2 x VIP for 13,000 baht, lives in the use
+case text in `docs/04-use-cases.md`, which is where a concrete walkthrough
+helps. The **SSD is deliberately left specific**: a system sequence diagram
+conventionally traces one scenario, and a generic one would say very little.
+
 ### Two decisions that must both be visible
 
 1. **Did the atomic hold succeed?** — this is where overselling is prevented.

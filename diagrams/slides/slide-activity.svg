@@ -18,7 +18,7 @@
 
   <!-- title -->
   <text x="60" y="58" font-size="32" font-weight="700" fill="#14232E">Activity Diagram — Queue, Hold and Checkout</text>
-  <text x="60" y="88" font-size="18" fill="#64777F">Kenji buys 2 × VIP.  Follow the green line for the normal path.</text>
+  <text x="60" y="88" font-size="18" fill="#64777F">Follow the green line for the normal path.</text>
 
   <!-- swimlanes -->
   <rect x="60" y="106" width="1480" height="158" fill="#FBFCFC" stroke="#D5DEE1" stroke-width="1.5"/>
@@ -26,8 +26,8 @@
   <rect x="60" y="514" width="1480" height="242" fill="#FCFAF8" stroke="#D5DEE1" stroke-width="1.5"/>
   <line x1="200" y1="106" x2="200" y2="756" stroke="#D5DEE1" stroke-width="1.5"/>
 
-  <text x="130" y="134" font-size="17" font-weight="700" fill="#3D525E" text-anchor="middle">Customer</text>
-  <text x="130" y="155" font-size="14" fill="#8496A0" text-anchor="middle">Kenji</text>
+  <text x="130" y="140" font-size="17" font-weight="700" fill="#3D525E" text-anchor="middle">Customer</text>
+  
   <text x="130" y="292" font-size="17" font-weight="700" fill="#3D525E" text-anchor="middle">System</text>
   <text x="130" y="542" font-size="17" font-weight="700" fill="#A85A18" text-anchor="middle">When it</text>
   <text x="130" y="563" font-size="17" font-weight="700" fill="#A85A18" text-anchor="middle">fails</text>
@@ -37,12 +37,12 @@
   <text x="280" y="192" font-size="16" fill="#14232E" text-anchor="middle">Open sale page</text>
 
   <rect x="683" y="155" width="160" height="60" rx="8" fill="#FFFFFF" stroke="#5A6E79" stroke-width="2"/>
-  <text x="763" y="181" font-size="16" fill="#14232E" text-anchor="middle">Choose</text>
-  <text x="763" y="202" font-size="16" font-weight="700" fill="#14232E" text-anchor="middle">VIP × 2</text>
+  <text x="763" y="181" font-size="16" fill="#14232E" text-anchor="middle">Choose tier</text>
+  <text x="763" y="202" font-size="16" fill="#14232E" text-anchor="middle">and quantity</text>
 
   <rect x="1070" y="155" width="160" height="60" rx="8" fill="#FFFFFF" stroke="#5A6E79" stroke-width="2"/>
-  <text x="1150" y="181" font-size="16" fill="#14232E" text-anchor="middle">Pay with</text>
-  <text x="1150" y="202" font-size="16" fill="#14232E" text-anchor="middle">PromptPay</text>
+  <text x="1150" y="181" font-size="16" fill="#14232E" text-anchor="middle">Enter payment</text>
+  <text x="1150" y="202" font-size="16" fill="#14232E" text-anchor="middle">details</text>
 
   <!-- ============ SYSTEM LANE (centre y 390) ============ -->
   <rect x="200" y="356" width="160" height="68" rx="8" fill="#EAF5F2" stroke="#0B7A63" stroke-width="2"/>
@@ -51,7 +51,7 @@
 
   <rect x="393" y="356" width="160" height="68" rx="8" fill="#EAF5F2" stroke="#0B7A63" stroke-width="2"/>
   <text x="473" y="384" font-size="16" fill="#0A5949" text-anchor="middle">Show position</text>
-  <text x="473" y="405" font-size="16" font-weight="700" fill="#0A5949" text-anchor="middle">4,182</text>
+  <text x="473" y="405" font-size="16" fill="#0A5949" text-anchor="middle">and wait time</text>
 
   <rect x="587" y="356" width="160" height="68" rx="8" fill="#EAF5F2" stroke="#0B7A63" stroke-width="2"/>
   <text x="667" y="384" font-size="16" fill="#0A5949" text-anchor="middle">Admit +</text>
@@ -59,12 +59,12 @@
 
   <!-- decision 1 -->
   <path d="M 860 344 L 938 390 L 860 436 L 782 390 z" fill="#FDF3E7" stroke="#B4741C" stroke-width="2.5"/>
-  <text x="860" y="386" font-size="15" font-weight="700" fill="#8A5A1F" text-anchor="middle">Got 2</text>
-  <text x="860" y="405" font-size="15" font-weight="700" fill="#8A5A1F" text-anchor="middle">seats?</text>
+  <text x="860" y="386" font-size="15" font-weight="700" fill="#8A5A1F" text-anchor="middle">Seats</text>
+  <text x="860" y="405" font-size="15" font-weight="700" fill="#8A5A1F" text-anchor="middle">secured?</text>
 
   <rect x="973" y="356" width="160" height="68" rx="8" fill="#EAF5F2" stroke="#0B7A63" stroke-width="2"/>
   <text x="1053" y="384" font-size="16" fill="#0A5949" text-anchor="middle">Seats held</text>
-  <text x="1053" y="405" font-size="16" font-weight="700" fill="#0A5949" text-anchor="middle">10:00 starts</text>
+  <text x="1053" y="405" font-size="16" fill="#0A5949" text-anchor="middle">countdown starts</text>
 
   <!-- decision 2 -->
   <path d="M 1247 344 L 1325 390 L 1247 436 L 1169 390 z" fill="#FDF3E7" stroke="#B4741C" stroke-width="2.5"/>
@@ -73,7 +73,7 @@
 
   <rect x="1360" y="352" width="168" height="76" rx="10" fill="#0B7A63" stroke="#08574A" stroke-width="2"/>
   <text x="1444" y="382" font-size="16" font-weight="700" fill="#FFFFFF" text-anchor="middle">Confirmed</text>
-  <text x="1444" y="404" font-size="15" fill="#CFEAE2" text-anchor="middle">2 tickets issued</text>
+  <text x="1444" y="404" font-size="15" fill="#CFEAE2" text-anchor="middle">tickets issued</text>
 
   <!-- ============ FAILURE LANE (centre y 635) ============ -->
   <rect x="785" y="603" width="150" height="66" rx="8" fill="#FDF3E7" stroke="#B4741C" stroke-width="2"/>
@@ -81,7 +81,7 @@
   <text x="860" y="651" font-size="15" fill="#8A5A1F" text-anchor="middle">choose again</text>
 
   <rect x="978" y="603" width="150" height="66" rx="8" fill="#FFFFFF" stroke="#B4741C" stroke-width="2" stroke-dasharray="7 5"/>
-  <text x="1053" y="630" font-size="15" font-weight="700" fill="#8A5A1F" text-anchor="middle">10 min elapse</text>
+  <text x="1053" y="630" font-size="15" font-weight="700" fill="#8A5A1F" text-anchor="middle">hold time elapses</text>
   <text x="1053" y="651" font-size="14" fill="#8A5A1F" text-anchor="middle">seats back on sale</text>
 
   <rect x="1265" y="599" width="180" height="74" rx="10" fill="#FBEAE8" stroke="#B3261E" stroke-width="2.5"/>
@@ -114,7 +114,7 @@
 
   <!-- c2 -> d1  (down) -->
   <path d="M 793 215 L 793 300 L 860 300 L 860 340" fill="none" stroke="#0B7A63" stroke-width="2.5" marker-end="url(#ag)"/>
-  <text x="875" y="282" font-size="14" fill="#3E7D6E">hold 2 seats</text>
+  <text x="875" y="282" font-size="14" fill="#3E7D6E">request hold</text>
 
   <!-- d1 -> n5 : yes -->
   <line x1="938" y1="390" x2="969" y2="390" stroke="#0B7A63" stroke-width="2.5" marker-end="url(#ag)"/>
@@ -154,7 +154,7 @@
   <line x1="60" y1="790" x2="1540" y2="790" stroke="#DCE3E5" stroke-width="1.5"/>
   <text x="60" y="824" font-size="18" font-weight="700" fill="#14232E">Two questions decide everything</text>
   <path d="M 84 846 L 112 862 L 84 878 L 56 862 z" fill="#FDF3E7" stroke="#B4741C" stroke-width="2"/>
-  <text x="130" y="868" font-size="17" fill="#3D525E"><tspan font-weight="700" fill="#14232E">Got 2 seats?</tspan>  stops the same seat being sold twice.</text>
+  <text x="130" y="868" font-size="17" fill="#3D525E"><tspan font-weight="700" fill="#14232E">Seats secured?</tspan>  stops the same seat being sold twice.</text>
   <path d="M 700 846 L 728 862 L 700 878 L 672 862 z" fill="#FDF3E7" stroke="#B4741C" stroke-width="2"/>
-  <text x="746" y="868" font-size="17" fill="#3D525E"><tspan font-weight="700" fill="#14232E">Hold still alive?</tspan>  stops Kenji paying for a seat they no longer have.</text>
+  <text x="746" y="868" font-size="17" fill="#3D525E"><tspan font-weight="700" fill="#14232E">Hold still alive?</tspan>  stops the customer paying for a seat they no longer have.</text>
 </svg>
