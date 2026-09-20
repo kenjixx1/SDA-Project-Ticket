@@ -14,38 +14,38 @@
    Screens trace to UC-01 .. UC-04. Content pinned to
    diagrams/ui-mockup-prompt.md and AGENTS.md section 2.
 
-   Direction: a dark, stage-lit ticketing app. Concerts happen in the dark,
-   so the app does too. One amber accent, used at full scale rather than in
-   6px doses. Tickets are real perforated stubs. Theme is locked dark on
-   purpose: this is a single committed visual world, not an auto-switching
-   document. Native CSS, one file, no build step.
+   Direction: NEON ARENA. An arena lit by two sources. Cyan is the light you
+   move toward: every action, the queue progress, the live signal. Magenta is
+   the light that stops you: scarcity and failure. Nothing else is coloured,
+   so the two lights always mean something.
+   Native CSS, one file, no build step.
    ========================================================================== */
 
 :root {
-  /* stage */
-  --ink:        #0E0F12;   /* page ground */
-  --shell:      #141519;   /* phone body */
-  --raise:      #1B1D22;   /* cards, rows */
-  --raise-2:    #23262C;   /* pressed / selected */
-  --edge:       #2B2F36;
-  --edge-soft:  #212429;
+  /* the room, dark and violet rather than grey */
+  --ink:        #07060D;   /* page ground */
+  --shell:      #0C0A16;   /* phone body */
+  --raise:      #151226;   /* cards, rows */
+  --raise-2:    #1E1A33;   /* pressed */
+  --edge:       #2A2545;
+  --edge-soft:  #1F1B36;
 
-  /* light on the stage */
-  --bone:       #F3F1EC;
-  --bone-2:     #A8AAB0;
-  --bone-3:     #71757D;
+  --bone:       #F2F0FF;
+  --bone-2:     #A49CC8;
+  --bone-3:     #837AAD;
 
-  /* one accent, locked across every screen */
-  --amber:      #F0A93B;
-  --amber-deep: #C9821C;
-  --amber-wash: #2A2013;
-  --on-amber:   #17130A;
+  /* light one: move toward it */
+  --amber:      #35E3F5;
+  --amber-deep: #12A3B8;
+  --amber-wash: #0A2A33;
+  --on-amber:   #021419;
 
-  --stop:       #F2705E;
-  --stop-wash:  #2B1714;
+  /* light two: it stops you */
+  --stop:       #FF5CA8;
+  --stop-wash:  #2C1026;
 
   --r:    18px;
-  --r-sm: 11px;
+  --r-sm: 12px;
 
   --display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
   --mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
@@ -107,7 +107,7 @@ body {
 .ghost:hover { background: var(--raise-2); color: var(--bone); }
 .ghost:active { transform: scale(0.98); }
 .ghost:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-.ghost.danger { color: var(--stop); border-color: #4A2722; background: var(--stop-wash); }
+.ghost.danger { color: var(--stop); border-color: #5A2244; background: var(--stop-wash); }
 
 /* ================================ stage ================================== */
 
@@ -146,7 +146,7 @@ body {
   border: 1px solid var(--edge);
   border-radius: 38px; overflow: hidden;
   display: flex; flex-direction: column;
-  box-shadow: 0 30px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+  box-shadow: 0 34px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(242,240,255,0.06);
 }
 
 @media (max-width: 430px) {
@@ -174,23 +174,25 @@ body {
 
 .poster {
   position: relative; flex: none;
-  padding: 30px 24px 26px;
+  padding: 34px 24px 28px;
   overflow: hidden;
+  /* two rigs, one each side, falling off into the dark */
   background:
-    radial-gradient(125% 95% at 50% -20%, rgba(240,169,59,0.38) 0%, rgba(240,169,59,0.09) 44%, transparent 76%),
-    linear-gradient(180deg, #1A1C21 0%, #131418 100%);
+    radial-gradient(85% 115% at 10% -12%, rgba(53,227,245,0.34) 0%, rgba(53,227,245,0.05) 46%, transparent 68%),
+    radial-gradient(85% 115% at 92% -8%,  rgba(255,92,168,0.26) 0%, rgba(255,92,168,0.04) 44%, transparent 66%),
+    linear-gradient(180deg, #17122B 0%, #0C0A16 100%);
   border-bottom: 1px solid var(--edge-soft);
 }
-.poster::after {           /* stage haze */
-  content: ""; position: absolute; left: 50%; top: -60px;
-  width: 320px; height: 220px; transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgba(255,255,255,0.14), transparent 70%);
+.poster::after {           /* haze in the beam */
+  content: ""; position: absolute; left: 50%; top: -70px;
+  width: 360px; height: 240px; transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(242,240,255,0.13), transparent 72%);
   pointer-events: none;
 }
 .poster .act-name {
   position: relative; z-index: 1;
-  font-size: 44px; font-weight: 900; line-height: 0.88;
-  letter-spacing: -0.035em; font-variation-settings: 'wdth' 118;
+  font-size: 48px; font-weight: 900; line-height: 0.86;
+  letter-spacing: -0.04em; font-variation-settings: 'wdth' 121;
   text-transform: uppercase; margin: 0 0 10px;
 }
 .poster .act-meta {
@@ -241,8 +243,8 @@ body {
   margin-bottom: 12px;
 }
 .big {
-  font-size: 96px; font-weight: 800; line-height: 0.86; letter-spacing: -0.055em;
-  font-variation-settings: 'wdth' 108;
+  font-size: 104px; font-weight: 800; line-height: 0.84; letter-spacing: -0.06em;
+  font-variation-settings: 'wdth' 104;
   font-variant-numeric: tabular-nums; margin-bottom: 8px;
 }
 .sub { font-size: 14px; color: var(--bone-2); margin: 0 0 30px; }
@@ -252,6 +254,7 @@ body {
 .fill {
   display: block; height: 100%; width: 100%; border-radius: 4px;
   background: linear-gradient(90deg, var(--amber-deep), var(--amber));
+  box-shadow: 0 0 14px rgba(53,227,245,0.5);
   transform: scaleX(0.62); transform-origin: left center;
   transition: transform 900ms var(--ease);
 }
@@ -279,7 +282,10 @@ body {
   display: flex; align-items: center; gap: 10px;
   font-family: var(--mono); font-size: 11px; color: var(--bone-3); letter-spacing: 0.03em;
 }
-.beacon { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); flex: none; position: relative; }
+.beacon {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--amber);
+  flex: none; position: relative; box-shadow: 0 0 9px rgba(53,227,245,0.75);
+}
 .beacon::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1px solid var(--amber); opacity: 0; }
 @media (prefers-reduced-motion: no-preference) { .beacon::after { animation: ring 2.6s var(--ease) infinite; } }
 @keyframes ring { 0% { opacity: .6; transform: scale(.6);} 70%,100% { opacity: 0; transform: scale(1.6);} }
@@ -393,9 +399,13 @@ body {
 /* the one detail only this product has: a stub with real notches */
 
 .stub {
-  position: relative; background: var(--raise);
-  border: 1px solid var(--edge); border-radius: var(--r);
+  position: relative; border: 1px solid var(--edge); border-radius: var(--r);
   margin-bottom: 14px; overflow: hidden;
+  /* a laminated pass catches the rig above it */
+  background:
+    linear-gradient(158deg, rgba(53,227,245,0.09) 0%, transparent 38%),
+    linear-gradient(20deg, rgba(255,92,168,0.07) 0%, transparent 42%),
+    var(--raise);
 }
 .stub .sh {
   padding: 14px 17px 13px;
@@ -432,7 +442,7 @@ body {
   display: grid; place-items: center; font-size: 27px; line-height: 1;
 }
 .mark.ok   { background: var(--amber); color: var(--on-amber); }
-.mark.stop { background: var(--stop-wash); color: var(--stop); border: 1px solid var(--stop); }
+.mark.stop { background: var(--stop-wash); color: var(--stop); border: 1px solid var(--stop); box-shadow: 0 0 22px rgba(255,92,168,0.3); }
 
 .headline {
   font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.08;

@@ -96,22 +96,22 @@ where the held / sold / remaining split becomes visible.
 
 ## The visual direction
 
-**A dark, stage-lit ticketing app.** Concerts happen in the dark, so the app
-does too.
+**Neon Arena.** An arena lit by two rigs.
 
-- **Theme is locked dark**, not auto. This is one committed visual world. A
-  ticketing app that flips to warm paper in daylight would read as a document,
-  not a product.
-- **One accent: amber `#F0A93B`.** Used at full scale on every primary button,
-  the progress bar and the countdown, not in 6px doses. Red appears only as
-  semantic state on the expired screen, never as a second brand colour.
-- **Archivo variable**, pushed to 900 weight and 118 width for the event
-  poster. **JetBrains Mono** for anything countable.
-- **Tickets are perforated stubs**, with real half-circle notches punched into
-  both edges. It is the one detail only this product has.
-- **No texture overlay.** The atmosphere comes from the poster light alone.
-  A tiled gradient pretending to be film grain is a lattice, not noise, and
-  it reads as a generated-UI tell.
+- **Cyan `#35E3F5` is the light you move toward.** Every action, the queue
+  progress, the countdown, the live signal.
+- **Magenta `#FF5CA8` is the light that stops you.** Scarcity on a tier, and
+  the expired screen. Nothing else on any screen is coloured, so both lights
+  always mean something.
+- **The poster is lit by both**, cyan from the left rig and magenta from the
+  right, falling off into black with haze in the beam.
+- **Ticket stubs are laminated passes** that catch the rigs above them, with
+  real notches punched into both edges.
+- **Archivo at 900 weight and width 121** for the act name, 104px for the
+  queue position.
+- **Glow appears exactly twice:** the queue progress bar and the live dot.
+  Both are literally light sources in the fiction. Nothing else glows, which
+  is what keeps it from reading as generic neon.
 
 ### Still needs a real asset
 
