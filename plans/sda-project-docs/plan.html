@@ -1,0 +1,805 @@
+<title>Ticket Queue Docs Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:     #EFF2F1;
+    --surface:    #FFFFFF;
+    --surface-2:  #F6F8F7;
+    --ink:        #14232E;
+    --ink-soft:   #4C6270;
+    --ink-faint:  #7C8F99;
+    --rule:       #D3DCDA;
+    --rule-soft:  #E3E9E7;
+    --accent:     #0B6E5F;
+    --accent-dim: #D8EAE5;
+    --on-accent:  #FFFFFF;
+    --warn:       #B2511A;
+    --warn-dim:   #F7E5D6;
+    --flag:       #8A4B8F;
+    --flag-dim:   #EFE0F0;
+
+    --display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+    --body: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --mono: 'IBM Plex Mono', 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:     #0E191F;
+      --surface:    #16242C;
+      --surface-2:  #1C2D36;
+      --ink:        #E3EAEC;
+      --ink-soft:   #A3B6BE;
+      --ink-faint:  #77909A;
+      --rule:       #2C424E;
+      --rule-soft:  #223540;
+      --accent:     #5AC9AD;
+      --accent-dim: #16362F;
+      --on-accent:  #05231E;
+      --warn:       #E89B62;
+      --warn-dim:   #3A2818;
+      --flag:       #C99BCE;
+      --flag-dim:   #2E2033;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:     #0E191F;
+    --surface:    #16242C;
+    --surface-2:  #1C2D36;
+    --ink:        #E3EAEC;
+    --ink-soft:   #A3B6BE;
+    --ink-faint:  #77909A;
+    --rule:       #2C424E;
+    --rule-soft:  #223540;
+    --accent:     #5AC9AD;
+    --accent-dim: #16362F;
+    --on-accent:  #05231E;
+    --warn:       #E89B62;
+    --warn-dim:   #3A2818;
+    --flag:       #C99BCE;
+    --flag-dim:   #2E2033;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+    padding-inline: 20px;
+    padding-block: 0 72px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 780px; margin: 0 auto; }
+
+  /* ---------- masthead ---------- */
+  .mast {
+    padding-block: 44px 28px;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(30px, 6.4vw, 46px);
+    line-height: 1.06;
+    letter-spacing: -0.022em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 60ch;
+  }
+
+  /* ---------- sections ---------- */
+  section { padding-block: 40px 0; }
+  h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(21px, 3.6vw, 27px);
+    letter-spacing: -0.014em;
+    line-height: 1.2;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 16.5px;
+    letter-spacing: -0.006em;
+    margin: 0 0 8px;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 12px;
+  }
+  p { margin: 0 0 14px; max-width: 66ch; }
+  p:last-child { margin-bottom: 0; }
+  .lede { font-size: 18.5px; color: var(--ink-soft); }
+  strong { font-weight: 600; }
+  em.term { font-style: normal; font-family: var(--mono); font-size: 0.88em; background: var(--surface-2); padding: 1px 5px; border-radius: 3px; border: 1px solid var(--rule-soft); }
+
+  ul.plain { margin: 0 0 14px; padding-left: 20px; max-width: 66ch; }
+  ul.plain li { margin-bottom: 7px; }
+  ul.plain li:last-child { margin-bottom: 0; }
+
+  hr.div {
+    border: 0;
+    border-top: 1px solid var(--rule);
+    margin: 40px 0 0;
+  }
+
+  /* ---------- panels ---------- */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 22px;
+    margin: 18px 0;
+  }
+  .panel > :last-child { margin-bottom: 0; }
+
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--surface-2);
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 16px;
+    color: var(--ink-soft);
+  }
+  .note > :last-child { margin-bottom: 0; }
+  .note b { color: var(--ink); }
+
+  /* ---------- scenario ---------- */
+  .scene {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 26px;
+    align-items: start;
+    margin: 20px 0 0;
+  }
+  @media (max-width: 660px) { .scene { grid-template-columns: 1fr; gap: 22px; } }
+
+  .phone {
+    background: var(--ink);
+    border-radius: 22px;
+    padding: 9px;
+    box-shadow: 0 10px 28px rgba(12,32,42,0.2);
+  }
+  .phone-screen {
+    background: var(--surface);
+    border-radius: 15px;
+    overflow: hidden;
+    font-family: var(--display);
+  }
+  .ph-top {
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 11px 14px 13px;
+  }
+  .ph-top .ev { font-size: 13px; font-weight: 600; letter-spacing: -0.01em; }
+  .ph-top .dt { font-size: 10.5px; opacity: 0.82; margin-top: 2px; font-family: var(--mono); }
+  .ph-body { padding: 18px 14px 16px; text-align: center; }
+  .ph-label {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .ph-num {
+    font-family: var(--display); font-weight: 700;
+    font-size: 42px; line-height: 1.05; letter-spacing: -0.03em;
+    color: var(--ink); font-variant-numeric: tabular-nums; margin-top: 4px;
+  }
+  .ph-bar {
+    height: 7px; border-radius: 4px; background: var(--rule-soft);
+    margin: 14px 0 8px; overflow: hidden;
+  }
+  .ph-bar i { display: block; height: 100%; width: 62%; background: var(--accent); border-radius: 4px; }
+  .ph-meta { font-size: 11.5px; color: var(--ink-soft); font-family: var(--mono); }
+  .ph-foot {
+    border-top: 1px solid var(--rule-soft); margin-top: 14px; padding-top: 11px;
+    font-size: 10.5px; color: var(--ink-faint); line-height: 1.45;
+  }
+  .caption {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+    text-align: center; margin-top: 10px; line-height: 1.5;
+  }
+
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  ol.steps li {
+    counter-increment: s;
+    position: relative;
+    padding-left: 34px;
+    margin-bottom: 13px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  ol.steps li:last-child { margin-bottom: 0; }
+  ol.steps li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 1px;
+    width: 23px; height: 23px; border-radius: 50%;
+    background: var(--accent-dim); color: var(--accent);
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  ol.steps li b { font-weight: 600; }
+
+  /* ---------- file tree ---------- */
+  .tree-wrap { overflow-x: auto; margin: 18px 0; }
+  pre.tree {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.75;
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 20px;
+    min-width: 520px;
+    color: var(--ink-soft);
+  }
+  pre.tree b { color: var(--ink); font-weight: 600; }
+  pre.tree span.c { color: var(--ink-faint); }
+  pre.tree span.new { color: var(--accent); }
+
+  /* ---------- tables ---------- */
+  .tbl-wrap { overflow-x: auto; margin: 18px 0; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 560px;
+    font-size: 14.5px;
+    background: var(--surface);
+  }
+  th, td {
+    text-align: left;
+    padding: 11px 13px;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+    line-height: 1.45;
+  }
+  thead th {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface-2);
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.id { font-family: var(--mono); font-size: 12.5px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+  table { border: 1px solid var(--rule); border-radius: 4px; }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .tag.add { background: var(--accent-dim); color: var(--accent); }
+  .tag.fix { background: var(--warn-dim); color: var(--warn); }
+  .tag.split { background: var(--flag-dim); color: var(--flag); }
+
+  /* ---------- gap cards ---------- */
+  .gaps { display: grid; gap: 14px; margin: 20px 0 0; }
+  .gap {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--warn);
+    border-radius: 4px;
+    padding: 16px 18px;
+  }
+  .gap h3 { margin-bottom: 5px; }
+  .gap p { font-size: 15.5px; color: var(--ink-soft); margin-bottom: 8px; }
+  .gap p:last-child { margin-bottom: 0; }
+  .gap .fix-line { color: var(--ink); font-size: 15.5px; }
+  .gap .fix-line b { color: var(--accent); font-family: var(--display); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* ---------- pipeline diagram ---------- */
+  .fig {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 24px 20px 18px;
+    margin: 20px 0;
+  }
+  .fig-title {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 18px;
+  }
+  .pipe { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+  .filt {
+    flex: 1 1 130px;
+    min-width: 0;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 11px 12px;
+    background: var(--surface-2);
+  }
+  .filt .role {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); font-weight: 600;
+  }
+  .filt .nm {
+    font-family: var(--display); font-weight: 600; font-size: 14px;
+    margin-top: 3px; letter-spacing: -0.005em; line-height: 1.25;
+  }
+  .filt .ds { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; margin-top: 4px; }
+  .arw {
+    flex: 0 0 26px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-faint); font-family: var(--mono); font-size: 15px;
+  }
+  @media (max-width: 720px) {
+    .pipe { flex-direction: column; }
+    .arw { flex: 0 0 22px; transform: rotate(90deg); height: 22px; }
+  }
+
+  /* ---------- microkernel diagram ---------- */
+  .kernel { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  @media (max-width: 560px) { .kernel { grid-template-columns: 1fr; } }
+  .core {
+    grid-column: 1 / -1;
+    border: 2px solid var(--accent);
+    background: var(--accent-dim);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .core .role { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .core .nm { font-family: var(--display); font-weight: 600; font-size: 15px; margin-top: 3px; }
+  .core .ds { font-size: 13px; color: var(--ink-soft); margin-top: 4px; line-height: 1.45; }
+  .seam {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-family: var(--mono); font-size: 11px; color: var(--ink-faint);
+    padding: 4px 0 0;
+  }
+  .plug {
+    border: 1px dashed var(--rule);
+    border-radius: 4px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+  }
+  .plug .ct { font-family: var(--mono); font-size: 11.5px; font-weight: 600; color: var(--flag); }
+  .plug ul { margin: 7px 0 0; padding-left: 16px; font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+
+  /* ---------- decisions ---------- */
+  .dec {
+    border-top: 1px solid var(--rule);
+    padding-block: 16px;
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 14px;
+  }
+  .dec:last-of-type { border-bottom: 1px solid var(--rule); }
+  .dec .n {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    color: var(--ink-faint); padding-top: 3px;
+  }
+  .dec h3 { margin-bottom: 5px; }
+  .dec p { font-size: 15.5px; color: var(--ink-soft); margin-bottom: 6px; }
+  .dec p:last-child { margin-bottom: 0; }
+  .cost { font-size: 14.5px; color: var(--ink-faint); }
+  .cost b { color: var(--warn); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ---------- questions ---------- */
+  .q {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 17px 19px;
+    margin-bottom: 13px;
+  }
+  .q:last-child { margin-bottom: 0; }
+  .q h3 { margin-bottom: 6px; }
+  .q p { font-size: 15.5px; color: var(--ink-soft); margin-bottom: 9px; }
+  .q .def {
+    font-size: 14.5px; color: var(--ink);
+    background: var(--accent-dim); border-radius: 3px;
+    padding: 8px 11px;
+  }
+  .q .def b {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent);
+    display: block; margin-bottom: 2px;
+  }
+
+  footer {
+    margin-top: 44px;
+    padding-top: 20px;
+    border-top: 2px solid var(--ink);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    line-height: 1.7;
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <div class="eyebrow">
+      <span>SDA Group Project 2</span>
+      <span>KMITL</span>
+      <span>Due 12 Oct 2026</span>
+      <span>Plan — not yet built</span>
+    </div>
+    <h1>Event Ticket &amp; Queue Management System</h1>
+    <p class="standfirst">The documentation set for the project, plus the repo wiring so Claude, Codex and DeepSeek all read the same rules. Nothing is written yet — this page is what you approve first.</p>
+  </header>
+
+  <section>
+    <p class="kicker">Outcome</p>
+    <h2>What is true when this is done</h2>
+    <p class="lede">The repo holds seven markdown documents that cover the first three deliverables of Group Project 2 — Problem Description, Requirements Model, and Design — with the six core use cases rewritten as full specifications, the missing behaviours named, and the architecture tied line by line to slides 8.1 and 8.2. An empty Java tree waits for the Implementation deliverable.</p>
+    <div class="note">
+      <p><b>Scope note.</b> Members 4, 5 and 6 are on Lab 9 patterns (Bridge, Mediator, Proxy). That is separate work and nothing here touches it.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <p class="kicker">The anchor</p>
+    <h2>One customer, one purchase</h2>
+    <p>Every document in the set is written against this single story, so nothing resets halfway through.</p>
+
+    <div class="scene">
+      <div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="ph-top">
+              <div class="ev">BLACKPINK — Bangkok</div>
+              <div class="dt">Impact Arena · 14 Nov 2026</div>
+            </div>
+            <div class="ph-body">
+              <div class="ph-label">Your position</div>
+              <div class="ph-num">4,182</div>
+              <div class="ph-bar"><i></i></div>
+              <div class="ph-meta">~6 min wait</div>
+              <div class="ph-foot">Keep this tab open. Your place is saved. You will get 10 minutes to choose and pay once it is your turn.</div>
+            </div>
+          </div>
+        </div>
+        <p class="caption">Customer Queue screen — the UI mockup<br>target named in the brief. Proposed, not final.</p>
+      </div>
+
+      <div>
+        <ol class="steps">
+          <li><b>Ploy opens the sale page</b> at 10:00:00. Forty thousand other people do the same second.</li>
+          <li><b>She gets a queue token</b> and position 4,182. The screen above is what she sees.</li>
+          <li><b>She is admitted</b> and picks 2 × VIP at ฿6,500.</li>
+          <li><b>The system holds those 2 seats</b> for exactly 10 minutes. From this moment nobody else can buy them.</li>
+          <li><b>She pays by PromptPay.</b> The hold becomes a confirmed order.</li>
+          <li><b>She gets a digital ticket</b> with a signed QR code she can show at the gate.</li>
+        </ol>
+        <div class="note" style="margin-top:18px">
+          <p><b>The hard part is step 4.</b> If the 10 minutes run out while she is typing her card number, the seats must go back to the pool — and her payment must not go through. The brief never says who owns that moment. The documents will.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <p class="kicker">Deliverables</p>
+    <h2>What gets written</h2>
+    <p>Seven documents, numbered in the order the course asks for them. Everything is new — the repo currently holds only the brief PDF.</p>
+
+    <div class="tree-wrap">
+<pre class="tree">SDA Project/
+├── <b>AGENTS.md</b>                    <span class="new">NEW</span>  <span class="c">shared rules — the one file every AI tool reads</span>
+├── <b>CLAUDE.md</b>                    <span class="new">NEW</span>  <span class="c">one line: @AGENTS.md</span>
+├── <b>README.md</b>                    <span class="new">NEW</span>  <span class="c">what this is, where everything lives</span>
+├── <b>docs/</b>
+│   ├── 01-problem-description.md  <span class="c">the problem, in plain English</span>
+│   ├── 02-requirements.md         <span class="c">FR + NFR + architecture characteristics</span>
+│   ├── 03-prd.md                  <span class="c">product view: users, goals, scope, risks</span>
+│   ├── 04-use-cases.md            <span class="c">7 full use-case specifications</span>
+│   ├── 05-domain-model.md         <span class="c">6 entities, fields, states, relations</span>
+│   ├── 06-architecture.md         <span class="c">pipeline + microkernel, mapped to 8.1 / 8.2</span>
+│   └── 07-glossary.md             <span class="c">every technical word, defined once</span>
+├── <b>diagrams/</b>                    <span class="c">use-case, SSD, activity — placeholders for now</span>
+├── <b>src/</b>main/java/…             <span class="c">empty Java package tree, ready</span>
+├── .gitignore
+└── SDA Project.pdf               <span class="c">the brief, left where it is</span></pre>
+    </div>
+
+    <div class="note">
+      <p><b>Why both <em class="term">02-requirements.md</em> and <em class="term">03-prd.md</em>?</b> They are not the same document and it is easy to confuse them.</p>
+      <p style="margin-top:8px"><b>Requirements</b> is the engineering list: numbered FR-01…, NFR-01…, each testable, each traced to a use case. It is the graded Requirements Model.<br>
+      <b>PRD</b> is the product view: who the users are, what success looks like, what is in and out of scope, what could go wrong. It is what you would hand a teammate to explain <i>why</i> the system exists.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <p class="kicker">The main work</p>
+    <h2>Six use cases in, seven out</h2>
+    <p>The brief lists six names. Names are not specifications — none of them say what happens when something fails. Each becomes a full spec: ID, actor, preconditions, trigger, main success scenario, extensions, postconditions.</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th style="width:74px">ID</th><th>Use case</th><th></th><th>What changes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id">UC-01</td>
+            <td>Join Waiting Room</td>
+            <td><span class="tag fix">Harden</span></td>
+            <td>Adds the rules the brief skips: one active token per account per event (stops queue-jumping with ten tabs), reconnect keeps the same position, and what happens when the sale has already sold out.</td>
+          </tr>
+          <tr>
+            <td class="id">UC-02</td>
+            <td>Select &amp; Hold Tickets</td>
+            <td><span class="tag fix">Harden</span></td>
+            <td>The 10-minute expiry becomes an explicit extension flow that returns seats to the pool. Adds: asked for more than remain, over the per-order limit.</td>
+          </tr>
+          <tr>
+            <td class="id">UC-03</td>
+            <td>Checkout &amp; Pay</td>
+            <td><span class="tag fix">Harden</span></td>
+            <td>Three failure paths written out — card declined, hold expired mid-payment, and the same order submitted twice.</td>
+          </tr>
+          <tr>
+            <td class="id">UC-04</td>
+            <td>View Digital Ticket</td>
+            <td><span class="tag add">Define</span></td>
+            <td>"Verifiable" gets a meaning: a signed, single-use QR payload. Scanning at the gate is declared out of scope, on purpose, in writing.</td>
+          </tr>
+          <tr>
+            <td class="id">UC-05</td>
+            <td>Create Event with Tiers</td>
+            <td><span class="tag split">Split</span></td>
+            <td rowspan="2" style="vertical-align:middle">The brief writes this as one name with a slash: "Create / Manage Event &amp; Tiers". Creating and editing have different preconditions, so they are two use cases. Seven total still fits the brief's 5–7 range.</td>
+          </tr>
+          <tr>
+            <td class="id">UC-06</td>
+            <td>Manage Event &amp; Tiers</td>
+            <td><span class="tag split">Split</span></td>
+          </tr>
+          <tr>
+            <td class="id">UC-07</td>
+            <td>Monitor Live Queue &amp; Sales</td>
+            <td><span class="tag add">Define</span></td>
+            <td>Names the actual numbers on the screen: queue length, admission rate, and held / sold / remaining per tier.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:18px"><strong>Actors stay at two:</strong> Customer and Organizer. Keeping one human actor per side means the use-case diagram stays readable — no system actors, no API actors.</p>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <p class="kicker">Analysis</p>
+    <h2>Three real gaps in the brief</h2>
+    <p>These are not style problems. Each one is something a grader can ask about and the brief has no answer for.</p>
+
+    <div class="gaps">
+      <div class="gap">
+        <h3>Nobody owns the expiring hold</h3>
+        <p>The 10-minute TTL is the single mechanism that stops overselling, and no use case is responsible for it. Seats are locked by UC-02 and nothing in the brief ever unlocks them.</p>
+        <p class="fix-line"><b>Fix — </b>expiry becomes a named extension flow inside UC-02, not a new use case. It is triggered by time, not by a person, so giving it its own bubble would put a clock in the actor column of the diagram.</p>
+      </div>
+
+      <div class="gap">
+        <h3>Payment and the hold can race each other</h3>
+        <p>What if the hold expires while the payment is in flight? The customer is charged and has no seat, or keeps a seat somebody else was just sold. The brief does not mention it.</p>
+        <p class="fix-line"><b>Fix — </b>UC-03 gets an explicit extension: if the hold is gone when the payment result arrives, the payment is voided and no ticket is issued. Written down, so the implementation has no choice to make.</p>
+      </div>
+
+      <div class="gap">
+        <h3>No non-functional requirements at all</h3>
+        <p>The brief lists only things the system <i>does</i>. This is an architecture course — Lecture 3.1 is explicit that architecture characteristics are what justify a design, and Lecture 5.1 is about measuring them. A design section with no characteristics has nothing to defend.</p>
+        <p class="fix-line"><b>Fix — </b>three driving characteristics, each with a number attached.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin-bottom:12px">The three characteristics this system is designed for</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th style="width:150px">Characteristic</th><th>Plain meaning</th><th style="width:38%">How it gets measured</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Elasticity</strong></td><td>Stay responsive during a sudden spike, not a slow climb. Lecture 3.1 separates this from scalability and the separation matters here — a ticket sale is all spike.</td><td>Concurrent joiners go from ~100 to 50,000 inside one minute and queue positions still issue.</td></tr>
+            <tr><td><strong>Data integrity</strong></td><td>Tickets sold never exceed tickets that exist. No exceptions, no reconciliation afterwards.</td><td>200 buyers race for the last 10 seats; sold count is exactly 10, every time.</td></tr>
+            <tr><td><strong>Performance</strong></td><td>The queue screen tells the truth quickly enough to be believed.</td><td>Position refresh within 5 s; a hold is placed or refused within 300 ms.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:14px; font-size:15.5px; color:var(--ink-soft)">Deliberately <strong>not</strong> prioritised, to avoid the overengineering Lecture 3.1 warns about: internationalisation, offline use, and extensibility beyond the two plug-in seams below.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <p class="kicker">Design</p>
+    <h2>Two styles, mapped to the slides</h2>
+    <p>The brief names both styles but not the parts. <em class="term">06-architecture.md</em> fills them in, using the exact vocabulary from Lecture 8 so the mapping is checkable.</p>
+
+    <div class="fig">
+      <div class="fig-title">8.1 — Pipeline: one order, flowing one way</div>
+      <div class="pipe">
+        <div class="filt">
+          <div class="role">Producer</div>
+          <div class="nm">QueueIntake</div>
+          <div class="ds">Emits an order context when a token is admitted.</div>
+        </div>
+        <div class="arw">→</div>
+        <div class="filt">
+          <div class="role">Tester</div>
+          <div class="nm">AvailabilityHold</div>
+          <div class="ds">Checks stock, takes the atomic hold. Passes only if it got one.</div>
+        </div>
+        <div class="arw">→</div>
+        <div class="filt">
+          <div class="role">Transformer</div>
+          <div class="nm">Pricing</div>
+          <div class="ds">Applies tier price, discounts and fees.</div>
+        </div>
+        <div class="arw">→</div>
+        <div class="filt">
+          <div class="role">Consumer</div>
+          <div class="nm">OrderPersistence</div>
+          <div class="ds">Writes the reservation. End of the line.</div>
+        </div>
+      </div>
+      <p style="font-size:14.5px; color:var(--ink-soft); margin-top:16px; max-width:none">Slide 8.1 lists four risks. The document answers each: filters stay single-purpose, pipes stay one-way, a rejected order leaves through its own consumer rather than a pipe pointing backwards, and the contract between filters is one small record.</p>
+    </div>
+
+    <div class="fig">
+      <div class="fig-title">8.2 — Microkernel: a fixed core, two plug-in seams</div>
+      <div class="kernel">
+        <div class="core">
+          <div class="role">Core system</div>
+          <div class="nm">Booking engine</div>
+          <div class="ds">Queue admission, inventory holds, order lifecycle. The happy path — no payment brand and no promotion rule is ever named inside it.</div>
+        </div>
+        <div class="seam">▲ looked up by key in a plug-in registry ▲</div>
+        <div class="plug">
+          <div class="ct">PaymentProvider</div>
+          <ul><li>StripePlugin</li><li>PromptPayPlugin</li></ul>
+        </div>
+        <div class="plug">
+          <div class="ct">PricingRule</div>
+          <ul><li>EarlyBirdPlugin</li><li>StudentDiscountPlugin</li><li>FanClubPresalePlugin</li></ul>
+        </div>
+      </div>
+      <p style="font-size:14.5px; color:var(--ink-soft); margin-top:16px; max-width:none">This is slide 8.2's recycling-app example applied directly: no <em class="term">if (method.equals("stripe"))</em> chain in the core, just a registry lookup. Plug-ins are compile-based — simpler, and Java makes the contract obvious.</p>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <p class="kicker">Commitments</p>
+    <h2>Decisions that are expensive to undo</h2>
+    <p>These get written into the documents as stated decisions, not options. Changing them later means rewriting the domain model and the flows.</p>
+
+    <div class="dec">
+      <div class="n">01</div>
+      <div>
+        <h3>The hold is the unit of truth, not the payment</h3>
+        <p>Inventory goes down the moment a seat is held, not when money arrives. This is what makes overselling structurally impossible rather than merely unlikely.</p>
+        <p class="cost"><b>Cost — </b>expired holds must reliably return stock, or seats leak out of the sale forever.</p>
+      </div>
+    </div>
+
+    <div class="dec">
+      <div class="n">02</div>
+      <div>
+        <h3>The 10-minute clock is the server's</h3>
+        <p>The TTL is stamped when the hold is created and judged server-side. The countdown the customer sees is display only.</p>
+        <p class="cost"><b>Cost — </b>the customer's timer and the server's can disagree by a second or two near zero.</p>
+      </div>
+    </div>
+
+    <div class="dec">
+      <div class="n">03</div>
+      <div>
+        <h3>The queue token carries identity through the whole purchase</h3>
+        <p>One token means one checkout attempt. It ties the queue, the hold and the order together, which is what lets the system spot a duplicate submit.</p>
+        <p class="cost"><b>Cost — </b>a customer who loses their token starts over at the back of the queue.</p>
+      </div>
+    </div>
+
+    <div class="dec">
+      <div class="n">04</div>
+      <div>
+        <h3><em class="term">PaymentProvider</em> and <em class="term">PricingRule</em> are the only plug-in seams</h3>
+        <p>Every payment method and every promotion depends on these two interface shapes, so they are fixed now, in writing, before anything is built against them.</p>
+        <p class="cost"><b>Cost — </b>anything that is neither a payment method nor a pricing rule has to change the core.</p>
+      </div>
+    </div>
+
+    <div class="dec">
+      <div class="n">05</div>
+      <div>
+        <h3><em class="term">AGENTS.md</em> is the one source of rules</h3>
+        <p>All project rules live in <em class="term">AGENTS.md</em>. <em class="term">CLAUDE.md</em> is a single pointer line. Codex reads <em class="term">AGENTS.md</em> natively; Command Code reads one of the two. One file to edit, three tools kept in step.</p>
+        <p class="cost"><b>Cost — </b>if a tool ever needs different rules, the split has to be reintroduced.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <p class="kicker">Before I start</p>
+    <h2>Four things to decide</h2>
+    <p>Each has a default. Say nothing and I take the default.</p>
+
+    <div class="q">
+      <h3>1 · Seventh use case — split, or add gate validation?</h3>
+      <p>Splitting "Create / Manage" gives seven. The alternative is keeping it merged and spending the seventh slot on <strong>Validate Ticket at Gate</strong>, which would give "verifiable ticket" a real home — but it adds a third actor (gate staff) to the diagram.</p>
+      <div class="def"><b>Default</b>Split into UC-05 and UC-06. Keeps two actors, keeps the diagram clean.</div>
+    </div>
+
+    <div class="q">
+      <h3>2 · Should this become a git repo?</h3>
+      <p>It is a plain folder right now. Version history would help, and the group may want a shared remote later.</p>
+      <div class="def"><b>Default</b><em class="term">git init</em> locally, first commit, no remote until you ask.</div>
+    </div>
+
+    <div class="q">
+      <h3>3 · Real payment integration, or simulated?</h3>
+      <p>Stripe and PromptPay are named in the brief. Actually integrating either is a large job on its own.</p>
+      <div class="def"><b>Default</b>Simulated plug-ins behind the real <em class="term">PaymentProvider</em> contract. The architecture is demonstrated; no API keys needed.</div>
+    </div>
+
+    <div class="q">
+      <h3>4 · Diagrams now, or after you approve the text?</h3>
+      <p>The use-case diagram, SSD and activity diagram are Member 3's deliverables. They depend on the use-case text being settled.</p>
+      <div class="def"><b>Default</b>Text first. Once the seven use cases are agreed, the diagrams get built from them — nothing to redraw.</div>
+    </div>
+  </section>
+
+  <footer>
+    Plan · not yet implemented · no files written<br>
+    Grounded in: SDA Project.pdf · Lecture 3.1 Architecture Characteristics Defined · Lecture 8.1 Pipe &amp; Filter · Lecture 8.2 Microkernel · Lecture 8.5 Group Project 2
+  </footer>
+
+</div>

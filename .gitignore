@@ -1,0 +1,28 @@
+# Java
+*.class
+target/
+build/
+out/
+bin/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+.gradle/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# macOS
+.DS_Store
+
+# Local AI tool state
+.claude/
+.commandcode/
+.codex/
+
+# impeccable design-hook state
+.impeccable/
