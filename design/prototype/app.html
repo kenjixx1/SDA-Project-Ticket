@@ -67,16 +67,6 @@ body {
   padding: 0 20px 56px;
 }
 
-/* film grain over the whole stage. fixed layer, never on a scroller. */
-body::after {
-  content: "";
-  position: fixed; inset: 0; z-index: 90; pointer-events: none;
-  opacity: 0.16;
-  background-image: repeating-radial-gradient(circle at 17% 29%, rgba(255,255,255,0.10) 0 1px, transparent 1px 3px),
-                    repeating-radial-gradient(circle at 71% 63%, rgba(255,255,255,0.08) 0 1px, transparent 1px 4px);
-  background-size: 140px 140px, 190px 190px;
-}
-
 /* ============================= prototype chrome ========================== */
 
 .chrome {
@@ -178,14 +168,14 @@ body::after {
   padding: 30px 24px 26px;
   overflow: hidden;
   background:
-    radial-gradient(120% 90% at 50% -18%, rgba(240,169,59,0.30) 0%, rgba(240,169,59,0.06) 42%, transparent 72%),
+    radial-gradient(125% 95% at 50% -20%, rgba(240,169,59,0.38) 0%, rgba(240,169,59,0.09) 44%, transparent 76%),
     linear-gradient(180deg, #1A1C21 0%, #131418 100%);
   border-bottom: 1px solid var(--edge-soft);
 }
 .poster::after {           /* stage haze */
   content: ""; position: absolute; left: 50%; top: -60px;
   width: 320px; height: 220px; transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgba(255,255,255,0.10), transparent 70%);
+  background: radial-gradient(closest-side, rgba(255,255,255,0.14), transparent 70%);
   pointer-events: none;
 }
 .poster .act-name {

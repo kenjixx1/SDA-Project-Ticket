@@ -108,8 +108,9 @@ does too.
   poster. **JetBrains Mono** for anything countable.
 - **Tickets are perforated stubs**, with real half-circle notches punched into
   both edges. It is the one detail only this product has.
-- **Film grain** over the whole stage, on a fixed pointer-events-none layer so
-  it never repaints while scrolling.
+- **No texture overlay.** The atmosphere comes from the poster light alone.
+  A tiled gradient pretending to be film grain is a lattice, not noise, and
+  it reads as a generated-UI tell.
 
 ### Still needs a real asset
 
