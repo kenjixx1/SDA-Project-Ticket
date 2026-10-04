@@ -55,6 +55,15 @@ of a time window. Here: **99.9% during the announced sale window** (NFR-04).
 
 ---
 
+### Banner
+A short message strip across the top of a screen's content. It stays until the situation it describes ends.
+
+*Like a "Wet floor" sign. It stays up until the floor is dry.*
+
+**Example:** SCR-13b shows "The payment did not go through" while Kenji picks another way to pay.
+
+---
+
 ### Consumer *(pipeline filter type)*
 The **end** of a pipeline. Slide 8.1: *"the termination point for the pipeline
 flow"* — it may write the result to a database or show it on a screen.
@@ -92,9 +101,25 @@ This is "no overselling", written as a rule a computer can check.
 
 ---
 
+### Dialog
+A small window in the middle of a desktop screen that asks one question and blocks the page behind it until answered.
+
+**Example:** SCR-39 asks Chai "Close the sale?" before anything happens.
+
+---
+
 ### Digital ticket
 What Kenji shows at the gate. Carries a QR code with a **signed**,
 **single-use** payload. Entity **E-06**.
+
+---
+
+### Dynamic content
+Parts of a screen that are filled in from stored data, so they change per event, per customer or over time. Marked `[D]` in `08-screen-requirements.md`. A repeating dynamic part is a **dynamic list**, `[D-list]`, and can hold 0, 1 or many items.
+
+*Like the name on a boarding pass. The pass layout is the same for everyone, the name is not.*
+
+**Example:** the Tickets list (SCR-02) shows one card per concert Kenji bought for. Two concerts, two cards. None, and the empty state shows instead.
 
 ---
 
@@ -111,6 +136,13 @@ whole project:
 
 A ticket sale is 100 users at 09:59:59 and 40,000 at 10:00:00. There is no
 gradual growth to plan for. **NFR-01.**
+
+---
+
+### Empty state
+What a list screen shows when the list has nothing in it. It says why it is empty and what to do next.
+
+**Example:** SCR-03 says "No tickets yet" with a Browse events button.
 
 ---
 
@@ -198,6 +230,13 @@ matter what happens in between. Written as **INV-nn**.
 
 If an invariant is ever false, the system is not merely wrong, it is broken.
 INV-01 is this project's most important line.
+
+---
+
+### Live content
+Dynamic content that updates by itself while the screen is open, without the user doing anything. Marked `[D-live]`.
+
+**Example:** Kenji's queue position, 4,182, counting down on SCR-06 with no refresh button.
 
 ---
 
@@ -340,6 +379,20 @@ driving concern — see **elasticity**.
 
 ---
 
+### Screen requirement
+The list of everything one screen must show and do. It says *what* is on the screen, not how it looks. Each screen has an ID, `SCR-nn`. All of them are in `08-screen-requirements.md`.
+
+*Like a menu's list of dishes and ingredients. The plating style is a separate thing.*
+
+---
+
+### Sheet
+A panel that slides up from the bottom of a phone screen, over the current screen, and is closed by a button.
+
+**Example:** SCR-09b, "Release these seats?", slides up while the countdown keeps running behind it.
+
+---
+
 ### Signature *(signed)*
 A code added to a digital ticket, calculated from the ticket's own contents,
 that only this system could have produced. Change any field and the code stops
@@ -364,6 +417,20 @@ in one second. The condition **elasticity** is about.
 
 ---
 
+### Static content
+Parts of a screen that are fixed, the same for every customer, event and moment. Marked `[S]`.
+
+**Example:** the button label "Join the queue".
+
+---
+
+### Stepper
+A minus button, a number and a plus button, for picking a small quantity.
+
+**Example:** on SCR-08 Kenji steps the quantity to 2. The plus button stops at 4.
+
+---
+
 ### Structural measure
 A check on the **shape** of the code rather than its behaviour — Lecture 5.1's
 term. Cyclomatic complexity is the slides' example.
@@ -371,6 +438,13 @@ term. Cyclomatic complexity is the slides' example.
 This project's structural measure: the build fails if anything under `core/`
 imports anything under `plugin/`. That is how NFR-08 is governed rather than
 merely hoped for.
+
+---
+
+### Takeover
+A full-screen flow with no tab bar, so the user cannot wander off to another part of the app.
+
+**Example:** from the queue to the confirmed screen, the purchase is a takeover. Wandering off during the 10 minutes is how seats are lost.
 
 ---
 
@@ -424,6 +498,13 @@ go wrong. Written as **UC-nn**.
 
 A use case is not a feature name. "Checkout & Pay" is a name; the
 specification in `04-use-cases.md` with its six extensions is a use case.
+
+---
+
+### Variant (screen)
+The same screen in a different situation. Written as the screen ID plus a letter. Parts not mentioned stay the same.
+
+**Example:** SCR-08e is the Select screen after Kenji asked for more VIP seats than are left.
 
 ---
 

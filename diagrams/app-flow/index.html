@@ -1,0 +1,297 @@
+<title>Ticket App Flow</title>
+<!-- GENERATED LAYOUT: screen images in screens/ are captured from design/The 1975 Ticket App 1a (offline).html by capture.mjs. Re-run it after a design change; do not edit the images by hand. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a pannable board. Main flow runs left to right on row 1, alternatives drop down their column, merges climb back up. */
+:root{
+  --board:#E8E7E2; --board-dot:#D3D1CA; --paper:#F6F5F1; --ink:#17191D; --ink-2:#4A4E57; --ink-3:#7C808A;
+  --main:#17191D; --alt:#5B6475; --merge:#8A6A00; --guard:#3E5BA8; --chip:#FFFFFF; --chip-line:#CFCCC3;
+  --lime:#C5F25A; --lime-ink:#1B2400; --stop:#C2412D;
+  --f:'Hanken Grotesk',ui-sans-serif,system-ui,sans-serif; --fm:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --board:#141619; --board-dot:#24272C; --paper:#1C1F23; --ink:#EDEDEA; --ink-2:#B5B8BF; --ink-3:#80858E;
+  --main:#EDEDEA; --alt:#8E98AB; --merge:#E0B83E; --guard:#8EA9F2; --chip:#22262B; --chip-line:#3A3F46;
+  --lime:#C5F25A; --lime-ink:#1B2400; --stop:#FF8B7B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --board:#141619; --board-dot:#24272C; --paper:#1C1F23; --ink:#EDEDEA; --ink-2:#B5B8BF; --ink-3:#80858E;
+  --main:#EDEDEA; --alt:#8E98AB; --merge:#E0B83E; --guard:#8EA9F2; --chip:#22262B; --chip-line:#3A3F46;
+  --lime:#C5F25A; --lime-ink:#1B2400; --stop:#FF8B7B; color-scheme:dark}
+html,body{height:100%}
+body{margin:0;background:var(--board);color:var(--ink);font:400 14px/1.45 var(--f);display:flex;flex-direction:column}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--chip-line);padding-block:12px;padding-inline:16px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+.ttl{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ttl h1{margin:0;font:700 19px/1.15 var(--f);letter-spacing:-.01em;text-wrap:balance}
+.ttl p{margin:0;color:var(--ink-2);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend svg{flex:none}
+.zoom{margin-left:auto;display:flex;gap:6px}
+.zoom button{font:600 12px/1 var(--fm);height:30px;padding:0 11px;border-radius:7px;border:1px solid var(--chip-line);background:var(--chip);color:var(--ink);cursor:pointer}
+.zoom button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.zoom button:focus-visible{outline:2px solid var(--guard);outline-offset:2px}
+#vp{flex:1;min-height:0;overflow:auto;cursor:grab;background-image:radial-gradient(var(--board-dot) 1.2px,transparent 1.3px);background-size:22px 22px}
+#vp.drag{cursor:grabbing}
+#sizer{position:relative}
+#board{position:absolute;left:0;top:0;transform-origin:0 0}
+svg#wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.card{position:absolute;width:200px;display:flex;flex-direction:column;gap:6px}
+.guard{font:500 11.5px/1.3 var(--fm);color:var(--guard);height:30px;display:flex;align-items:flex-end}
+.name{display:flex;align-items:center;gap:7px;height:22px;white-space:nowrap}
+.id{font:600 11px/1 var(--fm);padding:4px 6px;border-radius:5px;background:var(--chip);border:1px solid var(--chip-line);color:var(--ink)}
+.main .id{background:var(--lime);border-color:var(--lime);color:var(--lime-ink)}
+.name b{font:600 13.5px/1.1 var(--f);overflow:hidden;text-overflow:ellipsis}
+.shot{width:200px;height:421px;border-radius:30px;display:block;box-shadow:0 1px 0 rgba(0,0,0,.08),0 14px 30px -18px rgba(0,0,0,.55);background:#000}
+.dup .shot{opacity:.55}
+.exits{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.exits div{font:500 11.5px/1.3 var(--f);color:var(--ink-2);display:flex;gap:6px}
+.exits i{font-style:normal;font-family:var(--fm);color:var(--ink-3);flex:none}
+.exits .end{color:var(--stop)}
+.lbl{position:absolute;width:96px;font:600 11px/1.25 var(--f);color:var(--ink);text-align:center;transform:translate(-50%,-100%);padding-bottom:7px}
+.node-start,.node-end{position:absolute;width:22px;height:22px;border-radius:50%;transform:translate(-50%,-50%)}
+.node-start{background:var(--main)}
+.node-end{border:2.5px solid var(--main);background:var(--board)}
+.node-end::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--main)}
+.tag{position:absolute;font:600 11px/1.2 var(--fm);color:var(--ink-2);transform:translate(-50%,-100%);white-space:nowrap;padding-bottom:16px}
+.band{position:absolute;left:24px;display:flex;flex-direction:column;gap:4px}
+.band h2{margin:0;font:700 22px/1.1 var(--f);letter-spacing:-.01em}
+.band p{margin:0;color:var(--ink-2);font-size:14px;max-width:70ch}
+.band.hr{border-top:2px dashed var(--chip-line);padding-top:22px}
+@media (prefers-reduced-motion:no-preference){#board{transition:transform .25s ease}}
+@media (max-width:640px){.legend{font-size:12px}.zoom{margin-left:0}}
+</style>
+
+<header>
+  <div class="ttl">
+    <h1>Ticket App Flow</h1>
+    <p>Every customer screen in the design, as one activity diagram. 44 screens, start top left.</p>
+  </div>
+  <div class="legend" aria-label="Legend">
+    <span><svg width="34" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="var(--main)" stroke-width="3"/><path d="M26 1 L33 5 L26 9z" fill="var(--main)"/></svg>Main flow</span>
+    <span><svg width="34" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="var(--alt)" stroke-width="2"/><path d="M26 1.5 L33 5 L26 8.5z" fill="var(--alt)"/></svg>Alternative</span>
+    <span><svg width="34" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="var(--merge)" stroke-width="2" stroke-dasharray="5 4"/><path d="M26 1.5 L33 5 L26 8.5z" fill="var(--merge)"/></svg>Merges back</span>
+    <span><svg width="16" height="16"><rect x="3" y="3" width="10" height="10" transform="rotate(45 8 8)" fill="var(--paper)" stroke="var(--alt)" stroke-width="1.6"/></svg>Decision</span>
+    <span style="color:var(--guard);font-family:var(--fm)">[ guard ]</span><span>= when this path happens</span>
+    <span><i style="font-style:normal;font-family:var(--fm);color:var(--ink-3)">↩</i> = jumps to a screen shown elsewhere</span>
+  </div>
+  <div class="zoom" role="group" aria-label="Zoom">
+    <button id="z-fit" type="button">Fit</button>
+    <button id="z-35" type="button">35%</button>
+    <button id="z-60" type="button">60%</button>
+    <button id="z-100" type="button">100%</button>
+  </div>
+</header>
+<div id="vp"><div id="sizer"><div id="board"><svg id="wires"></svg></div></div></div>
+
+<script>
+(() => {
+const CW = 310, W = 200, H = 421, IMGTOP = 66, RH = 640, PADL = 120, PADT = 70, BANDGAP = 170;
+const FWD = 120, MRG = 200, IN1 = H - 60, IN2 = H - 30;
+
+// [id, col, row, name, guard, exits, image]
+const N = [
+  ['01a',0,0,'Events','',[['↓','Tab bar screens: see the lower band']]],
+  ['01b',0,1,'Events, none','No events on sale',[['■','Stays here until one is announced','end']]],
+  ['05b',1,0,'Event, on sale',''],
+  ['05a',1,1,'Event, before sale','Before 10:00',[['↑','At 10:00 the button turns on, 05b']]],
+  ['05c',1,2,'Already in queue','Already has a place in line',[['→','Back to my place, 06c']]],
+  ['05d',1,3,'Sold out','Every tier sold out',[['↩','Back to events, 01a']]],
+  ['05e',1,4,'Sale closed','Organizer closed the sale',[['↩','Back to events, 01a']]],
+  ['05f',1,5,'Event cancelled','Event was cancelled',[['↩','Back to events, 01a']]],
+  ['06e',2,0,'Queue, joining',''],
+  ['06a',3,0,'Queue, waiting',''],
+  ['06d',3,1,'Reconnecting','No update for 15 s',[['↑','Connection returns, 06a']]],
+  ['06c',3,2,'Welcome back','Came back to the page',[['↑','Banner fades after 5 s, 06a']]],
+  ['06b',4,0,'Almost your turn',''],
+  ['08a',5,0,'Select tickets',''],
+  ['08c',5,1,'At the limit of 4','Quantity reaches 4',[['↑','Lower the number, 08a']]],
+  ['07',5,2,'Your turn passed','Chose nothing in time',[['↩','Join the queue again, 06e'],['↩','Back to the event, 05b']]],
+  ['08d',5,3,'Tier sold out','One tier has 0 left',[['↑','Pick another tier, 08a']]],
+  ['08g',5,4,'Everything sold out','All seats sold while waiting',[['↩','Back to events, 01a']]],
+  ['08b',6,0,'Holding',''],
+  ['08e',6,1,'More than remain','Server: not enough left',[['↑','Numbers refresh, 08a']]],
+  ['08f',6,2,'Seats just went','Server: lost a race',[['↑','Numbers refresh, 08a']]],
+  ['09a',7,0,'Seats held',''],
+  ['09b',7,1,'Release sheet','Tap Release these seats',[['↑','Keep my seats, 09a'],['→','Release seats, 10']]],
+  ['11',7,2,'Hold ran out','Timer reaches 00:00',[['↩','Join the queue again, 06e'],['↩','Back to the event, 05b']]],
+  ['10',8,1,'Seats released','',[['↩','Join the queue again, 06e'],['↩','Back to the event, 05b']]],
+  ['12a',8,0,'Checkout',''],
+  ['12b',8,2,'Promotion applied','A pricing rule applies',[['↑','Same as checkout, lower total']]],
+  ['12c',8,3,'One method down','One provider not answering',[['↑','Pick a working method, 12a']]],
+  ['12d',8,4,'Payment unavailable','Every provider down',[['↑','A provider comes back, 12a']]],
+  ['13a',9,0,'Pay by PromptPay',''],
+  ['14a',9,1,'Card provider','Chose card',[['→','Approve, 15a']]],
+  ['15a',10,0,'Confirming',''],
+  ['15b',10,1,'Bank is slow','No answer after 8 s',[['↑','Bank answers, 15a']]],
+  ['13b',10,2,'PromptPay declined','Bank declined, PromptPay',[['↑','Pick a method again, 13a']]],
+  ['14b',10,3,'Card declined','Bank declined, card',[['↑','Try again, 14a']]],
+  ['18',10,4,'Expired while paying','Hold expired before the bank answered',[['↩','Join the queue again, 06e'],['↩','Back to the event, 05b']]],
+  ['16',11,0,'Confirmed','',[['↩','Go to my tickets, 02']]],
+  ['17a',12,0,'Ticket',''],
+  // lower band: tab bar screens
+  ['02',0,6,'Tickets','Tickets tab'],
+  ['17t',1,6,'Ticket','Same screen as 17a above',[],'17a'],
+  ['03',0,7,'Tickets, empty','No tickets yet',[['↩','Browse events, 01a']]],
+  ['17b',1,7,'Event cancelled','The event was cancelled'],
+  ['17c',1,8,'Past event','The event date has passed'],
+  ['04',4,6,'Account','Account tab'],
+  ['04s',4,7,'Sign out sheet','Tap Sign out',[['↑','Cancel, 04'],['■','Sign out leaves the app','end']]],
+];
+// diamonds: [id, before-col, row]
+const D = [['d05',1,0],['d08',5,0],['d12',8,0],['d13',9,0],['d17',1,6]];
+// edges
+const E = [
+  ['start','s0','01a','Open the app'],
+  ['next','01a','d05','Tap an event'],['next','d05','05b',''],
+  ['dbr','d05','05a'],['dbr','d05','05c'],['dbr','d05','05d'],['dbr','d05','05e'],['dbr','d05','05f'],
+  ['merge','05a','05b'],
+  ['next','05b','06e','Join the queue'],
+  ['across','05c','06c'],
+  ['next','06e','06a','Place arrives'],
+  ['br','06a','06d'],['merge','06d','06a'],['merge','06c','06a'],
+  ['next','06a','06b','Position 50 or less'],
+  ['next','06b','d08','Admitted'],['next','d08','08a',''],
+  ['br','08a','08c'],['br','08a','07'],['merge','08c','08a'],
+  ['dbr','d08','08d'],['dbr','d08','08g'],['merge','08d','08a'],
+  ['next','08a','08b','Hold these seats'],
+  ['br','08b','08e'],['br','08b','08f'],['mergeL','08e','08a',44],['mergeL','08f','08a',44],
+  ['next','08b','09a','Hold succeeds'],
+  ['br','09a','09b'],['br','09a','11'],['merge','09b','09a'],['across','09b','10'],
+  ['next','09a','d12','Continue to payment'],['next','d12','12a',''],
+  ['dbr','d12','12b'],['dbr','d12','12c'],['dbr','d12','12d'],
+  ['merge','12b','12a'],['merge','12c','12a'],['merge','12d','12a'],
+  ['next','12a','d13',''],['next','d13','13a','PromptPay'],['dbr','d13','14a'],
+  ['next','13a','15a','I have paid'],
+  ['mergeR','14a','15a',88],
+  ['br','15a','15b'],['br','15a','13b'],['br','15a','14b'],['br','15a','18'],
+  ['merge','15b','15a'],['mergeL','13b','13a',44],['mergeL','14b','14a',66],
+  ['next','15a','16','Approved, hold still alive'],
+  ['next','16','17a','Open ticket 1'],
+  ['end','17a','e0','Done'],
+  ['start','s1','02','Tickets tab'],
+  ['next','02','d17','Tap an order'],['next','d17','17t',''],
+  ['br','02','03'],
+  ['dbr','d17','17b'],['dbr','d17','17c'],
+  ['start','s2','04','Account tab'],
+  ['br','04','04s'],['merge','04s','04'],
+];
+
+const board = document.getElementById('board'), svg = document.getElementById('wires');
+const cx = c => PADL + c * CW;
+const ry = r => PADT + r * RH + (r >= 6 ? BANDGAP : 0);
+const P = {};
+N.forEach(([id,c,r]) => { P[id] = {x:cx(c), iy:ry(r)+IMGTOP, c, r}; });
+D.forEach(([id,c,r]) => { P[id] = {x:cx(c)-(CW-W)/2, y:ry(r)+IMGTOP+FWD, c, r, d:true}; });
+
+const el = (t, cls, html) => { const e = document.createElement(t); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+N.forEach(([id,c,r,name,guard,exits=[],img]) => {
+  const card = el('div', 'card' + (r === 0 ? ' main' : '') + (img ? ' dup' : ''));
+  card.style.left = cx(c) + 'px'; card.style.top = ry(r) + 'px';
+  card.appendChild(el('div','guard', guard ? '[ ' + guard + ' ]' : ''));
+  card.appendChild(el('div','name', `<span class="id">SCR-${img || id}</span><b>${name}</b>`));
+  const im = el('img','shot'); im.src = `screens/${img || id}.jpg`; im.alt = `SCR-${img || id} ${name}`; im.width = W; im.height = H;
+  card.appendChild(im);
+  if (exits.length) { const x = el('div','exits'); exits.forEach(([a,t,k]) => x.appendChild(el('div', k || '', `<i>${a}</i><span>${t}</span>`))); card.appendChild(x); }
+  board.appendChild(card);
+});
+
+// start and end nodes
+const nodes = {s0:['01a','Start'], s1:['02',''], s2:['04','']};
+Object.entries(nodes).forEach(([k,[to]]) => { const t = P[to]; P[k] = {x:t.x-70, y:t.iy+FWD, pt:true};
+  const n = el('div','node-start'); n.style.left = P[k].x + 'px'; n.style.top = P[k].y + 'px'; board.appendChild(n); });
+P.e0 = {x:P['17a'].x+W+80, y:P['17a'].iy+FWD, pt:true};
+{ const n = el('div','node-end'); n.style.left = P.e0.x+'px'; n.style.top = P.e0.y+'px'; board.appendChild(n); }
+
+// band headings
+const b1 = el('div','band','<h2>The purchase</h2><p>Main flow on the first row. Each column drops into the other ways that screen can turn out.</p>');
+b1.style.top = '8px'; board.appendChild(b1);
+const b2 = el('div','band hr','<h2>Tab bar screens</h2><p>Reached from the tab bar at any time outside the purchase. Tickets opens the same ticket screen as the end of the purchase.</p>');
+b2.style.top = (ry(6) - 120) + 'px'; b2.style.width = (cx(12)) + 'px'; board.appendChild(b2);
+
+const NS = 'http://www.w3.org/2000/svg';
+const defs = document.createElementNS(NS,'defs');
+const mk = (id, col, s) => `<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="${s}" markerHeight="${s}" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="${col}"/></marker>`;
+defs.innerHTML = mk('am','var(--main)',6) + mk('aa','var(--alt)',7) + mk('ag','var(--merge)',7);
+svg.appendChild(defs);
+
+const fwd = id => { const p = P[id]; return p.pt || p.d ? p.y : p.iy + FWD; };
+const right = id => { const p = P[id]; return p.pt ? p.x + 11 : p.d ? p.x + 8 : p.x + W; };
+const left = id => { const p = P[id]; return p.pt ? p.x - 11 : p.d ? p.x - 8 : p.x; };
+function route(t, a, b, off) {
+  const A = P[a], B = P[b];
+  switch (t) {
+    case 'start': case 'next': case 'across': case 'end':
+      return [[right(a), fwd(a)], [left(b), fwd(b)]];
+    case 'br': { const tx = A.x - 22, sy = A.iy + IN1; return [[A.x, sy], [tx, sy], [tx, B.iy + FWD], [B.x, B.iy + FWD]]; }
+    case 'dbr': return [[A.x, A.y + 8], [A.x, B.iy + FWD], [B.x, B.iy + FWD]];
+    case 'merge': { const tx = B.x + W + 22; return [[B.x + W, B.iy + MRG], [tx, B.iy + MRG], [tx, A.iy + IN1], [A.x + W, A.iy + IN1]]; }
+    case 'mergeL': { const tx = B.x - off; return [[B.x, B.iy + MRG], [tx, B.iy + MRG], [tx, A.iy + IN2], [A.x + W, A.iy + IN2]]; }
+    case 'mergeR': { const tx = A.x - off; return [[B.x + W, B.iy + FWD], [tx, B.iy + FWD], [tx, A.iy + MRG], [A.x, A.iy + MRG]]; }
+  }
+}
+function path(pts, r = 10) {
+  let d = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [x0,y0] = pts[i-1], [x1,y1] = pts[i], [x2,y2] = pts[i+1];
+    const l1 = Math.hypot(x1-x0,y1-y0), l2 = Math.hypot(x2-x1,y2-y1), k = Math.min(r, l1/2, l2/2);
+    const ax = x1 - (x1-x0)/l1*k, ay = y1 - (y1-y0)/l1*k, bx = x1 + (x2-x1)/l2*k, by = y1 + (y2-y1)/l2*k;
+    d += ` L${ax} ${ay} Q${x1} ${y1} ${bx} ${by}`;
+  }
+  const L = pts[pts.length-1]; return d + ` L${L[0]} ${L[1]}`;
+}
+E.forEach(([t,a,b,x]) => {
+  const pts = route(t, a, b, typeof x === 'number' ? x : 0);
+  const isMain = (t === 'next' || t === 'start' || t === 'end') && P[a].r === 0 && P[b].r === 0 && !(P[a].pt && a !== 's0');
+  const isMerge = t.startsWith('merge');
+  const p = document.createElementNS(NS,'path');
+  p.setAttribute('d', path(pts)); p.setAttribute('fill','none');
+  const col = isMain ? 'var(--main)' : isMerge ? 'var(--merge)' : 'var(--alt)';
+  p.setAttribute('stroke', col); p.setAttribute('stroke-width', isMain ? 3 : 2);
+  if (isMerge) p.setAttribute('stroke-dasharray','6 5');
+  if (!(t === 'next' && P[b].d)) p.setAttribute('marker-end', `url(#${isMain ? 'am' : isMerge ? 'ag' : 'aa'})`);
+  svg.appendChild(p);
+  if (typeof x === 'string' && x) {
+    const l = el('div','lbl', x);
+    let mx = (pts[0][0] + pts[1][0]) / 2, my = pts[0][1];
+    if (P[b].d) { mx = P[b].x; my -= 12; } else if (P[a].d) { mx = P[a].x; my -= 12; }
+    l.style.left = mx + 'px'; l.style.top = my + 'px';
+    if (t === 'start' || t === 'end') { l.className = 'tag'; }
+    board.appendChild(l);
+  }
+});
+D.forEach(([id]) => {
+  const p = P[id], r = document.createElementNS(NS,'rect');
+  r.setAttribute('x', p.x - 8); r.setAttribute('y', p.y - 8); r.setAttribute('width', 16); r.setAttribute('height', 16);
+  r.setAttribute('transform', `rotate(45 ${p.x} ${p.y})`); r.setAttribute('fill','var(--paper)'); r.setAttribute('stroke','var(--alt)'); r.setAttribute('stroke-width','2');
+  svg.appendChild(r);
+});
+
+const BW = P.e0.x + 140, BH = ry(8) + IMGTOP + H + 160;
+board.style.width = BW + 'px'; board.style.height = BH + 'px';
+svg.setAttribute('width', BW); svg.setAttribute('height', BH);
+
+// zoom and pan
+const vp = document.getElementById('vp'), sizer = document.getElementById('sizer');
+let z = 1;
+function setZoom(nz, btn) {
+  const cxv = (vp.scrollLeft + vp.clientWidth/2) / z, cyv = (vp.scrollTop + vp.clientHeight/2) / z;
+  z = nz; board.style.transform = `scale(${z})`;
+  sizer.style.width = BW*z + 'px'; sizer.style.height = BH*z + 'px';
+  if (btn !== 'fit') { vp.scrollLeft = cxv*z - vp.clientWidth/2; vp.scrollTop = cyv*z - vp.clientHeight/2; } else { vp.scrollLeft = 0; vp.scrollTop = 0; }
+  document.querySelectorAll('.zoom button').forEach(b => b.setAttribute('aria-pressed', String(b.id === 'z-' + btn)));
+  try { localStorage.setItem('flow-zoom', btn); } catch (e) {}
+}
+const fit = () => setZoom(Math.min(1, (vp.clientWidth - 8) / BW), 'fit');
+document.getElementById('z-fit').onclick = fit;
+[['35',.35],['60',.6],['100',1]].forEach(([k,v]) => document.getElementById('z-'+k).onclick = () => setZoom(v, k));
+let saved = null; try { saved = localStorage.getItem('flow-zoom'); } catch (e) {}
+const map = {'35':.35,'60':.6,'100':1};
+if (saved && map[saved]) setZoom(map[saved], saved); else fit();
+let drag = null;
+vp.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; drag = {x:e.clientX, y:e.clientY, l:vp.scrollLeft, t:vp.scrollTop}; vp.classList.add('drag'); });
+addEventListener('pointermove', e => { if (!drag) return; vp.scrollLeft = drag.l - (e.clientX - drag.x); vp.scrollTop = drag.t - (e.clientY - drag.y); });
+addEventListener('pointerup', () => { drag = null; vp.classList.remove('drag'); });
+addEventListener('resize', () => { if (document.getElementById('z-fit').getAttribute('aria-pressed') === 'true') fit(); });
+})();
+</script>
