@@ -94,7 +94,7 @@ built for 200 per second.
 | Extension is cheap | Files changed to add a payment method | Only the new plug-in and one registry line |
 
 The engineering versions of these numbers, with the tests that check them, are
-NFR-01 to NFR-08 in `02-requirements.md`.
+NFR-01 to NFR-09 in `02-requirements.md`.
 
 ---
 

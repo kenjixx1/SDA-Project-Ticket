@@ -1,4 +1,4 @@
-# Event Ticket & Queue Management System
+# EventFlow — Event Ticket & Queue Management System
 
 **KMITL · Software Design and Architecture · Group Project 2**
 Due **12 October 2026**
@@ -30,7 +30,7 @@ same seat twice.
 | 3 | [`docs/03-prd.md`](docs/03-prd.md) | Who is it for, what counts as success, what do we build first? |
 | 4 | [`docs/04-use-cases.md`](docs/04-use-cases.md) | Seven use cases, with every way each one can go wrong. |
 | 5 | [`docs/05-domain-model.md`](docs/05-domain-model.md) | The six things the system stores, and the rules that must never break. |
-| 6 | [`docs/06-architecture.md`](docs/06-architecture.md) | Pipeline + microkernel, and which requirement forced each decision. |
+| 6 | [`docs/06-architecture.md`](docs/06-architecture.md) | Event-driven + microkernel, and which requirement forced each decision. |
 | — | [`docs/07-glossary.md`](docs/07-glossary.md) | Every technical word, in plain English. Read whenever a word is unfamiliar. |
 
 **In a hurry?** Read `01`, then `04`, then `06`.
@@ -58,15 +58,13 @@ specification so nothing has to be invented at drawing time.
 
 ## The two architectural styles
 
-Both are required by the brief, and both come from Lecture 8.
-
-**Pipeline** (slide 8.1) — an order flows one way through four filters:
+**Event-driven** — the parts of the booking engine announce what happened,
+and the parts that care react:
 
 ```
-  PRODUCER          TESTER              TRANSFORMER    CONSUMER
-  QueueIntake  ──►  AvailabilityHold ──► Pricing  ──►  OrderPersistence
-                            │
-                            └── hold failed ──► RejectionConsumer
+  UserAdmitted ──► TicketHeld ──► PaymentCompleted ──► OrderConfirmed ──► TicketIssued
+                       │
+                       └── 10 minutes, no payment ──► HoldExpired ──► seats back on sale
 ```
 
 **Microkernel** (slide 8.2) — a booking engine that never learns a payment
@@ -80,7 +78,8 @@ method's name:
    PromptPay · Stripe    EarlyBird · Student · FanClub
 ```
 
-The join: the pipeline **is** the core system's happy path.
+The join: the event flow **is** the core system's happy path. Plug-ins are
+called directly and never see an event.
 Full reasoning in [`docs/06-architecture.md`](docs/06-architecture.md).
 
 ---

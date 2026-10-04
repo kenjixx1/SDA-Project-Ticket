@@ -10,7 +10,8 @@ Command Code (DeepSeek) all read it. If you change a rule, change it here.
 A university coursework repository for **KMITL — Software Design and
 Architecture (SDA), Group Project 2**, due **12 October 2026**.
 
-The system being designed is the **Event Ticket & Queue Management System**: a
+The system being designed is **EventFlow**, the **Event Ticket & Queue
+Management System**: a
 ticket-selling platform that survives a sudden traffic spike (40,000 people
 pressing "buy" in the same second) without ever selling the same seat twice.
 
@@ -143,16 +144,22 @@ Grounding lives outside this repository, in the course folder:
 ~/Desktop/Life/University/Software Design and Architecture/
   Lecture 3/3.1 SDA Arch Characteristics defined.pdf   architecture characteristics
   Lecture 5/5.1 SDA measure arch Characteristics.pdf   how to measure them
-  Lecture 8/8.1 SDA pipe filter.pdf                    pipeline style
+  Lecture 8/8.1 SDA pipe filter.pdf                    pipeline style (not used)
   Lecture 8/8.2 SDA microkernel.pdf                    microkernel style
   Lecture 8/8.5 GroupProject2.pdf                      the six deliverables
 ```
 
 The project brief itself is `SDA Project.pdf` at the repository root.
 
-**Use the course's own vocabulary.** The slides say *producer, transformer,
-tester, consumer* for pipeline filters, and *core system* and *plug-in
-components* for microkernel. Use those exact words, not synonyms.
+**The architecture is event-driven + microkernel.** The pipeline style was
+dropped on 4 October 2026; do not bring its words (filter, producer, consumer)
+back into the documents.
+
+**Use consistent vocabulary.** For microkernel, use the slides' words: *core
+system* and *plug-in components*. For event-driven, use *event*, *event
+channel*, *event processor*, *publish*, *listen* and *broker topology*, as
+defined in `docs/07-glossary.md`. If the course has an event-driven slide,
+add it to the list above and switch to its exact words.
 
 ---
 

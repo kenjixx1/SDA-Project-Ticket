@@ -8,17 +8,17 @@ package and, more importantly, what must never import what.
 
 ```
 th.ac.kmitl.sda.ticketqueue
-├── queue/          the waiting room
 ├── core/           THE CORE SYSTEM — knows no plug-in by name
-│   ├── pipeline/   Producer → Tester → Transformer → Consumer
+│   ├── event/      the event channel (EventBus) + every event type
+│   ├── queue/      the waiting room
 │   ├── inventory/  the ONLY writer of heldQuantity / soldQuantity
-│   ├── order/      reservation lifecycle + hold expiry
+│   ├── order/      reservation lifecycle, hold expiry, checkout, pricing
 │   └── registry/   key → plug-in lookup
-├── contract/       THE SEAMS: PaymentProvider, PricingRule
+├── contract/       THE SEAMS: PaymentProvider, PricingRule, PricingRequest
 ├── plugin/         plug-ins. core/ must never import this.
 │   ├── payment/    PromptPay, Stripe  (simulated — ASM-04)
 │   └── pricing/    EarlyBird, StudentDiscount, FanClubPresale
-├── ticket/         signing and issuing digital tickets
+├── ticket/         issuing digital tickets
 └── admin/          organizer: event management + dashboard
 ```
 

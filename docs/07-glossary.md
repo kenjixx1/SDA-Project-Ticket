@@ -23,6 +23,9 @@ Chai sets it. In our story it is **200 per second**.
 *Like a doorman letting people into a club at a steady pace, however many are
 outside.*
 
+Customers are let in as **batches** (FR-05): each second, the next 200
+tokens in line.
+
 ---
 
 ### Architecture characteristic
@@ -34,7 +37,7 @@ do; *architecture characteristics* say how well, and why certain design
 choices were made. They are also called the "-ilities" (scalability,
 availability, maintainability).
 
-In this project they are written as **NFR-01 … NFR-08**.
+In this project they are written as **NFR-01 … NFR-09**.
 
 ---
 
@@ -55,12 +58,14 @@ of a time window. Here: **99.9% during the announced sale window** (NFR-04).
 
 ---
 
-### Consumer *(pipeline filter type)*
-The **end** of a pipeline. Slide 8.1: *"the termination point for the pipeline
-flow"* — it may write the result to a database or show it on a screen.
+### Broker topology *(event-driven)*
+A way of wiring an event-driven system with **no central controller**. Each
+event processor listens, does its one job, and publishes a new event. The
+other way is the **mediator** topology, where one controller directs every
+step. This design uses broker.
 
-This system has two: `OrderPersistenceFilter` (success) and
-`RejectionConsumer` (failure).
+*A kitchen with an order rail and no head chef shouting: each cook reads the
+rail and does their part.*
 
 ---
 
@@ -75,8 +80,8 @@ The part that never changes. Slide 8.2 gives two definitions: *the minimal
 functionality required to run the system*, and *the happy path — a general
 processing flow with little or no custom processing*.
 
-Here it is the **booking engine**: queue admission, holds, inventory, order
-lifecycle. It contains no payment method's name and no promotion's name.
+Here it is the **booking engine**: queue management, ticket inventory,
+reservations and booking. Its parts talk to each other by **events**. It contains no payment method's name and no promotion's name.
 
 ---
 
@@ -114,6 +119,46 @@ gradual growth to plan for. **NFR-01.**
 
 ---
 
+### Event
+A short message saying that something has **already happened**. It is news,
+not a request.
+
+**Real example:** `TicketHeld` — "2 VIP seats were held for Kenji at
+10:03:12, reservation R-1042." It is published only after the hold is saved.
+
+The events in this system: `UserAdmitted`, `TicketHeld`, `PaymentCompleted`,
+`OrderConfirmed`, `TicketIssued`, `HoldExpired`, `PaymentVoided`.
+
+---
+
+### Event channel
+The path that carries events from the processor that publishes them to every
+processor that listens. The publisher does not know who is listening. In code
+this is `EventBus`.
+
+*The order rail in a restaurant kitchen.*
+
+---
+
+### Event processor
+One part of an event-driven system. It **publishes** events, **listens** for
+them, or both, and does one job. Here: `AdmissionScheduler`,
+`InventoryService`, `ReservationService`, `TicketService` and others.
+
+---
+
+### Event-driven architecture
+An architectural style where the parts of a system work by announcing and
+reacting to **events**, instead of calling each other in a fixed line.
+
+*A restaurant kitchen. The waiter pins an order on the rail and walks away;
+each cook takes what is theirs.*
+
+Used here for the booking flow, because admission, expiry and payment all
+happen at different times. See `06-architecture.md` §6.2.
+
+---
+
 ### Extension *(use case)*
 A branch in a use case: what happens when the ordinary story does not happen.
 Numbered against the step it branches from — `6a` branches from step 6.
@@ -127,11 +172,21 @@ flight).
 
 ---
 
-### Filter *(pipeline)*
-One processing stage. Slide 8.1: filters are **self-contained**, independent
-of each other, generally **stateless**, and each **performs one task only**.
+### Fairness
+The characteristic that admission follows **FIFO** with no way to skip the
+line. **NFR-09.** Defended by one token per account (FR-03), same place on
+reconnect (FR-04) and admission by issue time (FR-05).
 
-There are four types: **producer**, **transformer**, **tester**, **consumer**.
+---
+
+### FIFO — first in, first out
+The rule of a normal queue: whoever arrived first is served first. Here it
+decides admission order. **NFR-09.**
+
+*Like the number machine at a bank counter: 40 is always called before 41.*
+
+**Real example:** Kenji's token was issued at 10:00:00.412. A token issued at
+10:00:00.413 is never admitted before Kenji's.
 
 ---
 
@@ -190,6 +245,9 @@ twice.*
 countdown. That is not an edge case — it is what people do. The key means they
 are charged once (FR-18).
 
+**Idempotent** is the same idea for event listeners: handling the same event
+twice has the same effect as handling it once.
+
 ---
 
 ### Invariant
@@ -234,24 +292,6 @@ except the **signature** that proves it is genuine.
 
 ---
 
-### Pipe
-The channel between two filters. Slide 8.1: **unidirectional** and
-**point-to-point** — one source in, one destination out. Architects favour
-**small** payloads on pipes, for performance.
-
-In this system the only thing on a pipe is one small `OrderContext` record.
-
----
-
-### Pipeline
-An architectural style where data flows one way through a series of filters.
-Also called **pipes and filters**. Lecture 8.1.
-
-*A car wash: wash, rinse, dry, polish. Each machine does one job, and no car
-goes backwards.*
-
----
-
 ### Plug-in component
 A standalone, independent piece that adds specialised behaviour to a core
 system. Slide 8.2 stresses that plug-ins should have **no dependencies on each
@@ -274,17 +314,8 @@ What must already be true before a use case can start.
 
 ### Pricing rule
 A plug-in that changes an order's total — early bird, student discount,
-fan-club presale. Applied by the `PricingFilter`. The core booking engine
+fan-club presale. Applied by the `PricingService`. The core booking engine
 never knows any of their names.
-
----
-
-### Producer *(pipeline filter type)*
-The **start** of a pipeline. Slide 8.1: *"the starting point of a process,
-outbound only, sometimes called the source"*.
-
-Here: `QueueIntakeFilter`. When a token is admitted, it creates the
-`OrderContext` and sends it down the pipe.
 
 ---
 
@@ -374,16 +405,6 @@ merely hoped for.
 
 ---
 
-### Tester *(pipeline filter type)*
-Slide 8.1: *"accepts input, tests one or more criteria, then **optionally**
-produces output, based on the test"*.
-
-The word *optionally* is the whole point — a tester is allowed to stop an
-order. Here: `AvailabilityHoldFilter`, which passes the order on only if it
-actually got the hold.
-
----
-
 ### Tier *(ticket tier)*
 One price band within an event, holding a fixed number of seats: VIP ฿6,500,
 Zone A ฿3,800, Zone B ฿1,900. Entity **E-02**.
@@ -398,14 +419,6 @@ design decision to the requirement that forced it. Nothing appears from
 nowhere.
 
 The traceability tables are at the end of `02-requirements.md`.
-
----
-
-### Transformer *(pipeline filter type)*
-Slide 8.1: *"accepts input, optionally performs a transformation on some or
-all of the data, then forwards it to the outbound pipe"*.
-
-Here: `PricingFilter`. It changes the money and nothing else.
 
 ---
 

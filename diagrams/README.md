@@ -95,7 +95,7 @@ It shows *what* is asked and *what* comes back — never what happens inside.
    Kenji : Customer                    : System
 ```
 
-Two lifelines. The system is one box — do not draw filters, services or the
+Two lifelines. The system is one box — do not draw services, events or the
 database. Those are design, and this diagram is requirements.
 
 ### Messages, in order

@@ -2,9 +2,9 @@
 
 **Deliverable 3 of 6 — Design**
 
-Two architectural styles, both required by the brief. This document says which
-parts of the system are which, and — more importantly — **which requirement
-forced each decision**.
+Two architectural styles: **event-driven** and **microkernel**. This document
+says which parts of the system are which, and — more importantly — **which
+requirement forced each decision**.
 
 ---
 
@@ -16,121 +16,158 @@ Before the styles, the shape.
   40,000 people
        │
        ▼
-  ┌─────────────────┐
-  │  WAITING ROOM   │   absorbs the spike · issues tokens · reports positions
-  │  (queue)        │   does nothing else
-  └────────┬────────┘
-           │  admits ~200 per second
-           ▼
-  ┌──────────────────────────────────────────────────────┐
-  │  BOOKING ENGINE  =  the microkernel CORE SYSTEM      │
-  │                                                       │
-  │  its happy path  =  the PIPELINE                      │
-  │                                                       │
-  │  Producer → Tester → Transformer → Consumer           │
-  │                          │                            │
-  └──────────────────────────┼────────────────────────────┘
-                             │  looks up by key
-                    ┌────────┴────────┐
-                    ▼                 ▼
-             PricingRule        PaymentProvider
-              plug-ins            plug-ins
+  ┌───────────────────────────────────────────────────────────┐
+  │  CORE SYSTEM  (microkernel)                                │
+  │                                                            │
+  │   WAITING ROOM ── UserAdmitted ──► booking: hold · pay     │
+  │   admits ~200/s                    · confirm · expire      │
+  │                                                            │
+  │   the parts talk by EVENTS on one event channel            │
+  │   TicketHeld · HoldExpired · PaymentCompleted · ...        │
+  └──────────────────────────────┬────────────────────────────┘
+                                 │  looks up by key
+                        ┌────────┴────────┐
+                        ▼                 ▼
+                 PricingRule        PaymentProvider
+                  plug-ins            plug-ins
 ```
 
 **The one idea to take from this picture:** the waiting room exists so the
-booking engine never experiences a spike. Everything expensive happens at 200
+booking part never experiences a spike. Everything expensive happens at 200
 requests per second, not 40,000. That single move is what makes NFR-01
 achievable without buying machines that idle for 364 days a year.
 
+**The second idea:** inside the core, one part never calls the next part
+directly to say "now do your job". It announces what just happened — an
+**event** — and the parts that care react.
+
 ---
 
-## 6.2 Style 1 — Pipeline  *(slide 8.1)*
+## 6.2 Style 1 — Event-driven
 
 ### What the style is
 
-Lecture 8.1 calls it **pipes and filters**.
+**Event-driven architecture** is a style where the parts of a system work by
+announcing and reacting to **events**.
 
-- **Filters** are self-contained, independent of each other, generally
-  stateless, and each **performs one task only**.
-- **Pipes** are the channels between them: **unidirectional and
-  point-to-point**, one source in, one destination out.
-- The slides note that architects favour **small amounts of data** on the
-  pipes, for performance.
+- An **event** is a short message saying that something has **already
+  happened**. For example: "2 VIP seats were held for Kenji at 10:03:12."
+- An **event processor** is one part of the system. It **publishes** events,
+  **listens** for events, or both. Each one does one job.
+- The **event channel** carries events from the publisher to every listener.
+  The publisher does not know who is listening.
 
-There are exactly **four filter types**, and the slides define each one.
+**Analogy.** A restaurant kitchen. The waiter pins an order ticket on the rail
+and walks away. The grill cook takes what is theirs, the salad cook takes what
+is theirs. Nobody phones anybody. Adding a dessert station means one more
+cook reading the rail — the waiter does not change.
 
-**Analogy.** A car wash. The car goes in one end and comes out the other. Wash,
-then rinse, then dry, then polish. Each machine does one job and knows nothing
-about the others. No car ever goes backwards.
+There are two common **topologies** (ways of wiring it):
+
+| Topology | How it works | Used here? |
+|---|---|---|
+| **Broker** | No central controller. Each processor listens, does its job, and publishes a new event. | **Yes** |
+| **Mediator** | One central controller receives every event and tells each processor what to do next. | No — see below |
 
 ### Why this style fits here
 
-An order only ever moves forwards: admitted → checked and held → priced →
-saved. It never needs to go back a stage. And because each filter does exactly
-one job, **the inventory logic lives in exactly one place** — which is what
-makes NFR-02 (no overselling) something we can actually prove rather than hope
-for.
+The booking flow is full of things that happen **later**, on their own
+schedule:
 
-### The four filters
+- Kenji is **admitted** whenever the queue reaches him.
+- His hold **expires** 10 minutes after it was made — or it doesn't.
+- PromptPay says **"paid"** whenever Kenji finishes scanning.
 
-| Slide 8.1 type | The slide's definition | Our filter | What it does |
-|---|---|---|---|
-| **Producer** | *"The starting point of a process, outbound only, sometimes called the source"* | `QueueIntakeFilter` | A token is admitted. Creates an `OrderContext` and sends it down the pipe. The pipeline starts here and nowhere else. |
-| **Tester** | *"Accepts input, tests one or more criteria, then optionally produces output, based on the test"* | `AvailabilityHoldFilter` | Checks the tier has enough seats and takes the **atomic hold**. Produces output **only if the hold succeeded**. |
-| **Transformer** | *"Accepts input, optionally performs a transformation on some or all of the data, then forwards it"* | `PricingFilter` | Applies the tier price, then offers the order to every registered `PricingRule` plug-in. Changes `totalAmount`. Touches nothing else. |
-| **Consumer** | *"The termination point... could persist the final result of the pipeline process to a database"* | `OrderPersistenceFilter` | Writes the `Reservation`. End of the line. |
+A straight line of steps cannot wait 10 minutes for something that may never
+come. An event can simply arrive when it arrives. That is the whole fit.
+
+It also helps three characteristics directly:
+
+- **NFR-01 Elasticity.** Events queue up on the channel and are handled at a
+  steady pace, so a burst does not knock anything over.
+- **NFR-05 Fault tolerance.** If the payment provider is down, the waiting
+  room and the hold still work — they never call payment at all.
+- **FR-12 / FR-17.** Expiry and late payment are just two more events, not
+  special cases bolted onto a flow.
+
+### Why broker, not mediator
+
+The workflow is short — five steps — and each reaction is independent. The
+one place where order truly matters (expire **or** confirm, never both) is
+already decided by a single atomic step inside `ReservationService` (rule
+R-E04-6). A mediator would be a controller that mostly passes messages along.
+
+The cost is that no single class shows the whole workflow. The event table
+below is that map instead.
+
+### The events — Kenji's purchase, end to end
+
+Kenji buys 2 × VIP at ฿6,500. Every event carries his `tokenId` and, once it
+exists, his `reservationId` (locked decision 3), so the whole chain can be
+traced afterwards (NFR-07).
+
+| # | Event | Published by | Who listens | What they do |
+|---|---|---|---|---|
+| 1 | **`UserAdmitted`** | `AdmissionScheduler` | Kenji's session · `SalesDashboardService` | Show "your turn" · count one more admitted |
+| 2 | **`TicketHeld`** | `InventoryService`, after the atomic hold succeeds | `HoldExpiryScheduler` · `SalesDashboardService` | Start the 10-minute clock · VIP held goes 10 → 12 |
+| 3 | **`PaymentCompleted`** | `CheckoutService`, after the `PaymentProvider` authorises | `ReservationService` | Confirm the order if the hold is still alive (FR-16). Otherwise void the payment (FR-17). |
+| 4 | **`OrderConfirmed`** | `ReservationService` | `InventoryService` · `TicketService` · `SalesDashboardService` | Move 2 seats from held to sold · issue 2 tickets · add ฿13,000 revenue |
+| 5 | **`TicketIssued`** | `TicketService` | Kenji's session | Show the two tickets |
+| — | **`HoldExpired`** | `ReservationService`, when expiry wins | `InventoryService` · `SalesDashboardService` · Kenji's session | Return the 2 seats (FR-12) · held goes back down · show "You have not been charged" |
+| — | **`PaymentVoided`** | `ReservationService`, when a payment arrived too late | `SalesDashboardService` · Kenji's session | Record it · tell Kenji the money is released |
 
 ```
- ┌───────────────┐   ┌─────────────────────┐   ┌───────────────┐   ┌──────────────────────┐
- │   PRODUCER    │   │       TESTER        │   │  TRANSFORMER  │   │      CONSUMER        │
- │ QueueIntake   │──►│ AvailabilityHold    │──►│   Pricing     │──►│  OrderPersistence    │
- │               │   │                     │   │               │   │                      │
- │ token admitted│   │ atomic hold: 2 or 0 │   │ tier price +  │   │ Reservation written  │
- │ → OrderContext│   │ held 10 → 12        │   │ pricing rules │   │ state = HELD         │
- └───────────────┘   └──────────┬──────────┘   └───────────────┘   └──────────────────────┘
-                                │ hold failed
-                                ▼
-                     ┌─────────────────────┐
-                     │   CONSUMER          │
-                     │ RejectionConsumer   │   tells Kenji why · nothing written
-                     └─────────────────────┘
+ AdmissionScheduler ──UserAdmitted──►  Kenji picks 2 × VIP
+                                            │  (direct call, answer needed now)
+                                            ▼
+                                     InventoryService ──TicketHeld──► HoldExpiryScheduler
+                                                                            │ 10 min pass
+ CheckoutService ──PaymentCompleted──►  ReservationService  ◄───────────────┘
+                                        HELD → CONFIRMED   or   HELD → EXPIRED
+                                             │                        │
+                                     OrderConfirmed               HoldExpired
+                                       │       │                      │
+                            InventoryService  TicketService     InventoryService
+                             held → sold     ──TicketIssued──►   seats returned
 ```
 
-### The thing on the pipes
+### What is NOT an event
 
-Slide 8.1 asks for small payloads. One small record travels the whole
-pipeline:
+Some steps need an answer **right now**, so they stay direct calls:
 
-```java
-record OrderContext(
-    String  tokenId,
-    String  tierId,
-    int     quantity,
-    Money   unitPrice,      // filled by PricingFilter
-    Money   totalAmount,    // filled by PricingFilter
-    String  reservationId   // filled by AvailabilityHoldFilter on success
-) {}
-```
+- **Issuing a queue token.** Kenji must see his position immediately.
+- **The atomic hold.** Kenji must know at once whether he got the seats.
+- **Calling the payment provider.** Checkout waits for "authorised" or
+  "declined".
 
-No object graphs, no entity loaded and passed around. Each filter fills in its
-own part and forwards.
+**The rule:** a request that needs an answer is a call. A fact that others may
+care about is an event.
 
-### The four risks from slide 8.1, answered
+### Events are news, not decisions
 
-The slides list four common risks for this style. A design that names them and
-does not answer them has not used the style — it has only drawn it.
+An event is published **only after** the change it describes has been saved.
+The database is the truth; events are the announcements.
 
-| Risk (slide 8.1) | Our answer |
+This matters for INV-01. No event ever decides who gets the last VIP seat.
+`InventoryService` decides that with one atomic update, and only then says
+`TicketHeld`.
+
+### The risks of this style, answered
+
+A design that names a style's risks and does not answer them has not used the
+style — it has only drawn it.
+
+| Risk | Our answer |
 |---|---|
-| **Overloading filters with too much responsibility** | `AvailabilityHoldFilter` checks and holds — and does **not** price, persist or notify. `PricingFilter` changes money and nothing else. If a filter needs a second verb in its name, it is doing two jobs. |
-| **Introducing bidirectional communication** | No filter calls the one before it. A failed hold does not send the order backwards; it leaves sideways through `RejectionConsumer`, which is a **second consumer**, not a return pipe. |
-| **Handling error conditions** | Every failure ends the pipeline at a consumer. `RejectionConsumer` is a real, named terminal — errors are a path through the design, not an exception thrown out of it. |
-| **Managing the contracts between filters** | One record, `OrderContext`, is the only contract. It is defined in the core and changing it is a deliberate, visible act. |
+| **Two events race** — `PaymentCompleted` and `HoldExpired` for the same hold | `ReservationService` changes state with one conditional update: `HELD → CONFIRMED` or `HELD → EXPIRED`. Only one can win. The loser becomes `PaymentVoided` or does nothing. |
+| **An event is lost** — the server crashes after saving but before publishing | The hold's expiry time is stored with the hold (locked decision 2). `HoldExpiryScheduler` also scans the database for holds past their time, so a lost `TicketHeld` cannot leave seats stuck. |
+| **An event is delivered twice** | Every listener is **idempotent** — handling the same event twice has the same effect as once. `InventoryService` checks the reservation's state before moving seats. |
+| **Nobody can see the whole workflow** (broker topology) | The event table above is the map. Every event carries `tokenId` and `reservationId`, so the chain can be walked backwards (NFR-07). |
+| **Hard to test** | Each processor is tested alone: publish one fake event, check what it did. |
 
 ### Data topology
 
-Slide 8.1 offers a choice: one database, or one per filter. **This design uses
-a single database.**
+**This design uses a single database.**
 
 The reason is INV-01. `heldQuantity` and `soldQuantity` must be correct at
 every instant; splitting inventory across separate stores would make the
@@ -186,14 +223,15 @@ that must never break.
 **`th.ac.kmitl.sda.ticketqueue.core`** — the booking engine.
 
 It owns:
-- queue admission,
-- the atomic hold and the inventory counters,
-- the reservation lifecycle (`HELD` → `CONFIRMED` / `EXPIRED` / `RELEASED`),
-- the pipeline itself.
+- queue management and admission (the waiting room),
+- ticket inventory: the atomic hold and the inventory counters,
+- reservations: the lifecycle `HELD` → `CONFIRMED` / `EXPIRED` / `RELEASED`,
+- booking: checkout and pricing,
+- the event channel that connects all of the above.
 
-**Its happy path is the pipeline from §6.2.** That is not two styles bolted
-together — it is exactly what slide 8.2 says a core system *is*: a general
-processing flow with little or no custom processing in it.
+**Its happy path is the event flow from §6.2.** That is exactly what slide 8.2
+says a core system *is*: a general processing flow with little or no custom
+processing in it.
 
 The core does not contain the word "Stripe", "PromptPay" or "EarlyBird"
 anywhere.
@@ -201,7 +239,7 @@ anywhere.
 ### The two plug-in seams
 
 Slide 8.2 warns that plug-ins should be **independent of each other**. Both
-contracts below are one-method interfaces, so a plug-in has nothing to talk to
+contracts below are small interfaces, so a plug-in has nothing to talk to
 except the core.
 
 ```java
@@ -217,21 +255,29 @@ public interface PaymentProvider {
 
 /** Seam 2 — how a price is changed. One implementation per promotion. */
 public interface PricingRule {
-    String key();                                   // "early-bird"
-    boolean appliesTo(OrderContext order);
-    Money   apply(Money currentTotal, OrderContext order);
+    String  key();                                  // "early-bird"
+    boolean appliesTo(PricingRequest request);
+    Money   apply(Money currentTotal, PricingRequest request);
 }
+
+/** What a pricing rule may look at. Small on purpose. */
+public record PricingRequest(String eventId, String tierId,
+                             int quantity, String customerId) {}
 ```
 
 | Seam | Plug-ins | Used by |
 |---|---|---|
-| `PaymentProvider` | `PromptPayPlugin`, `StripePlugin` | Checkout (UC-03) |
-| `PricingRule` | `EarlyBirdRule`, `StudentDiscountRule`, `FanClubPresaleRule` | `PricingFilter` (the Transformer) |
+| `PaymentProvider` | `PromptPayPlugin`, `StripePlugin` | `CheckoutService` (UC-03) |
+| `PricingRule` | `EarlyBirdRule`, `StudentDiscountRule`, `FanClubPresaleRule` | `PricingService` (UC-03, FR-14) |
 
 **These two are the only seams.** NFR-08 says so, and §2.4 explains why:
 Lecture 3.1 warns that supporting too many characteristics complicates the
 design for little benefit. A system where everything is pluggable is a system
 nobody can read.
+
+**Plug-ins never publish or listen to events.** The core calls them and gets
+an answer back. This keeps every plug-in a plain class with one job, and keeps
+them independent of each other — they cannot even see each other's events.
 
 ### The registry — how the core finds a plug-in
 
@@ -283,17 +329,18 @@ They are not side by side. One is inside the other.
 
 | Layer | Style | What it is |
 |---|---|---|
-| Waiting room | — | Absorbs the spike. Plain, small, and in front of everything. |
-| Booking engine | **Microkernel core system** | Queue admission, holds, inventory, order lifecycle. |
-| ↳ its happy path | **Pipeline** | Producer → Tester → Transformer → Consumer. |
-| Around it | **Microkernel plug-ins** | `PaymentProvider` and `PricingRule`. |
+| Booking engine | **Microkernel core system** | Queue, inventory, reservations, booking. |
+| ↳ how its parts talk | **Event-driven** (broker topology) | `UserAdmitted` → `TicketHeld` → `PaymentCompleted` → `OrderConfirmed` → `TicketIssued`, plus `HoldExpired`. |
+| Around it | **Microkernel plug-ins** | `PaymentProvider` and `PricingRule`. Called directly, never by event. |
 
-The join is at one filter and one step:
+The join is at three calls, all through the registry:
 
-- The **Transformer** (`PricingFilter`) asks the registry for every
-  `PricingRule` and offers each one the order.
-- **Checkout** (UC-03 step 5) asks the registry for one `PaymentProvider` by
-  key.
+- **`PricingService`** asks for every `PricingRule` and offers each one the
+  order (FR-14).
+- **`CheckoutService`** asks for one `PaymentProvider` by key, then publishes
+  `PaymentCompleted` (UC-03 step 5).
+- **`ReservationService`** asks the same provider to void a late payment
+  (FR-17).
 
 Everywhere else, the two styles do not touch.
 
@@ -305,32 +352,36 @@ Package root: `th.ac.kmitl.sda.ticketqueue` (CON-04).
 
 ```
 th.ac.kmitl.sda.ticketqueue
-├── queue/                    the waiting room
-│   ├── QueueToken.java
-│   ├── QueueService.java             issue · position · admit
-│   └── AdmissionScheduler.java       lets N through per second
-│
 ├── core/                     ◄── THE CORE SYSTEM. Knows no plug-in by name.
-│   ├── pipeline/
-│   │   ├── Filter.java               the shared filter interface
-│   │   ├── OrderContext.java         the only thing on the pipes
-│   │   ├── QueueIntakeFilter.java        PRODUCER
-│   │   ├── AvailabilityHoldFilter.java   TESTER
-│   │   ├── PricingFilter.java            TRANSFORMER
-│   │   ├── OrderPersistenceFilter.java   CONSUMER
-│   │   └── RejectionConsumer.java        CONSUMER (failure terminal)
+│   ├── event/
+│   │   ├── DomainEvent.java          the shared event interface
+│   │   ├── EventBus.java             the event channel: publish · subscribe
+│   │   ├── UserAdmitted.java
+│   │   ├── TicketHeld.java
+│   │   ├── PaymentCompleted.java
+│   │   ├── OrderConfirmed.java
+│   │   ├── TicketIssued.java
+│   │   ├── HoldExpired.java
+│   │   └── PaymentVoided.java
+│   ├── queue/                        the waiting room
+│   │   ├── QueueToken.java
+│   │   ├── QueueService.java             issue · position · reconnect
+│   │   └── AdmissionScheduler.java       admits a batch per second → UserAdmitted
 │   ├── inventory/
-│   │   └── InventoryService.java     ◄── the ONLY writer of held/sold
+│   │   └── InventoryService.java     ◄── the ONLY writer of held/sold → TicketHeld
 │   ├── order/
 │   │   ├── Reservation.java
 │   │   ├── ReservationService.java   HELD → CONFIRMED / EXPIRED / RELEASED
-│   │   └── HoldExpiryScheduler.java  ◄── UC-02 ext. 6a. Returns the seats.
+│   │   ├── HoldExpiryScheduler.java  ◄── UC-02 ext. 6a. Asks for expiry.
+│   │   ├── CheckoutService.java      calls PaymentProvider → PaymentCompleted
+│   │   └── PricingService.java       applies every PricingRule (FR-14)
 │   └── registry/
 │       └── PluginRegistry.java       key → plug-in
 │
 ├── contract/                 ◄── THE SEAMS. Core and plug-ins both depend on these.
 │   ├── PaymentProvider.java
-│   └── PricingRule.java
+│   ├── PricingRule.java
+│   └── PricingRequest.java
 │
 ├── plugin/                   ◄── PLUG-INS. Nothing in core/ may import this.
 │   ├── payment/
@@ -343,12 +394,17 @@ th.ac.kmitl.sda.ticketqueue
 │
 ├── ticket/
 │   ├── DigitalTicket.java
-│   └── TicketSigningService.java     signed, single-use payload (FR-21)
+│   └── TicketService.java            listens to OrderConfirmed → TicketIssued (FR-20, FR-21)
 │
 └── admin/
     ├── EventService.java             UC-05, UC-06
-    └── SalesDashboardService.java    UC-07
+    └── SalesDashboardService.java    UC-07 · listens to every event
 ```
+
+**Event channel implementation.** `EventBus` is a small in-process class: a
+map from event type to its listeners. No message-broker product is needed to
+demonstrate the style. Whether a real one is used in production is an
+Operation question (§6.8).
 
 ### The one dependency rule
 
@@ -377,13 +433,13 @@ and nothing important is enforced in two places.
 |---|---|---|
 | **INV-01 · No overselling** | `InventoryService` — the only writer of `heldQuantity` and `soldQuantity` | **Yes.** This is the most important row in the document. |
 | FR-08 · Holds are atomic | `InventoryService`, one conditional update | Yes |
-| FR-12 · Expired holds return seats | `HoldExpiryScheduler` | Yes |
+| FR-12 · Expired holds return seats | `HoldExpiryScheduler` → `HoldExpired` → `InventoryService` | Yes — the seats move in `InventoryService` only |
 | FR-16 · Confirm only if still held | `ReservationService`, rule R-E04-6 | Yes |
 | FR-17 · Void a late authorisation | `ReservationService` → `PaymentProvider.voidAuthorisation` | Yes |
 | FR-18 · Charge once | Idempotency key, `PaymentRequest` → provider | Yes |
 | FR-03 · One token per account per event | `QueueService` | Yes |
-| FR-05 · First in, first admitted | `AdmissionScheduler` | Yes |
-| FR-21 · Signed ticket | `TicketSigningService` | Yes |
+| FR-05 · First in, first admitted, in batches (NFR-09) | `AdmissionScheduler` | Yes |
+| FR-21 · Signed ticket | `TicketService` | Yes |
 | FR-26 · No price change while on sale | `EventService` | Yes |
 | FR-28 · No reduction below sold + held | `EventService`, reading `InventoryService` | Yes |
 | NFR-08 · Two seams only | `contract/` + the build rule in §6.5 | Yes |
@@ -397,6 +453,7 @@ An architecture document that lists only benefits has not made any choices.
 | Decision | What it buys | What it costs |
 |---|---|---|
 | Inventory drops at **hold**, not payment | Overselling becomes structurally impossible | Seats sit unavailable during abandoned checkouts. Mitigated by the 10-minute limit — which is why FR-12 is not optional. |
+| **Event-driven**, broker topology | Late and timed things (expiry, payment) fit naturally; parts fail independently (NFR-05) | No single class shows the whole workflow. Events can race, repeat or go missing — each answered in §6.2. |
 | Single database for inventory | A genuinely atomic hold, easy to prove | Inventory is a single point of contention, and eventually a scaling ceiling. Acceptable: the queue caps the rate that reaches it. |
 | Waiting room in front of everything | NFR-01 without over-provisioning | Every customer waits, including the one who arrives at 10:47 to an empty queue. |
 | **Compile-based** plug-ins | Simple, readable, easy to govern with a build check | Adding a payment method needs a redeploy. Nothing requires otherwise. |
@@ -409,9 +466,9 @@ An architecture document that lists only benefits has not made any choices.
 
 Honest gaps, so they are not mistaken for oversights.
 
-- **Deployment topology.** Slide 8.1 notes that the pipeline suits cloud
-  deployment well, because of its modularity and separate filter types. How
-  many instances of what, and where, belongs to Deliverable 5 (Operation).
+- **Deployment topology.** The in-process `EventBus` could later become a
+  real message broker running on its own machines. How many instances of
+  what, and where, belongs to Deliverable 5 (Operation).
 - **The queue's own storage.** It must be fast and it must survive a restart
   without losing positions. The choice is an Operation concern.
 - **Monitoring and alerting.** NFR-04 states 99.9% availability; how it is

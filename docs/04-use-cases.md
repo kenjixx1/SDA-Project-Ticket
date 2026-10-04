@@ -127,7 +127,7 @@ activity diagram, not in the use case diagram.
 ### Traces to
 
 **Requirements** FR-01 … FR-06 · **Entities** E-01 Event, E-03 QueueToken ·
-**Characteristics** NFR-01 Elasticity, NFR-03 Performance
+**Characteristics** NFR-01 Elasticity, NFR-03 Performance, NFR-09 Fairness
 
 ---
 
