@@ -23,12 +23,12 @@ first three.
 | 1 | Problem Description | `docs/01-problem-description.md` | Written |
 | 2 | Requirements Model | `docs/02` – `docs/05` | Written |
 | 3 | Design | `docs/06-architecture.md`, `docs/08-screen-requirements.md` | Written |
-| 4 | Implementation | `src/` | Empty — not started |
+| 4 | Implementation | `src/` | Slice 1 built — core booking engine + tests |
 | 5 | Operation | not yet | Not started |
 | 6 | Conclusion & Recommendation | not yet | Not started |
 
-**This is a documentation repository right now.** `src/` is an empty Java
-package tree. Do not put code anywhere else.
+**Code lives in `src/` only.** Slice 1 (the core booking engine) is built and
+tested. Slices 2 and 3 are not. Do not put code anywhere else.
 
 ---
 
@@ -164,9 +164,10 @@ add it to the list above and switch to its exact words.
 
 ---
 
-## 8. When code starts
+## 8. Code
 
-Nothing is implemented yet. When it is:
+Slice 1 of `docs/03-prd.md` §3.6 is built. Run `./run.sh test` before every
+commit that touches `src/`; all tests must pass.
 
 - **Language:** Java. The course uses Java in almost every lab.
 - **Package root:** `th.ac.kmitl.sda.ticketqueue`
@@ -176,6 +177,10 @@ Nothing is implemented yet. When it is:
 - Payment providers are **simulated**. No real Stripe or PromptPay keys, no
   network calls. They sit behind the real `PaymentProvider` interface so the
   architecture is still demonstrated.
+- **No build tool, no libraries.** Plain `javac` through `./run.sh`, Java 17
+  language level. Tests use the small runner in `src/test/java`, not JUnit.
+- Only the composition root `EventFlow.java` (outside `core/`) may name a
+  plug-in class. `ArchitectureTest` fails the build otherwise (NFR-08).
 
 ---
 

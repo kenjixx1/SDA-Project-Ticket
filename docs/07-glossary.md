@@ -78,6 +78,15 @@ rail and does their part.*
 
 ---
 
+### Composition root
+The one place in the code that creates every part and plugs them together.
+Here: `EventFlow.java`. It is the only class allowed to name a plug-in, and it
+sits outside `core/`, so the core still never knows a plug-in's name (NFR-08).
+
+*The electrician's fuse box: every wire is connected there, and nowhere else.*
+
+---
+
 ### Constraint
 Something fixed that the design did not get to choose — a rule handed down.
 "Must be written in Java" is a constraint. Written as **CON-nn**.

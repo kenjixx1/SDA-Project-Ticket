@@ -109,7 +109,7 @@ traced afterwards (NFR-07).
 | # | Event | Published by | Who listens | What they do |
 |---|---|---|---|---|
 | 1 | **`UserAdmitted`** | `AdmissionScheduler` | Kenji's session · `SalesDashboardService` | Show "your turn" · count one more admitted |
-| 2 | **`TicketHeld`** | `InventoryService`, after the atomic hold succeeds | `HoldExpiryScheduler` · `SalesDashboardService` | Start the 10-minute clock · VIP held goes 10 → 12 |
+| 2 | **`TicketHeld`** | `InventoryService`, after the atomic hold succeeds | `SalesDashboardService` | VIP held goes 10 → 12 on the dashboard. The 10-minute deadline is already saved on the hold; `HoldExpiryScheduler` finds it by scanning, not by listening. |
 | 3 | **`PaymentCompleted`** | `CheckoutService`, after the `PaymentProvider` authorises | `ReservationService` | Confirm the order if the hold is still alive (FR-16). Otherwise void the payment (FR-17). |
 | 4 | **`OrderConfirmed`** | `ReservationService` | `InventoryService` · `TicketService` · `SalesDashboardService` | Move 2 seats from held to sold · issue 2 tickets · add ฿13,000 revenue |
 | 5 | **`TicketIssued`** | `TicketService` | Kenji's session | Show the two tickets |
@@ -120,8 +120,9 @@ traced afterwards (NFR-07).
  AdmissionScheduler ──UserAdmitted──►  Kenji picks 2 × VIP
                                             │  (direct call, answer needed now)
                                             ▼
-                                     InventoryService ──TicketHeld──► HoldExpiryScheduler
-                                                                            │ 10 min pass
+                                     InventoryService ──TicketHeld──► dashboard
+                                     (saves expiresAt)             HoldExpiryScheduler
+                                                                   scans · 10 min pass
  CheckoutService ──PaymentCompleted──►  ReservationService  ◄───────────────┘
                                         HELD → CONFIRMED   or   HELD → EXPIRED
                                              │                        │
@@ -378,7 +379,10 @@ th.ac.kmitl.sda.ticketqueue
 │   └── registry/
 │       └── PluginRegistry.java       key → plug-in
 │
+├── EventFlow.java            ◄── composition root: wires core + plug-ins. Outside core/.
+│
 ├── contract/                 ◄── THE SEAMS. Core and plug-ins both depend on these.
+│   ├── Money.java
 │   ├── PaymentProvider.java
 │   ├── PricingRule.java
 │   └── PricingRequest.java
@@ -400,6 +404,11 @@ th.ac.kmitl.sda.ticketqueue
     ├── EventService.java             UC-05, UC-06
     └── SalesDashboardService.java    UC-07 · listens to every event
 ```
+
+**Built so far.** Slice 1 of `03-prd.md` §3.6: `core/event`, `core/inventory`,
+`core/order` (without `PricingService`), `core/registry`, `contract/` (payment
+only), the simulated `PromptPayPlugin`, `admin/EventService` and `EventFlow`.
+`src/README.md` lists what is built and what the tests prove.
 
 **Event channel implementation.** `EventBus` is a small in-process class: a
 map from event type to its listeners. No message-broker product is needed to
