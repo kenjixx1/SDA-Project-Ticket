@@ -54,8 +54,13 @@ async function startPay(ctx, rid) {
 async function answer(ctx, rid, pid, approve) {
   ctx.state.working = approve ? 'yes' : 'no';
   ctx.render();
-  await api.answer(pid, approve);
-  ctx.go(`#/confirming/${rid}/${pid}`, { replace: true });
+  try {
+    await api.answer(pid, approve);
+    ctx.go(`#/confirming/${rid}/${pid}`, { replace: true });
+  } catch (e) {
+    ctx.state.working = ''; // the tap can be repeated safely (FR-18)
+    throw e;
+  }
 }
 
 async function loadHeld(ctx, rid) {
