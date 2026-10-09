@@ -140,6 +140,7 @@ img{max-width:100%;display:block}
 .feature h2{font:700 30px/1.05 var(--f);text-transform:uppercase;margin:0}
 .feature .meta{font:400 13px var(--fm);color:var(--mu)}
 .feature .from{color:var(--ac);font-weight:500}
+.feature .pill:not(.stop):not(.grey){background:var(--ac);color:var(--aci);border-color:var(--ac)}
 .pill{align-self:flex-start;font:600 11px/1 var(--fm);letter-spacing:.06em;padding:6px 9px;border-radius:999px;border:1px solid var(--ac);color:var(--ac);white-space:nowrap}
 .pill.stop{border-color:var(--st);color:var(--st)}
 .pill.grey{border-color:var(--l2);color:var(--mu)}
@@ -148,6 +149,8 @@ img{max-width:100%;display:block}
 .erow span{font:400 12px var(--fm);color:var(--mu)}
 .erow .p{font:500 15px var(--fm);color:var(--tx)}
 .erow .p.stop{color:var(--st)}
+.erow .who{display:flex;align-items:center;gap:12px;min-width:0}
+.erow .thumb{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:none}
 
 /* SCR-02 tickets */
 .ocard{display:flex;align-items:center;gap:16px;padding:14px 16px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);width:100%;text-align:left}
