@@ -1,0 +1,196 @@
+<title>EventFlow Build Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one reading column; lanes drawn as 3 tracks; real design screens as a filmstrip */
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --fg:#141a2b; --muted:#5b6478; --line:#dfe3ee;
+  --accent:#3f5fe0; --accent-soft:#e8edff; --warn:#b26a00; --warn-soft:#fff3dc; --new:#127a52; --new-soft:#e1f5ec;
+  --docs:#8a4fd1; --docs-soft:#f1e8fc;
+  --display:"IBM Plex Sans",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1020; --surface:#121a2e; --fg:#e8ecf7; --muted:#9aa4bd; --line:#26304a;
+  --accent:#8aa2ff; --accent-soft:#1c2850; --warn:#ffb84d; --warn-soft:#3a2a0e; --new:#4fd39b; --new-soft:#0f3326;
+  --docs:#c59bff; --docs-soft:#2a1d40; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1020; --surface:#121a2e; --fg:#e8ecf7; --muted:#9aa4bd; --line:#26304a;
+  --accent:#8aa2ff; --accent-soft:#1c2850; --warn:#ffb84d; --warn-soft:#3a2a0e; --new:#4fd39b; --new-soft:#0f3326;
+  --docs:#c59bff; --docs-soft:#2a1d40; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:40px 80px;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,4vw,40px);line-height:1.15;font-weight:700;letter-spacing:-.01em}
+h2{font-size:22px;font-weight:700}
+h3{font-size:16px;font-weight:600}
+p{margin:0;max-width:68ch}
+code{font-family:var(--mono);font-size:.88em}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.sec{display:flex;flex-direction:column;gap:18px}
+.sec-head{display:flex;flex-direction:column;gap:6px}
+.sec-head p{color:var(--muted)}
+.hero{display:flex;flex-direction:column;gap:16px}
+.lead{font-size:19px;font-weight:500;max-width:62ch}
+.status{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;font:600 13px var(--mono);color:var(--warn);background:var(--warn-soft);padding:6px 12px;border-radius:999px}
+.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--muted);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.stat b{font:700 26px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:14px}
+/* filmstrip */
+.film{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}
+.frame{flex:0 0 auto;width:150px;display:flex;flex-direction:column;gap:8px}
+.frame img{width:150px;border-radius:18px;border:1px solid var(--line);display:block}
+.frame span{font:600 12px var(--mono);color:var(--muted)}
+.frame b{font-size:13px;font-weight:600;line-height:1.3}
+.note{font-size:14px;color:var(--muted)}
+/* lanes */
+.lanes{display:flex;flex-direction:column;gap:10px;overflow-x:auto}
+.lane{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;min-width:640px}
+.lane .who{font:600 13px var(--mono);color:var(--muted)}
+.track{display:flex;gap:6px;align-items:center}
+.chip{font:600 13px var(--mono);padding:8px 10px;border-radius:8px;white-space:nowrap}
+.chip.java{background:var(--accent-soft);color:var(--accent)}
+.chip.docs{background:var(--docs-soft);color:var(--docs)}
+.chip.web{background:var(--new-soft);color:var(--new)}
+.arrow{color:var(--muted);font-size:13px}
+.join{border-left:2px dashed var(--line);padding-left:10px;margin-left:4px}
+.diagram{width:100%;height:75vh;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:block}
+/* task table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td.n{font:700 13px var(--mono);white-space:nowrap}
+td.n.java{color:var(--accent)} td.n.docs{color:var(--docs)} td.n.web{color:var(--new)}
+td .files{font:12px var(--mono);color:var(--muted)}
+/* risk rows, checks */
+.risk{display:flex;flex-direction:column;gap:12px}
+.risk-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.risk-row p{color:var(--muted);font-size:15px}
+@media (max-width:640px){.risk-row{grid-template-columns:1fr}}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.card li span{color:var(--muted)}
+.foot{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:20px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">EventFlow · Implementation plan</span>
+  <h1>Build plan for the customer app</h1>
+  <p class="lead">13 tasks turn the approved design into a working app. Kenji can buy 2 VIP tickets end to end on a fake backend. Every screen is checked against its design picture.</p>
+  <span class="status">Waiting for your approval</span>
+  <div class="meta">
+    <span>Plan <code>docs/superpowers/plans/2026-10-10-presentation-layer.md</code></span>
+    <span>Spec <code>docs/superpowers/specs/2026-10-10-presentation-layer-design.md</code></span>
+    <span>Due 12 Oct 2026</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>13</b><span>tasks</span></div>
+    <div class="stat"><b>38</b><span>JUnit tests</span></div>
+    <div class="stat"><b>35</b><span>screenshot checks</span></div>
+    <div class="stat"><b>18</b><span>customer screens</span></div>
+  </div>
+</header>
+
+<section class="sec">
+  <div class="sec-head"><span class="eyebrow">What you get</span><h2>Kenji's buy path, built from these exact designs</h2>
+  <p>These are the real reference pictures from <code>diagrams/app-flow/screens/</code>. After each screen task, a script takes a screenshot of the running app, and it is compared with the picture of the same name.</p></div>
+  <div class="film">
+    <div class="frame"><img alt="SCR-05b event on sale" src="__IMG_05b__"><span>SCR-05b</span><b>Event, on sale</b></div>
+    <div class="frame"><img alt="SCR-06a queue" src="__IMG_06a__"><span>SCR-06a</span><b>Queue, live position</b></div>
+    <div class="frame"><img alt="SCR-08a select tickets" src="__IMG_08a__"><span>SCR-08a</span><b>Select tickets</b></div>
+    <div class="frame"><img alt="SCR-09a seats held" src="__IMG_09a__"><span>SCR-09a</span><b>Seats held, 10:00</b></div>
+    <div class="frame"><img alt="SCR-13a PromptPay" src="__IMG_13a__"><span>SCR-13a</span><b>Pay by PromptPay</b></div>
+    <div class="frame"><img alt="SCR-16 confirmed" src="__IMG_16__"><span>SCR-16</span><b>You are going</b></div>
+  </div>
+  <p class="note">Example walk: <code>node src/test/e2e/walk.mjs 09a</code> resets the fake, joins as Kenji, jumps the clock to the front of the line, holds 2 VIP, then saves <code>target/shots/09a.png</code> to compare with <code>09a.jpg</code>.</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><span class="eyebrow">Who works when</span><h2>2 lanes at the same time, then the screens</h2>
+  <p>Lane A and lane B touch different files, so 2 workers can run them in parallel. The screens start when both are done.</p></div>
+  <div class="lanes">
+    <div class="lane"><span class="who">Lane A · Java</span><div class="track"><span class="chip java">1 Build</span><span class="arrow">→</span><span class="chip java">2 Gateway + fake queue</span><span class="arrow">→</span><span class="chip java">3 Fake holds + pay</span><span class="arrow">→</span><span class="chip java">4 Routes</span></div></div>
+    <div class="lane"><span class="who">Lane B · Docs</span><div class="track"><span class="chip docs">D docs/09, ASM-07/08, §6.5, glossary, §8.3</span></div></div>
+    <div class="lane"><span class="who">Join · Screens</span><div class="track join"><span class="chip web">5 Skeleton</span><span class="arrow">→</span><span class="chip web">6 Event</span><span class="arrow">→</span><span class="chip web">7 Queue</span><span class="arrow">→</span><span class="chip web">8 Select</span><span class="arrow">→</span><span class="chip web">9 Held</span><span class="arrow">→</span><span class="chip web">10 Pay</span><span class="arrow">→</span><span class="chip web">11 Shell + ticket</span><span class="arrow">→</span><span class="chip web">12 Full check</span></div></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><span class="eyebrow">The picture</span><h2>What the tasks build</h2>
+  <p>Tasks 1 to 4 build the Java side, from <code>web/ routes</code> to the fake. Tasks 5 to 11 build the page. The dashed path is your teammate's later work.</p></div>
+  <iframe class="diagram" id="arch" title="Presentation layer architecture diagram" srcdoc="__SRCDOC__"></iframe>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><span class="eyebrow">Tasks at a glance</span><h2>Each task ends with its own test or screenshot check</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>#</th><th>What</th><th>Main files</th><th>Done when</th></tr></thead>
+    <tbody>
+      <tr><td class="n java">1</td><td>Maven build, WebServer serves a page, the core-imports rule</td><td class="files">pom.xml, web/WebServer.java</td><td>2 tests pass. <code>/api/health</code> answers</td></tr>
+      <tr><td class="n java">2</td><td>BookingGateway, the reply records, fake clock, fake events and queue</td><td class="files">web/BookingGateway.java, dto/Views.java, fake/*</td><td>11 more tests: position 4,182 moves 12 a second, turn passes after 5 min</td></tr>
+      <tr><td class="n java">3</td><td>Fake holds, payments, orders</td><td class="files">fake/FakeBookingGateway.java</td><td>15 more tests: 10-minute expiry, charged once, void after expiry, race lost</td></tr>
+      <tr><td class="n java">4</td><td>13 messages over HTTP, the envelope, dev routes, the switch</td><td class="files">routes/*, dto/Requests.java</td><td>10 contract tests. 38 tests in total</td></tr>
+      <tr><td class="n docs">D</td><td>Traceability docs</td><td class="files">docs/09 (new), 02, 06, 07, 08, src/README, README</td><td>ASM-07/08, 6 glossary words, web/ in §6.5, lime and coral in §8.3</td></tr>
+      <tr><td class="n web">5</td><td>Page skeleton: parts C-01 to C-09, router, polling, dev panel, screenshot walk</td><td class="files">public/index.html, css/app.css, js/api.js, parts.js, app.js, dev.js, e2e/walk.mjs</td><td>Page loads, dev panel shows, no console errors</td></tr>
+      <tr><td class="n web">6</td><td>SCR-05 Event, 6 variants</td><td class="files">js/screens/event.js</td><td>Shots 05a to 05f. Switches to on-sale at 10:00 by itself</td></tr>
+      <tr><td class="n web">7</td><td>SCR-06 Queue, SCR-07 Turn passed</td><td class="files">js/screens/queue.js</td><td>Shots 06a, 06b, 06c, 07. Reconnecting after 15 s</td></tr>
+      <tr><td class="n web">8</td><td>SCR-08 Select tickets</td><td class="files">js/screens/select.js</td><td>Shots 08a, 08d, 08g. Hand checks 08b, 08c, 08e, 08f</td></tr>
+      <tr><td class="n web">9</td><td>SCR-09 Held, SCR-10 Released, SCR-11 Ran out</td><td class="files">js/screens/hold.js</td><td>Shots 09a, 10, 11. Timer at ×100 lands on SCR-11</td></tr>
+      <tr><td class="n web">10</td><td>SCR-12 to SCR-15 checkout and pay, SCR-18 Expired</td><td class="files">js/screens/pay.js</td><td>11 shots. Double tap charges once. Reload stays on SCR-15</td></tr>
+      <tr><td class="n web">11</td><td>SCR-01 to SCR-04 tabs, SCR-16 Confirmed, SCR-17 Ticket</td><td class="files">js/screens/shell.js, tickets.js</td><td>8 shots. Tab bar and sign-out sheet work</td></tr>
+      <tr><td class="n web">12</td><td>Full check</td><td class="files">no new files</td><td>38 tests, 35 shots, 1 full purchase by hand, 2 buyers race for the last 4 VIP</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><span class="eyebrow">Hard to undo</span><h2>4 things the plan locks in</h2></div>
+  <div class="risk">
+    <div class="risk-row"><h3>Every answer is <code>{serverNow, data}</code> or <code>{serverNow, error}</code></h3><p>Both the page and your teammate's core depend on this shape. <code>serverNow</code> is how countdowns follow the server clock (locked decision 2).</p></div>
+    <div class="risk-row"><h3>13 paths, M-01 to M-13</h3><p>Written in <code>docs/09-web-api.md</code>. <code>ApiContractTest</code> checks each one. The same test must pass when the real core is plugged in.</p></div>
+    <div class="risk-row"><h3>The token travels in the screen address</h3><p>For example <code>#/queue/the-1975/Q-1001</code>. The server returns <code>myToken</code> on reopen, so the browser stores nothing. This replaces the spec's <code>localStorage</code> line (Task D updates it).</p></div>
+    <div class="risk-row"><h3>Maven, Java 17, Javalin 6.3.0</h3><p>Your teammate's <code>core/</code> uses the same <code>pom.xml</code>. Maven is not installed on this Mac yet. Task 1 installs it with Homebrew.</p></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><span class="eyebrow">Worth knowing</span><h2>Things the plan decided for you</h2></div>
+  <div class="pair">
+    <div class="card"><h3>Added beyond the spec</h3><ul>
+      <li><code>/dev/advance</code> jumps the fake clock <span>so screenshots do not wait 10 real minutes</span></li>
+      <li>Reply records live in 2 files, <code>Views.java</code> and <code>Requests.java</code> <span>instead of 1 file each</span></li>
+      <li>The QR is a look-alike pattern <span>(not scannable). The signed payload is real text</span></li>
+    </ul></div>
+    <div class="card"><h3>Left as is</h3><ul>
+      <li><code>AGENTS.md</code> §2 still says BLACKPINK <span>(Q-2 said the story table is a separate decision)</span></li>
+      <li>The organizer console, SCR-30 to SCR-40 <span>(a later spec)</span></li>
+      <li>Swipe between tickets <span>(dots work instead)</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head"><span class="eyebrow">Next</span><h2>How it runs after you approve</h2>
+  <p>Your rule says implementers go through <code>cc-bridge</code> (Command Code, DeepSeek). Lanes A and B start together. Each task gets a review before the next starts. Nothing is pushed to GitHub without asking you.</p></div>
+</section>
+
+<p class="foot">This page is a readable overview. The markdown plan in the repo stays the source of truth for building.</p>
+</div>
+
+<script>
+(function(){
+  var f=document.getElementById('arch');
+  function fit(){try{var d=f.contentDocument;if(d&&d.documentElement){var h=d.documentElement.scrollHeight;if(h>200)f.style.height=h+'px';}}catch(e){}}
+  f.addEventListener('load',function(){fit();setTimeout(fit,400);setTimeout(fit,1500);});
+  window.addEventListener('resize',function(){setTimeout(fit,150);});
+})();
+</script>
