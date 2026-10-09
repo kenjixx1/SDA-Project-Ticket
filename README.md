@@ -31,6 +31,7 @@ same seat twice.
 | 4 | [`docs/04-use-cases.md`](docs/04-use-cases.md) | Seven use cases, with every way each one can go wrong. |
 | 5 | [`docs/05-domain-model.md`](docs/05-domain-model.md) | The six things the system stores, and the rules that must never break. |
 | 6 | [`docs/06-architecture.md`](docs/06-architecture.md) | Event-driven + microkernel, and which requirement forced each decision. |
+| 8 | [`docs/08-screen-requirements.md`](docs/08-screen-requirements.md) | Every screen, what it must show, and which parts are static or dynamic. Hand this to a designer. |
 | — | [`docs/07-glossary.md`](docs/07-glossary.md) | Every technical word, in plain English. Read whenever a word is unfamiliar. |
 
 **In a hurry?** Read `01`, then `04`, then `06`.

@@ -22,7 +22,7 @@ first three.
 |---|---|---|---|
 | 1 | Problem Description | `docs/01-problem-description.md` | Written |
 | 2 | Requirements Model | `docs/02` – `docs/05` | Written |
-| 3 | Design | `docs/06-architecture.md` | Written |
+| 3 | Design | `docs/06-architecture.md`, `docs/08-screen-requirements.md` | Written |
 | 4 | Implementation | `src/` | Empty — not started |
 | 5 | Operation | not yet | Not started |
 | 6 | Conclusion & Recommendation | not yet | Not started |
@@ -97,6 +97,7 @@ instead, so older documents and diagrams keep working.
 | `ASM-nn` | Assumption | `ASM-03` |
 | `INV-nn` | Domain invariant (a rule that must always hold) | `INV-01` |
 | `E-nn` | Domain entity | `E-04 Reservation` |
+| `SCR-nn` | Screen (a letter after it is a variant) | `SCR-08e Select tickets, more than remain` |
 
 ---
 

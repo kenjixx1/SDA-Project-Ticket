@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:#E7E7E7;font-family:system-ui,sans-serif}a{color:#2b3a55}a:hover{color:#0B1220}</style>
+<template id="__bundler_thumbnail" data-bg-color="#000000"><svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg"><rect x="480" y="200" width="240" height="400" rx="40" fill="#C5F25A"/><circle cx="600" cy="520" r="24" fill="#000"/></svg></template>
+</helmet>
+<section id="t1" style="padding:40px 48px 48px;display:flex;flex-direction:column;gap:22px">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:900px">
+    <div style="display:flex;align-items:center;gap:10px"><a href="#t1" style="font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#0B1220;color:#fff;border-radius:4px;text-decoration:none">1</a><span style="font:600 15px/1.2 system-ui,sans-serif;color:#0B1220">Event Ticket &amp; Queue: customer app, 1a</span></div>
+    <p style="margin:0;font:400 13px/1.55 system-ui,sans-serif;color:#4a5568">Clickable prototype covering all 18 customer screens. Use the menu above the phone to jump to any screen or variant.</p>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+    <div id="1a" style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:baseline;gap:8px;font:400 12px/1.3 system-ui,sans-serif;color:#4a5568"><a href="#1a" style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(11,18,32,.1);color:#0B1220;border-radius:5px;text-decoration:none">1a</a>Lime · Instrument Sans + JetBrains Mono · soft 22px corners · centred queue number</div>
+      <div style="--bg:#000000;--s1:#111112;--s2:#1A1A1C;--s3:#252527;--l1:rgba(255,255,255,.08);--l2:rgba(255,255,255,.18);--tx:#F2F2F2;--mu:#8F8F94;--ac:#C5F25A;--a2:#5B8CFF;--ac2:#8FE3B0;--aci:#000000;--acw:rgba(197,242,90,.09);--st:#FF8B7B;--stw:rgba(255,139,123,.11);--qr:#F3F6FA;--r:22px;--rb:16px;--f:'Instrument Sans',system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,monospace">
+        <dc-import name="TicketApp" look="a" speed="{{ speed }}" hint-size="410px,914px"></dc-import>
+      </div>
+    </div>
+      </div>
+  </section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;speed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;10&quot;,&quot;30&quot;,&quot;100&quot;],&quot;default&quot;:&quot;10&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+class Component extends DCLogic {
+  renderVals() { return { speed: String(this.props.speed ?? '10') }; }
+}
+</script>
+</body>
+</html>
