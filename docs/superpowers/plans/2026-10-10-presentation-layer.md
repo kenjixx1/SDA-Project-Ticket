@@ -15,7 +15,7 @@
 - Package root `th.ac.kmitl.sda.ticketqueue`. All Java under `src/main/java/th/ac/kmitl/sda/ticketqueue/web/`. Tests under `src/test/java/th/ac/kmitl/sda/ticketqueue/web/`.
 - `core/` must never import `web/` or `plugin/`. `web/` may import `core/`.
 - `BookingGateway` is not a plug-in seam. It lives in `web/`, has 2 implementations (fake now, core later) and holds no business rule of the real system.
-- Every JSON reply is an envelope: success `{"serverNow": <epoch ms>, "data": <payload>}`, failure `{"serverNow": <epoch ms>, "error": {"code": "...", "message": "...", "remaining": <int or null>}}`.
+- Every JSON reply is an envelope: success `{"serverNow": <epoch ms>, "clockRate": <int>, "data": <payload>}`, failure `{"serverNow": <epoch ms>, "clockRate": <int>, "error": {"code": "...", "message": "...", "remaining": <int or null>}}`. `clockRate` is how fast the server clock runs: 1 for real, 0 to 100 for the fake.
 - The customer comes from the `X-Customer` request header, default `kenji`. The page reads `?as=<name>` from its address and sends it.
 - Money is whole baht as a `long`. Shown as `฿` + digits with commas (`฿13,000`), `Free` for 0.
 - Times are epoch milliseconds. Shown in `Asia/Bangkok`, 24-hour (`10:00`), countdowns `mm:ss`, dates `14 Nov 2026` short and `Saturday 14 November` long.
@@ -25,7 +25,7 @@
 - Colours: lime `--ac #C5F25A` means "move forward". Coral `--st #FF8B7B` means "stop" (low stock, sold out, errors, expired). These replace the old cyan and magenta.
 - No pronoun guesses in any copy or doc. Kenji is "Kenji" or "they".
 - Never `git add -A`. Stage named paths only. End every commit message with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
-- Run the server with `mvn -q exec:java` (port 7070). Open `http://localhost:7070/`.
+- Run the server with `mvn -q compile exec:java` (port 7070). Open `http://localhost:7070/`.
 
 ## File map
 
@@ -75,7 +75,7 @@ Lanes A and B share no file and can run at the same time. The join starts when b
 After each screen task, run the server and the screenshot walk for that task's shots, then compare each picture with the design reference of the same name:
 
 ```bash
-mvn -q exec:java &          # leave running
+mvn -q compile exec:java &          # leave running
 node src/test/e2e/walk.mjs 06a 06b 06c 07
 open target/shots/06a.png diagrams/app-flow/screens/06a.jpg
 ```
@@ -300,12 +300,12 @@ public final class WebServer {
 
 - [ ] **Step 6: Run tests to verify they pass**
 
-Run: `mvn -q test`
+Run: `mvn test 2>&1 | grep "Tests run:" | tail -1`
 Expected: `Tests run: 2, Failures: 0, Errors: 0`.
 
 - [ ] **Step 7: Run the server once by hand**
 
-Run: `mvn -q exec:java`, then in another terminal `curl -s localhost:7070/api/health`
+Run: `mvn -q compile exec:java`, then in another terminal `curl -s localhost:7070/api/health`
 Expected: `{"ok":true}`. Stop the server with Ctrl+C.
 
 - [ ] **Step 8: Commit**
@@ -340,7 +340,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
   - `BookingGateway` with the 14 methods below.
   - `GatewayException(int status, String code, String message, Integer remaining)` with public final fields and factories `notFound(String what)`, `badRequest(String code, String message)`, `refused(String code, String message, int remaining)`.
   - Records in `Views`: `EventSummary`, `TierPrice`, `EventDetail`, `JoinResult`, `QueueStatus`, `TierAvailability`, `EventRef`, `Promotion`, `PaymentMethod`, `HoldView`, `PaymentStart`, `PaymentStatus`, `TicketView`, `OrderView`, `Me`.
-  - `FakeClock(long startFakeMillis, LongSupplier realMillis)`, `now()`, `setSpeed(int)`, `speed()`, `set(long)`, `advance(long)`.
+  - `FakeClock(long startFakeMillis, LongSupplier realMillis)`, `now()`, `setSpeed(int)`, `speed()`, `set(long)`, `advance(long)`. Speed 0 pauses the clock.
   - `Scenario` enum: `RACE_LOST, SOLD_OUT_ALL, PROVIDER_DOWN, ALL_PROVIDERS_DOWN, BANK_SLOW, TURN_PASSED, EVENT_CANCELLED, SALE_CLOSED`.
   - `DevControls`: `scenario(Scenario)`, `speed(int)`, `advance(long seconds)`, `reset()`.
   - `FakeBookingGateway(FakeClock clock)` implements both. Public constants `START`, `SALE_OPENS`, `HOLD_MS`, `ORDER_LIMIT`, `START_AHEAD`, `START_MOVED`, `ADMIT_PER_SECOND`, `TURN_LIMIT_MS`. Event ids `the-1975`, `bruno-mars`, `alan-walker`, `marshmello`. Tier ids `vip`, `zone-a`, `zone-b` (The 1975) and `standard` (others).
@@ -469,7 +469,7 @@ public interface DevControls {
 
     void scenario(Scenario scenario);
 
-    /** Allowed values: 1, 10, 30, 100. */
+    /** Allowed values: 0 (paused), 1, 10, 30, 100. */
     void speed(int times);
 
     void advance(long seconds);
@@ -480,7 +480,7 @@ public interface DevControls {
 
 - [ ] **Step 4: Run the clock test to verify it passes**
 
-Run: `mvn -q test -Dtest=FakeClockTest`
+Run: `mvn test -Dtest=FakeClockTest 2>&1 | grep "Tests run:" | tail -1`
 Expected: `Tests run: 1, Failures: 0`.
 
 - [ ] **Step 5: Write `BookingGateway`, `GatewayException`, `Views`**
@@ -512,6 +512,11 @@ public interface BookingGateway {
 
     /** The server's clock, epoch milliseconds. */
     long now();
+
+    /** How fast the server clock runs compared with real time. The real system is always 1. */
+    default int clockRate() {
+        return 1;
+    }
 
     List<EventSummary> listEvents(String customerId);                                      // M-01
 
@@ -780,7 +785,7 @@ class FakeQueueTest {
     }
 
     @Test
-    void speedOnlyAcceptsTheFourValues() {
+    void speedOnlyAcceptsTheAllowedValues() {
         assertThrows(GatewayException.class, () -> gw.speed(7));
     }
 }
@@ -1016,6 +1021,11 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     }
 
     @Override
+    public synchronized int clockRate() {
+        return clock.speed();
+    }
+
+    @Override
     public synchronized List<EventSummary> listEvents(String customerId) {
         sweep();
         return events.values().stream()
@@ -1143,8 +1153,8 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
 
     @Override
     public synchronized void speed(int times) {
-        if (times != 1 && times != 10 && times != 30 && times != 100) {
-            throw GatewayException.badRequest("BAD_SPEED", "Speed must be 1, 10, 30 or 100");
+        if (times != 0 && times != 1 && times != 10 && times != 30 && times != 100) {
+            throw GatewayException.badRequest("BAD_SPEED", "Speed must be 0, 1, 10, 30 or 100");
         }
         clock.setSpeed(times);
     }
@@ -1165,12 +1175,12 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
 
 - [ ] **Step 9: Run the queue test to verify it passes**
 
-Run: `mvn -q test -Dtest=FakeQueueTest`
+Run: `mvn test -Dtest=FakeQueueTest 2>&1 | grep "Tests run:" | tail -1`
 Expected: `Tests run: 10, Failures: 0`.
 
 - [ ] **Step 10: Run all tests**
 
-Run: `mvn -q test`
+Run: `mvn test 2>&1 | grep "Tests run:" | tail -1`
 Expected: `Tests run: 13, Failures: 0`.
 
 - [ ] **Step 11: Commit**
@@ -1269,6 +1279,14 @@ class FakeBookingTest {
     void onePlaceInLineHoldsOnce() {
         String token = admit("kenji").get(0);
         gw.hold("kenji", token, "vip", 1);
+        var e = assertThrows(GatewayException.class, () -> gw.hold("kenji", token, "vip", 1));
+        assertEquals("NOT_ADMITTED", e.code);
+    }
+
+    @Test
+    void turnPassedScenarioStopsTheHold() {
+        String token = admit("kenji").get(0);
+        gw.scenario(Scenario.TURN_PASSED);
         var e = assertThrows(GatewayException.class, () -> gw.hold("kenji", token, "vip", 1));
         assertEquals("NOT_ADMITTED", e.code);
     }
@@ -1714,10 +1732,16 @@ Replace everything from the comment `// ---------- M-05 to M-12: filled in by Ta
     public synchronized HoldView hold(String customerId, String tokenId, String tierId, int quantity) {
         sweep();
         Token t = ownedToken(customerId, tokenId);
+        if (scenarios.remove(Scenario.TURN_PASSED) && t.state.equals("ADMITTED")) {
+            t.state = "EXPIRED";
+        }
         if (!t.state.equals("ADMITTED")) {
             throw GatewayException.badRequest("NOT_ADMITTED", "This place in line cannot hold seats now");
         }
         Event e = event(t.eventId);
+        if (!state(e).equals("ON_SALE")) {
+            throw GatewayException.badRequest("NOT_ON_SALE", "This sale is not open");
+        }
         Tier tier = e.tier(tierId);
         if (quantity < 1 || quantity > ORDER_LIMIT) {
             throw GatewayException.refused("OVER_LIMIT", "At most 4 tickets per person", tier.remaining());
@@ -1774,6 +1798,9 @@ Replace everything from the comment `// ---------- M-05 to M-12: filled in by Ta
         }
         if (r.paymentId != null) {
             Payment last = payments.get(r.paymentId);
+            if (last.state.equals("PENDING") && last.answered) {
+                throw GatewayException.badRequest("PAYMENT_IN_PROGRESS", "A payment for these seats is already being confirmed");
+            }
             if (last.state.equals("PENDING") && !last.answered && last.providerKey.equals(provider.key())) {
                 return start(last);
             }
@@ -1818,13 +1845,13 @@ Replace everything from the comment `// ---------- M-05 to M-12: filled in by Ta
 
 - [ ] **Step 8: Run the test to verify it passes**
 
-Run: `mvn -q test -Dtest=FakeBookingTest`
-Expected: `Tests run: 15, Failures: 0`.
+Run: `mvn test -Dtest=FakeBookingTest 2>&1 | grep "Tests run:" | tail -1`
+Expected: `Tests run: 16, Failures: 0`.
 
 - [ ] **Step 9: Run all tests**
 
-Run: `mvn -q test`
-Expected: `Tests run: 28, Failures: 0`.
+Run: `mvn test 2>&1 | grep "Tests run:" | tail -1`
+Expected: `Tests run: 29, Failures: 0`.
 
 - [ ] **Step 10: Commit**
 
@@ -1936,6 +1963,7 @@ class ApiContractTest {
             assertEquals(200, r.code());
             JsonNode b = body(r);
             assertEquals(FakeBookingGateway.START, b.get("serverNow").asLong());
+            assertEquals(1, b.get("clockRate").asInt());
             assertEquals(4, b.get("data").size());
             assertEquals("the-1975", b.get("data").get(0).get("eventId").asText());
             assertEquals(1900, b.get("data").get(0).get("fromPrice").asLong());
@@ -2162,7 +2190,7 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/** Wraps every answer as {serverNow, data} or {serverNow, error}, and reads who is buying. */
+/** Wraps every answer as {serverNow, clockRate, data} or {serverNow, clockRate, error}, and reads who is buying. */
 public final class Reply {
 
     private Reply() {
@@ -2181,17 +2209,19 @@ public final class Reply {
     public static void ok(Context ctx, BookingGateway g, int status, Object data) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("serverNow", g.now());
+        body.put("clockRate", g.clockRate());
         body.put("data", data);
         ctx.status(status).json(body);
     }
 
-    public static void error(Context ctx, long now, GatewayException e) {
+    public static void error(Context ctx, BookingGateway g, GatewayException e) {
         Map<String, Object> err = new LinkedHashMap<>();
         err.put("code", e.code);
         err.put("message", e.getMessage());
         err.put("remaining", e.remaining);
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("serverNow", now);
+        body.put("serverNow", g.now());
+        body.put("clockRate", g.clockRate());
         body.put("error", err);
         ctx.status(e.status).json(body);
     }
@@ -2416,7 +2446,7 @@ public final class WebServer {
     public static Javalin create(BookingGateway gateway, DevControls dev) {
         Javalin app = Javalin.create(config -> config.staticFiles.add("/public", Location.CLASSPATH));
         app.get("/api/health", ctx -> ctx.json(Map.of("ok", true)));
-        app.exception(GatewayException.class, (e, ctx) -> Reply.error(ctx, gateway.now(), e));
+        app.exception(GatewayException.class, (e, ctx) -> Reply.error(ctx, gateway, e));
         EventRoutes.register(app, gateway);
         QueueRoutes.register(app, gateway);
         HoldRoutes.register(app, gateway);
@@ -2432,13 +2462,13 @@ public final class WebServer {
 
 - [ ] **Step 7: Run all tests to verify they pass**
 
-Run: `mvn -q test`
-Expected: `Tests run: 38, Failures: 0`.
+Run: `mvn test 2>&1 | grep "Tests run:" | tail -1`
+Expected: `Tests run: 39, Failures: 0`.
 
 - [ ] **Step 8: Smoke test by hand**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 curl -s localhost:7070/api/events | head -c 200; echo
 curl -s -X POST -H 'Content-Type: application/json' -d '{"seconds":60}' localhost:7070/dev/advance; echo
@@ -2467,7 +2497,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `docs/02-requirements.md` (§2.6 assumptions table, after the ASM-06 row)
 - Modify: `docs/06-architecture.md` (§6.5 tree and dependency rule)
 - Modify: `src/README.md` (tree)
-- Modify: `docs/07-glossary.md` (6 new entries)
+- Modify: `docs/07-glossary.md` (7 new entries)
 - Modify: `docs/08-screen-requirements.md` (§8.3 Design system)
 - Modify: `docs/superpowers/specs/2026-10-10-presentation-layer-design.md` (§4 token line)
 - Modify: `README.md` (reading-order table)
@@ -2493,7 +2523,7 @@ booking engine are built against this list. Change it here first.
 kitchen only has to cook what is on it.
 
 **Real example.** Kenji taps **Hold these seats** for 2 VIP. The page sends
-M-06 and gets back reservation **R-1042**, which expires at **10:16:50**.
+M-06 and gets back reservation **R-1042**, which expires at **10:16:20**.
 
 ---
 
@@ -2520,13 +2550,16 @@ Every answer has the server's clock, `serverNow`, in epoch milliseconds. The
 page draws countdowns from it, never from the phone's clock (locked decision 2).
 
 ```json
-{ "serverNow": 1790827190000, "data": { "...": "..." } }
+{ "serverNow": 1790827190000, "clockRate": 1, "data": { "...": "..." } }
 ```
+
+`clockRate` is how fast the server clock runs. The real system always sends 1.
+The demo fake can send 0 (paused) up to 100.
 
 A refusal or error:
 
 ```json
-{ "serverNow": 1790827190000,
+{ "serverNow": 1790827190000, "clockRate": 1,
   "error": { "code": "NOT_ENOUGH", "message": "Not enough seats left in this tier", "remaining": 1 } }
 ```
 
@@ -2562,9 +2595,9 @@ promotions[{name, amount}], totalAmount, expiresAt, remainingBefore,
 remainingAfter, paymentMethods[{key, tile, label, line, available}],
 paymentId}`. `state` is `HELD`, `CONFIRMED`, `EXPIRED` or `RELEASED`.
 
-**Story values.** Kenji holds 2 VIP at 10:06:50: `unitPrice` 6500,
+**Story values.** Kenji holds 2 VIP at 10:06:20: `unitPrice` 6500,
 `promotions` `[{"name":"Early Bird −10%","amount":1300}]`, `totalAmount`
-11700, `remainingBefore` 16, `remainingAfter` 14, `expiresAt` 10:16:50.
+11700, `remainingBefore` 16, `remainingAfter` 14, `expiresAt` 10:16:20.
 
 ## 9.5 Demo-only messages
 
@@ -2573,7 +2606,7 @@ These exist only while the fake is switched on (`WebServer.main`).
 | Path | Body | Does |
 |---|---|---|
 | `POST /dev/scenario` | `{scenario}` | Forces a hard case: `RACE_LOST`, `SOLD_OUT_ALL`, `PROVIDER_DOWN`, `ALL_PROVIDERS_DOWN`, `BANK_SLOW`, `TURN_PASSED`, `EVENT_CANCELLED`, `SALE_CLOSED` |
-| `POST /dev/speed` | `{times}` | Runs the fake clock 1, 10, 30 or 100 times faster |
+| `POST /dev/speed` | `{times}` | Runs the fake clock 0 (paused), 1, 10, 30 or 100 times faster |
 | `POST /dev/advance` | `{seconds}` | Jumps the fake clock forward |
 | `POST /dev/reset` | | Back to 09:59:30 on 1 October 2026, story data restored |
 
@@ -2646,17 +2679,29 @@ core/  ──MUST NEVER import──►  plugin/
 core/  ──MUST NEVER import──►  web/
 ```
 
-and change the following sentence to: `This is the NFR-08 fitness function. ArchitectureRuleTest fails the build when it is broken.`
+and replace the 2-line paragraph right under it, which reads exactly
+
+```
+This is the NFR-08 fitness function. It is not a guideline — the build should
+fail when it is broken. See `docs/06-architecture.md` §6.5.
+```
+
+with
+
+```
+This is the NFR-08 fitness function. `ArchitectureRuleTest` fails the build
+when it is broken. See `docs/06-architecture.md` §6.5.
+```
 
 4c. Replace the first line under the title, `**Empty on purpose.** Nothing is implemented yet.`, with:
 
 ```markdown
 **Started.** The presentation layer (`web/` and `resources/public/`) runs on a
 fake booking engine. `core/` is still empty and is being built in parallel.
-Run it with `mvn -q exec:java` and open http://localhost:7070/.
+Run it with `mvn -q compile exec:java` and open http://localhost:7070/.
 ```
 
-- [ ] **Step 5: Add 6 entries to `docs/07-glossary.md`**
+- [ ] **Step 5: Add 7 entries to `docs/07-glossary.md`**
 
 Each entry goes in alphabetical order, as its own block followed by `---`.
 
@@ -2682,6 +2727,17 @@ Before `### Event`:
 One address on the server that answers one kind of message.
 
 **Example:** `POST /api/holds` is the endpoint Kenji's page calls to hold 2 VIP seats.
+
+---
+
+### Envelope
+The fixed outer shape every answer from the server has, so the page always
+knows where to look.
+
+*A printed form: the boxes are always in the same place, only what is written in them changes.*
+
+**Example:** every answer starts with `serverNow`, the server's clock, then
+either `data` or `error` (`09-web-api.md` §9.3).
 
 ---
 
@@ -2776,9 +2832,11 @@ In `docs/superpowers/specs/2026-10-10-presentation-layer-design.md` §4, replace
 
 ```markdown
 **The token.** The queue token from M-03 travels in the screen address, for
-example `#/queue/the-1975/Q-1001`, and is sent with every purchase message
-(locked decision 3). Reopening the event asks M-02, which returns `myToken`,
-so the server, not the browser, remembers the place. No `localStorage` is used.
+example `#/queue/the-1975/Q-1001`, and is sent with M-04 and M-06. The hold
+records the token (`HoldView.token`), and payments reach it through the hold,
+so one token still ties queue, hold and order together (locked decision 3).
+Reopening the event asks M-02, which returns `myToken`, so the server, not the
+browser, remembers the place. No `localStorage` is used.
 ```
 
 - [ ] **Step 8: Add docs/09 to `README.md`**
@@ -2791,8 +2849,8 @@ In the reading-order table, directly after the row for `docs/08-screen-requireme
 
 - [ ] **Step 9: Check**
 
-Run: `grep -n "ASM-07\|ASM-08" docs/02-requirements.md && grep -n "^### API\|^### Endpoint\|^### Fake\|^### Gateway\|^### JSON\|^### Polling" docs/07-glossary.md && grep -n "web/" docs/06-architecture.md src/README.md | head`
-Expected: 2 ASM rows, 6 glossary headings, `web/` lines in both files.
+Run: `grep -n "ASM-07\|ASM-08" docs/02-requirements.md && grep -n "^### API\|^### Endpoint\|^### Envelope\|^### Fake\|^### Gateway\|^### JSON\|^### Polling" docs/07-glossary.md && grep -n "web/" docs/06-architecture.md src/README.md | head`
+Expected: 2 ASM rows, 7 glossary headings, `web/` lines in both files.
 
 - [ ] **Step 10: Commit**
 
@@ -3119,16 +3177,17 @@ img{max-width:100%;display:block}
 - [ ] **Step 4: Write `js/api.js`**
 
 ```js
-// The ONLY file that talks to Java. Every answer is {serverNow, data} or {serverNow, error}.
+// The ONLY file that talks to Java. Every answer is {serverNow, clockRate, data} or {serverNow, clockRate, error}.
 const params = new URLSearchParams(location.search);
 export const customer = (params.get('as') || 'kenji').toLowerCase().replace(/[^a-z0-9-]/g, '') || 'kenji';
 export const devMode = params.has('dev');
 
-let offset = 0;
+let lastServer = 0;
 let lastContact = 0;
+let rate = 1;
 
-/** The server's clock. Countdowns use this, never the phone's clock. */
-export const serverNow = () => Date.now() + offset;
+/** The server's clock, run forward from its last answer at its own rate. Countdowns use this, never the phone's clock. */
+export const serverNow = () => (lastContact ? lastServer + (Date.now() - lastContact) * rate : Date.now());
 /** Milliseconds since the server last answered. */
 export const contactAge = () => (lastContact ? Date.now() - lastContact : 0);
 
@@ -3159,8 +3218,9 @@ async function call(method, path, body) {
     json = null;
   }
   if (json && typeof json.serverNow === 'number') {
-    offset = json.serverNow - Date.now();
+    lastServer = json.serverNow;
     lastContact = Date.now();
+    rate = typeof json.clockRate === 'number' ? json.clockRate : 1;
   }
   if (!res.ok) {
     const e = (json && json.error) || {};
@@ -3420,7 +3480,8 @@ function route(force = false) {
 function start(def, params, path) {
   const me = { def, params, path, state: {}, alive: true, loaded: false, animated: false, zeroFired: false };
   run = me;
-  me.ctx = { state: me.state, params, run: me, go, render: () => render(me), alive: () => me.alive };
+  // A screen that has been left can never navigate: late answers are ignored.
+  me.ctx = { state: me.state, params, run: me, go: (hash, opts) => { if (me.alive) go(hash, opts); }, render: () => render(me), alive: () => me.alive };
   render(me);
   load(me);
   if (def.poll) {
@@ -3535,8 +3596,8 @@ const SCENARIOS = ['RACE_LOST', 'SOLD_OUT_ALL', 'PROVIDER_DOWN', 'ALL_PROVIDERS_
 export function mountDev(refresh) {
   const el = document.getElementById('dev');
   el.innerHTML = `<div class="panel"><b>Demo controls</b>
-    <div class="row2">${[1, 10, 30, 100].map((n) => `<button data-dev="speed" data-n="${n}">×${n}</button>`).join('')}</div>
-    <div class="row2"><button data-dev="advance" data-n="60">+1 min</button><button data-dev="advance" data-n="600">+10 min</button></div>
+    <div class="row2">${[0, 1, 10, 30, 100].map((n) => `<button data-dev="speed" data-n="${n}">${n === 0 ? 'Pause' : `×${n}`}</button>`).join('')}</div>
+    <div class="row2"><button data-dev="advance" data-n="60">+1 min</button><button data-dev="advance" data-n="350">+6 min</button><button data-dev="advance" data-n="600">+10 min</button></div>
     <select id="dev-scenario" aria-label="Scenario">${SCENARIOS.map((s) => `<option>${s}</option>`).join('')}</select>
     <div class="row2"><button data-dev="scenario">Set scenario</button><button data-dev="reset">Reset</button></div>
     <span id="dev-msg"></span></div>`;
@@ -3584,7 +3645,7 @@ export const screens = [];
 //   node src/test/e2e/walk.mjs prep 08e     set up a hand check and print the address to open
 //   node src/test/e2e/walk.mjs then 08e     second half of a hand check
 //
-// The server must be running (mvn -q exec:java). This resets its data.
+// The server must be running (mvn -q compile exec:java). This resets its data.
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
@@ -3609,7 +3670,9 @@ const dev = {
   scenario: (scenario) => call('kenji', 'POST', '/dev/scenario', { scenario }),
 };
 
-function shoot(name, as, hash, wait = 1500) {
+/** Pauses the fake clock first, so nothing moves between the setup and the picture. */
+async function shoot(name, as, hash, wait = 1500) {
+  await call('kenji', 'POST', '/dev/speed', { times: 0 });
   execFileSync('npx', ['-y', 'playwright@1.64.0', 'screenshot', '--viewport-size=390,844', `--wait-for-timeout=${wait}`,
     `${BASE}/?as=${as}#${hash}`, `target/shots/${name}.png`], { stdio: 'inherit' });
 }
@@ -3634,21 +3697,21 @@ async function paid(as) {
 }
 
 const shots = {
-  '01a': async () => { await fresh(); shoot('01a', 'kenji', '/events'); },
-  '02': async () => { await open(); await paid('kenji'); shoot('02', 'kenji', '/tickets'); },
-  '03': async () => { await fresh(); shoot('03', 'mint', '/tickets'); },
-  '04': async () => { await fresh(); shoot('04', 'kenji', '/account'); },
-  '05a': async () => { await fresh(); shoot('05a', 'kenji', `/event/${T}`); },
-  '05b': async () => { await open(); shoot('05b', 'kenji', `/event/${T}`); },
-  '05c': async () => { await open(); await join('kenji'); shoot('05c', 'kenji', `/event/${T}`); },
-  '05d': async () => { await open(); await dev.scenario('SOLD_OUT_ALL'); shoot('05d', 'kenji', `/event/${T}`); },
-  '05e': async () => { await open(); await dev.scenario('SALE_CLOSED'); shoot('05e', 'kenji', `/event/${T}`); },
-  '05f': async () => { await open(); await dev.scenario('EVENT_CANCELLED'); shoot('05f', 'kenji', `/event/${T}`); },
-  '06a': async () => { await open(); const t = await join('kenji'); shoot('06a', 'kenji', `/queue/${T}/${t}`); },
-  '06b': async () => { await open(); const t = await join('kenji'); await dev.advance(345); shoot('06b', 'kenji', `/queue/${T}/${t}`); },
-  '06c': async () => { await open(); const t = await join('kenji'); shoot('06c', 'kenji', `/queue/${T}/${t}/back`); },
-  '07': async () => { await open(); shoot('07', 'kenji', `/passed/${T}`); },
-  '08a': async () => { await open(); const t = await admitted('kenji'); shoot('08a', 'kenji', `/select/${T}/${t}`); },
+  '01a': async () => { await fresh(); await shoot('01a', 'kenji', '/events'); },
+  '02': async () => { await open(); await paid('kenji'); await shoot('02', 'kenji', '/tickets'); },
+  '03': async () => { await fresh(); await shoot('03', 'mint', '/tickets'); },
+  '04': async () => { await fresh(); await shoot('04', 'kenji', '/account'); },
+  '05a': async () => { await fresh(); await shoot('05a', 'kenji', `/event/${T}`); },
+  '05b': async () => { await open(); await shoot('05b', 'kenji', `/event/${T}`); },
+  '05c': async () => { await open(); await join('kenji'); await shoot('05c', 'kenji', `/event/${T}`); },
+  '05d': async () => { await open(); await dev.scenario('SOLD_OUT_ALL'); await shoot('05d', 'kenji', `/event/${T}`); },
+  '05e': async () => { await open(); await dev.scenario('SALE_CLOSED'); await shoot('05e', 'kenji', `/event/${T}`); },
+  '05f': async () => { await open(); await dev.scenario('EVENT_CANCELLED'); await shoot('05f', 'kenji', `/event/${T}`); },
+  '06a': async () => { await open(); const t = await join('kenji'); await shoot('06a', 'kenji', `/queue/${T}/${t}`); },
+  '06b': async () => { await open(); const t = await join('kenji'); await dev.advance(345); await shoot('06b', 'kenji', `/queue/${T}/${t}`); },
+  '06c': async () => { await open(); const t = await join('kenji'); await shoot('06c', 'kenji', `/queue/${T}/${t}/back`); },
+  '07': async () => { await open(); await shoot('07', 'kenji', `/passed/${T}`); },
+  '08a': async () => { await open(); const t = await admitted('kenji'); await shoot('08a', 'kenji', `/select/${T}/${t}`); },
   '08d': async () => {
     await open();
     const who = ['kenji', 'a', 'b', 'c', 'd'];
@@ -3656,59 +3719,59 @@ const shots = {
     for (const c of who) tokens.push(await join(c));
     await dev.advance(350);
     for (let i = 1; i < who.length; i++) await call(who[i], 'POST', '/api/holds', { token: tokens[i], tierId: 'vip', quantity: 4 });
-    shoot('08d', 'kenji', `/select/${T}/${tokens[0]}`);
+    await shoot('08d', 'kenji', `/select/${T}/${tokens[0]}`);
   },
-  '08g': async () => { await open(); const t = await admitted('kenji'); await dev.scenario('SOLD_OUT_ALL'); shoot('08g', 'kenji', `/select/${T}/${t}`); },
-  '09a': async () => { await open(); const h = await held('kenji'); shoot('09a', 'kenji', `/hold/${h.reservationId}`); },
+  '08g': async () => { await open(); const t = await admitted('kenji'); await dev.scenario('SOLD_OUT_ALL'); await shoot('08g', 'kenji', `/select/${T}/${t}`); },
+  '09a': async () => { await open(); const h = await held('kenji'); await shoot('09a', 'kenji', `/hold/${h.reservationId}`); },
   '10': async () => {
     await open(); const h = await held('kenji');
     await call('kenji', 'DELETE', `/api/holds/${h.reservationId}`);
-    shoot('10', 'kenji', `/released/${h.reservationId}`);
+    await shoot('10', 'kenji', `/released/${h.reservationId}`);
   },
-  '11': async () => { await open(); const h = await held('kenji'); await dev.advance(601); shoot('11', 'kenji', `/ranout/${h.reservationId}`); },
-  '12a': async () => { await open(); await dev.advance(1800); const h = await held('kenji'); shoot('12a', 'kenji', `/checkout/${h.reservationId}`); },
-  '12b': async () => { await open(); const h = await held('kenji'); shoot('12b', 'kenji', `/checkout/${h.reservationId}`); },
-  '12c': async () => { await open(); const h = await held('kenji'); await dev.scenario('PROVIDER_DOWN'); shoot('12c', 'kenji', `/checkout/${h.reservationId}`); },
-  '12d': async () => { await open(); const h = await held('kenji'); await dev.scenario('ALL_PROVIDERS_DOWN'); shoot('12d', 'kenji', `/checkout/${h.reservationId}`); },
+  '11': async () => { await open(); const h = await held('kenji'); await dev.advance(601); await shoot('11', 'kenji', `/ranout/${h.reservationId}`); },
+  '12a': async () => { await open(); await dev.advance(1800); const h = await held('kenji'); await shoot('12a', 'kenji', `/checkout/${h.reservationId}`); },
+  '12b': async () => { await open(); const h = await held('kenji'); await shoot('12b', 'kenji', `/checkout/${h.reservationId}`); },
+  '12c': async () => { await open(); const h = await held('kenji'); await dev.scenario('PROVIDER_DOWN'); await shoot('12c', 'kenji', `/checkout/${h.reservationId}`); },
+  '12d': async () => { await open(); const h = await held('kenji'); await dev.scenario('ALL_PROVIDERS_DOWN'); await shoot('12d', 'kenji', `/checkout/${h.reservationId}`); },
   '13a': async () => {
     await open(); const h = await held('kenji'); const p = await startPay('kenji', h.reservationId, 'promptpay');
-    shoot('13a', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
+    await shoot('13a', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
   },
   '13b': async () => {
     await open(); const h = await held('kenji'); const p = await startPay('kenji', h.reservationId, 'promptpay');
     await answer('kenji', p.paymentId, false); await dev.advance(3);
-    shoot('13b', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
+    await shoot('13b', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
   },
   '14a': async () => {
     await open(); const h = await held('kenji'); const p = await startPay('kenji', h.reservationId, 'card');
-    shoot('14a', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
+    await shoot('14a', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
   },
   '14b': async () => {
     await open(); const h = await held('kenji'); const p = await startPay('kenji', h.reservationId, 'card');
     await answer('kenji', p.paymentId, false); await dev.advance(3);
-    shoot('14b', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
+    await shoot('14b', 'kenji', `/pay/${h.reservationId}/${p.paymentId}`);
   },
   '15a': async () => {
     await open(); const h = await held('kenji'); await dev.scenario('BANK_SLOW');
     const p = await startPay('kenji', h.reservationId, 'promptpay'); await answer('kenji', p.paymentId, true);
-    shoot('15a', 'kenji', `/confirming/${h.reservationId}/${p.paymentId}`);
+    await shoot('15a', 'kenji', `/confirming/${h.reservationId}/${p.paymentId}`);
   },
   '15b': async () => {
     await open(); const h = await held('kenji'); await dev.scenario('BANK_SLOW');
     const p = await startPay('kenji', h.reservationId, 'promptpay'); await answer('kenji', p.paymentId, true);
-    shoot('15b', 'kenji', `/confirming/${h.reservationId}/${p.paymentId}`, 9500);
+    await shoot('15b', 'kenji', `/confirming/${h.reservationId}/${p.paymentId}`, 9500);
   },
-  '16': async () => { await open(); const { orderId } = await paid('kenji'); shoot('16', 'kenji', `/confirmed/${orderId}`); },
-  '17a': async () => { await open(); const { orderId } = await paid('kenji'); shoot('17a', 'kenji', `/ticket/${orderId}/1`); },
+  '16': async () => { await open(); const { orderId } = await paid('kenji'); await shoot('16', 'kenji', `/confirmed/${orderId}`); },
+  '17a': async () => { await open(); const { orderId } = await paid('kenji'); await shoot('17a', 'kenji', `/ticket/${orderId}/1`); },
   '17b': async () => {
     await open(); const { orderId } = await paid('kenji'); await dev.scenario('EVENT_CANCELLED');
-    shoot('17b', 'kenji', `/ticket/${orderId}/1`);
+    await shoot('17b', 'kenji', `/ticket/${orderId}/1`);
   },
-  '17c': async () => { await fresh(); shoot('17c', 'kenji', '/ticket/O-0001/1'); },
+  '17c': async () => { await fresh(); await shoot('17c', 'kenji', '/ticket/O-0001/1'); },
   '18': async () => {
     await open(); const h = await held('kenji'); const p = await startPay('kenji', h.reservationId, 'promptpay');
     await dev.advance(599); await answer('kenji', p.paymentId, true); await dev.advance(3);
-    shoot('18', 'kenji', `/expired/${h.reservationId}`);
+    await shoot('18', 'kenji', `/expired/${h.reservationId}`);
   },
 };
 
@@ -3756,7 +3819,7 @@ if (args[0] === 'prep') {
 - [ ] **Step 10: Check the skeleton runs**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 curl -s localhost:7070/js/app.js | head -2
 node src/test/e2e/walk.mjs 01a
@@ -3766,8 +3829,8 @@ Expected: the curl prints the first 2 lines of `app.js`. `target/shots/01a.png` 
 
 - [ ] **Step 11: Run the Java tests (the page must still contain "EventFlow")**
 
-Run: `mvn -q test`
-Expected: `Tests run: 38, Failures: 0`.
+Run: `mvn test 2>&1 | grep "Tests run:" | tail -1`
+Expected: `Tests run: 39, Failures: 0`.
 
 - [ ] **Step 12: Commit**
 
@@ -3886,7 +3949,7 @@ export const screens = [
 - [ ] **Step 2: Screenshot check**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 node src/test/e2e/walk.mjs 05a 05b 05c 05d 05e 05f
 ```
@@ -4021,7 +4084,7 @@ export const screens = [
 - [ ] **Step 2: Screenshot check**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 node src/test/e2e/walk.mjs 06a 06b 06c 07
 ```
@@ -4034,8 +4097,8 @@ Compare with `diagrams/app-flow/screens/06a.jpg`, `06b.jpg`, `06c.jpg`, `07.jpg`
 
 - [ ] **Step 3: Hand check admission and reconnecting**
 
-1. `curl -s -X POST -H 'Content-Type: application/json' -d '{"seconds":60}' localhost:7070/dev/advance`, then open `http://localhost:7070/?dev#/event/the-1975` and tap **Join the queue**. In the dev panel tap **×100**.
-   Expected: the position falls every 2 seconds. In about 4 seconds the lime `It is your turn` flash shows, then the address becomes `#/select/the-1975/Q-1001`.
+1. `curl -s -X POST -H 'Content-Type: application/json' -d '{"seconds":60}' localhost:7070/dev/advance`, then open `http://localhost:7070/?dev#/event/the-1975` and tap **Join the queue**. In the dev panel tap **×10**.
+   Expected: the position falls every 2 seconds. In about 35 seconds the lime `It is your turn` flash shows, then the address becomes `#/select/the-1975/Q-1001`.
 2. Join again with `?as=mint` in a second tab. Stop the server (`kill %1`) and wait 16 seconds.
    Expected (06d): numbers dim, the dot turns grey, the text reads `Reconnecting…`, the card reads `Still holding your place.` There is no retry button.
 
@@ -4059,7 +4122,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: `api.availability`, `api.hold`, `ApiError` fields `status`, `code`, `remaining`; `html`, `raw`, `baht`, `num`, `button`, `banner` from `parts.js`.
-- Produces: route `#/select/{eventId}/{token}`. A successful hold goes to `#/hold/{reservationId}`. `NOT_ADMITTED` goes to `#/passed/{eventId}`.
+- Produces: route `#/select/{eventId}/{token}`. A successful hold goes to `#/hold/{reservationId}`. `NOT_ADMITTED`, or the place ending while the screen is open (polled every 3 s with `api.queue`), goes to `#/passed/{eventId}`. `NOT_ON_SALE` goes to `#/event/{eventId}`.
 
 - [ ] **Step 1: Replace `select.js`**
 
@@ -4113,6 +4176,14 @@ export const screens = [
       ctx.state.qty = 1;
       await refresh(ctx, eventId);
     },
+    poll: {
+      every: 3000,
+      async run(ctx, eventId, token) {
+        if (ctx.state.working) return;
+        const q = await api.queue(token);
+        if (q.state === 'EXPIRED') ctx.go(`#/passed/${eventId}`, { replace: true }); // Q-3: the turn ends after 5 minutes
+      },
+    },
     view(st) {
       if (st.sel < 0) return soldOutView(st);
       const tier = st.tiers[st.sel];
@@ -4163,6 +4234,7 @@ export const screens = [
         } catch (e) {
           st.working = false;
           if (e.code === 'NOT_ADMITTED') return ctx.go(`#/passed/${eventId}`);
+          if (e.code === 'NOT_ON_SALE') return ctx.go(`#/event/${eventId}`);
           if (e.status !== 409) throw e;
           await refresh(ctx, eventId);
           if (e.code === 'NOT_ENOUGH' && e.remaining > 0) {
@@ -4182,7 +4254,7 @@ export const screens = [
 - [ ] **Step 2: Screenshot check**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 node src/test/e2e/walk.mjs 08a 08d 08g
 ```
@@ -4200,6 +4272,7 @@ Compare with `diagrams/app-flow/screens/08a.jpg`, `08d.jpg`, `08g.jpg`. Check:
 2. `node src/test/e2e/walk.mjs prep 08e`, open the address, choose VIP and 3 tickets. Run `node src/test/e2e/walk.mjs then 08e`. Tap **Hold these seats**.
    Expected (08e): coral banner `Only 2 VIP tickets are left.`, quantity drops to 2, VIP shows `only 2 left`.
 3. Tap **Hold these seats** again. Expected: the address becomes `#/hold/R-10xx` (the screen there is empty until Task 9).
+4. `node src/test/e2e/walk.mjs prep 08`, open the address, choose `TURN_PASSED` and tap **Set scenario**. Expected: within 3 seconds SCR-07 `Your turn has passed` shows.
 
 - [ ] **Step 4: Commit**
 
@@ -4348,7 +4421,7 @@ export const screens = [
 - [ ] **Step 2: Screenshot check**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 node src/test/e2e/walk.mjs 09a 10 11
 ```
@@ -4435,7 +4508,7 @@ async function startPay(ctx, rid) {
     if (e.code === 'PROVIDER_UNAVAILABLE') {
       st.h = await api.getHold(rid);
       keepMethod(st);
-    } else if (e.code === 'HOLD_NOT_ACTIVE') {
+    } else if (e.code === 'HOLD_NOT_ACTIVE' || e.code === 'PAYMENT_IN_PROGRESS') {
       await follow(ctx, await api.getHold(rid));
     } else {
       throw e;
@@ -4601,7 +4674,7 @@ export const screens = [
 - [ ] **Step 2: Screenshot check**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 node src/test/e2e/walk.mjs 12a 12b 12c 12d 13a 13b 14a 14b 15a 15b 18
 ```
@@ -4826,7 +4899,7 @@ export const screens = [
 - [ ] **Step 3: Screenshot check**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 node src/test/e2e/walk.mjs 01a 02 03 04 16 17a 17b 17c
 ```
@@ -4867,13 +4940,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 - [ ] **Step 1: All Java tests**
 
-Run: `mvn -q test`
-Expected: `Tests run: 38, Failures: 0, Errors: 0`.
+Run: `mvn test 2>&1 | grep "Tests run:" | tail -1`
+Expected: `Tests run: 39, Failures: 0, Errors: 0`.
 
 - [ ] **Step 2: Every screenshot**
 
 ```bash
-mvn -q exec:java &
+mvn -q compile exec:java &
 sleep 4
 node src/test/e2e/walk.mjs
 ```
@@ -4887,7 +4960,7 @@ Expected: nothing is cut off and there is no sideways scroll at 360 px wide.
 
 - [ ] **Step 3: The demo path in one go**
 
-Reset (`curl -s -X POST localhost:7070/dev/reset`), open `http://localhost:7070/?dev` and buy 2 VIP seats from the Events tab with no curl help: wait for 10:00 or tap **+1 min**, Join, tap **×100** to reach the front, select VIP × 2, Hold, Continue, PromptPay, Pay, I have paid, Open ticket 1.
+Reset (`curl -s -X POST localhost:7070/dev/reset`), open `http://localhost:7070/?dev` and buy 2 VIP seats from the Events tab with no curl help: tap **+1 min**, Join, tap **+6 min** to reach the front, select VIP × 2, Hold, Continue, PromptPay, Pay, I have paid, Open ticket 1.
 Expected: every step lands on the next screen by itself, the browser console shows no errors, and the Tickets tab then shows the new order.
 
 - [ ] **Step 4: 2 buyers race for the last seats**
@@ -4919,3 +4992,5 @@ Expected: exactly 1 tab reaches SCR-09. The other shows the coral banner `Those 
 - Spec §6 testing: JUnit for the messages (Task 4) and the fake's rules (Tasks 2 and 3), the screenshot walk (Tasks 5 to 12), the `core/` import rule (Task 1).
 - Spec §7 documents: Task D.
 - Spec §8 build order: Tasks 1 to 4, then 5 to 11 with the buy path (5 to 10) before the shell (11).
+- Review pass (10 findings, all applied): run with `mvn -q compile exec:java` so page files are fresh; `clockRate` in the envelope so countdowns follow the fake's speed; speed 0 pauses the fake so screenshots are stable; `+6 min` replaces ×100 for the demo path; `TURN_PASSED` and the 5-minute turn now reach SCR-08 (hold check + a 3 s poll); a left screen can no longer navigate; a second payment during confirmation is refused (`PAYMENT_IN_PROGRESS`); test summaries are visible (no `-q`); doc times and the token wording corrected; `Envelope` added to the glossary.
+- Known gap: SCR-01b (no events) cannot be reached with the fake, which always lists at least 3 events. It is a static empty state, checked by reading the code.
