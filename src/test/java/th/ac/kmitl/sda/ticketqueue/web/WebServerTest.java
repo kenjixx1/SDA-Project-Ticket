@@ -2,6 +2,8 @@ package th.ac.kmitl.sda.ticketqueue.web;
 
 import io.javalin.testtools.JavalinTest;
 import org.junit.jupiter.api.Test;
+import th.ac.kmitl.sda.ticketqueue.web.fake.FakeBookingGateway;
+import th.ac.kmitl.sda.ticketqueue.web.fake.FakeClock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,7 +12,8 @@ class WebServerTest {
 
     @Test
     void servesThePageAndHealth() {
-        JavalinTest.test(WebServer.create(), (server, client) -> {
+        var fake = new FakeBookingGateway(new FakeClock(FakeBookingGateway.START, System::currentTimeMillis));
+        JavalinTest.test(WebServer.create(fake, null), (server, client) -> {
             var page = client.get("/");
             assertEquals(200, page.code());
             assertTrue(page.body().string().contains("EventFlow"));
