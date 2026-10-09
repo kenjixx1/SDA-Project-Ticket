@@ -447,9 +447,18 @@ eventflow
 │   ├── DigitalTicket.java
 │   └── TicketService.java            listens to OrderConfirmed → TicketIssued (FR-20, FR-21)
 │
-└── admin/
-    ├── EventService.java             UC-05, UC-06
-    └── SalesDashboardService.java    UC-07 · listens to every event
+├── admin/
+│   ├── EventService.java             UC-05, UC-06
+│   └── SalesDashboardService.java    UC-07 · listens to every event
+│
+└── web/                      ◄── PRESENTATION LAYER. The doorway for the customer pages.
+    ├── WebServer.java                serves resources/public/, picks the gateway
+    ├── BookingGateway.java           1 interface, every message the pages can send (docs/09)
+    ├── routes/                       1 class per area: Event, Queue, Hold, Payment, Me, Dev
+    ├── dto/                          the JSON shapes
+    └── fake/                         in-memory stand-in for core/, demo only (ASM-07)
+
+src/main/resources/public/    ◄── THE SCREENS. Plain HTML, CSS and JavaScript (SCR-01 to SCR-18).
 ```
 
 **Built so far.** Slices 1 and 2 of `03-prd.md` §3.6: `core/event`,
@@ -471,13 +480,20 @@ is needed to demonstrate the style.
 ### The one dependency rule
 
 ```
-  plugin/  ──depends on──►  contract/  ◄──depends on──  core/
+  plugin/  ──depends on──►  contract/  ◄──depends on──  core/  ◄──depends on──  web/
 
   core/  ──MUST NEVER depend on──►  plugin/
+  core/  ──MUST NEVER depend on──►  web/
 ```
 
 This is not a guideline. It is the NFR-08 fitness function: the build fails if
 any class under `core/` imports anything under `plugin/`.
+
+`web/` is the presentation layer. It may call `core/`, and `core/` never
+calls it back. `BookingGateway` is **not** a third plug-in seam: it is the
+presentation layer's own adapter, with exactly 2 versions (the fake and the
+real one), and it holds no business rule. `ArchitectureRuleTest` fails the
+build if `core/` imports `web/` or `plugin/`.
 
 Lecture 5.1 calls this a **structural measure** — a check on the shape of the
 code rather than its behaviour. It is also, in the words of that lecture, how

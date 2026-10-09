@@ -37,6 +37,16 @@ tokens in line.
 
 ---
 
+### API
+Short for application programming interface. The list of messages one program
+accepts from another, and the answer to each.
+
+*A cafe menu. You can only order what is on it.*
+
+**Example:** the customer page uses 13 messages, M-01 to M-13, listed in `09-web-api.md`.
+
+---
+
 ### Architecture characteristic
 A quality the system must have — fast, reliable, secure — as opposed to
 something it must *do*.
@@ -169,6 +179,24 @@ What a list screen shows when the list has nothing in it. It says why it is empt
 
 ---
 
+### Endpoint
+One address on the server that answers one kind of message.
+
+**Example:** `POST /api/holds` is the endpoint Kenji's page calls to hold 2 VIP seats.
+
+---
+
+### Envelope
+The fixed outer shape every answer from the server has, so the page always
+knows where to look.
+
+*A printed form: the boxes are always in the same place, only what is written in them changes.*
+
+**Example:** every answer starts with `serverNow`, the server's clock, then
+either `data` or `error` (`09-web-api.md` §9.3).
+
+---
+
 ### Event
 A short message saying that something has **already happened**. It is news,
 not a request.
@@ -229,6 +257,17 @@ reconnect (FR-04) and admission by issue time (FR-05).
 
 ---
 
+### Fake
+A stand-in that behaves like the real part, but with simple made-up rules.
+It lets one part be built and tested before the real part exists.
+
+*A cardboard cut-out of a person at a photo stand.*
+
+**Example:** `FakeBookingGateway` holds seats and takes payments in memory
+while the real `core/` is still being written.
+
+---
+
 ### FIFO — first in, first out
 The rule of a normal queue: whoever arrived first is served first. Here it
 decides admission order. **NFR-09.**
@@ -260,6 +299,17 @@ not — regardless of what any document claims.
 Something the system **does**. Written as **FR-nn**.
 
 *"Issue a queue token to a customer who asks to enter a sale that is open."*
+
+---
+
+### Gateway
+The single doorway one layer uses to reach another. Swapping what is behind
+the doorway does not change the layer in front of it.
+
+*A wall socket. The lamp works the same whichever power station is behind it.*
+
+**Example:** `BookingGateway` is filled by the fake today and by `core/` later.
+Only 2 lines in `WebServer` change.
 
 ---
 
@@ -309,6 +359,13 @@ INV-01 is this project's most important line.
 
 ---
 
+### JSON
+A plain text format for sending data: names and values inside curly brackets.
+
+**Example:** `{"tierId": "vip", "quantity": 2}` is the body of Kenji's hold message.
+
+---
+
 ### Live content
 Dynamic content that updates by itself while the screen is open, without the user doing anything. Marked `[D-live]`.
 
@@ -355,6 +412,15 @@ system. Slide 8.2 stresses that plug-ins should have **no dependencies on each
 other**, and that they are where **highly volatile** code belongs.
 
 This system has exactly two kinds: `PaymentProvider` and `PricingRule`.
+
+---
+
+### Polling
+Asking the server the same question again on a timer, to keep a screen up to date.
+
+*Checking the queue number board at a bank every few seconds.*
+
+**Example:** the queue screen asks for Kenji's position every 2 seconds (SCR-06).
 
 ---
 

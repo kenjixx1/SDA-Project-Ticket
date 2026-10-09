@@ -136,20 +136,21 @@ Customer screens must also work at **360 px** wide with no sideways scrolling.
 
 ### Design system
 
-The look is already decided. It is **Neon Arena**, written in full in
-`design/mockups/BRIEF.md`. That file is the source of truth for colours, type,
-radius and glow. This document does not repeat it.
+The look is **Redesign V1**, the clickable prototype in
+`design/TicketApp.dc.html`, look **a**. Its reference screenshots are in
+`diagrams/app-flow/screens/`. That prototype is the source of truth for
+colours, type, radius and glow. This document does not repeat it.
 
 The three rules from it that every screen here depends on:
 
-- **Cyan `#35E3F5` means "move forward".** Primary buttons, the queue bar, the
+- **Lime `#C5F25A` means "move forward".** Primary buttons, the queue bar, the
   countdown, the live dot, the selected tier.
-- **Magenta `#FF5CA8` means "stop".** Low stock, sold out, errors, and the
+- **Coral `#FF8B7B` means "stop".** Low stock, sold out, errors, and the
   expired screens. Nothing else is coloured.
 - **Only the queue bar and the live dot glow.**
 
-> `diagrams/ui-mockup-prompt.md` asks for an amber countdown and red errors.
-> That was written before the design system was chosen. **BRIEF.md wins.**
+Where this document still says cyan, read lime. Where it says magenta, read
+coral.
 
 ### Writing rules for screen text
 

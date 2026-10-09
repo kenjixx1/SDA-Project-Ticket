@@ -140,9 +140,12 @@ When a countdown reaches 00:00, the page asks the server (M-07) and goes
 where the server says: SCR-11 or SCR-18. The page never decides "expired" by
 itself.
 
-**The token.** The queue token from M-03 is kept in `localStorage` per
-customer and event. It is sent with every purchase message (locked
-decision 3). Reopening the event finds it and shows SCR-05c.
+**The token.** The queue token from M-03 travels in the screen address, for
+example `#/queue/the-1975/Q-1001`, and is sent with M-04 and M-06. The hold
+records the token (`HoldView.token`), and payments reach it through the hold,
+so one token still ties queue, hold and order together (locked decision 3).
+Reopening the event asks M-02, which returns `myToken`, so the server, not the
+browser, remembers the place. No `localStorage` is used.
 
 **The look.** Copied from `design/TicketApp.dc.html`: its CSS, its markup per
 screen, and the artwork in `design/assets/`. That file's own logic is a
