@@ -156,7 +156,7 @@ design-tool component and is **not** reused. The rules in
 `FakeBookingGateway` is a small in-memory booking engine with just enough
 rules to drive every screen:
 
-- **Story data** from `AGENTS.md` §2: 1 headline event at Impact Arena, 14
+- **Story data** (Q-2): The 1975 Bangkok as the headline event at Impact Arena, 14
   November 2026, tiers VIP ฿6,500 × 500, Zone A ฿3,800 × 2,000, Zone B ฿1,900
   × 5,000. 3 more events for the SCR-01 list. Kenji owns 1 past order (SCR-02
   past card).
@@ -224,11 +224,13 @@ still leaves a working demo.
 
 ---
 
-## 9. Open questions
+## 9. Answered questions
 
-| # | Question | Default if nobody answers |
+Answered by Kenji on 10 October 2026.
+
+| # | Question | Answer |
 |---|---|---|
-| Q-1 | Build tool. The teammate's `core/` must use the same one. | **Maven**, Java 17. |
-| Q-2 | Event name. `AGENTS.md` says BLACKPINK. The new design and artwork use The 1975, Bruno Mars, Alan Walker and Marshmello. | Fake uses the **design's events and artwork**, with the story's venue, date, tiers and prices. |
-| Q-3 | How long may an admitted customer stay on SCR-08 before SCR-07 (OQ-05)? | 5 minutes in the fake. Only reachable by scenario in the demo. |
-| Q-4 | Does the teammate agree with the message list in §3? | Send them `docs/09-web-api.md` before step 4. |
+| Q-1 | Build tool | **Maven**, Java 17. The teammate's `core/` uses the same `pom.xml`. |
+| Q-2 | Event name | **The new design's events**: The 1975 Bangkok (headline), Bruno Mars, Alan Walker, Marshmello, with their artwork. The 1975 uses the story's venue, date, tiers and prices. `AGENTS.md` §2 still says BLACKPINK; changing the story table is a separate decision, not part of this spec. |
+| Q-3 | Time on SCR-08 before SCR-07 | **5 minutes** in the fake. Reached in the demo through the `TURN_PASSED` scenario. |
+| Q-4 | Message list agreed | **Yes.** `docs/09-web-api.md` is written in step 2 and sent to the teammate. |
