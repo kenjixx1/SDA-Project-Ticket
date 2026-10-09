@@ -1,6 +1,6 @@
 // SCR-09 Seats held (a running, b release sheet), SCR-10 Seats released, SCR-11 Hold ran out.
-import { api } from '../api.js';
-import { html, button, countdown, orderSummary, statusScreen, sheet, seats } from '../parts.js';
+import { api, serverNow } from '../api.js';
+import { html, button, countdown, orderSummary, statusScreen, sheet, seats, mmss } from '../parts.js';
 import { joinAgain } from './queue.js';
 
 /** Goes to the screen that matches the hold on the server. Returns true when it moved. */
@@ -67,10 +67,12 @@ export const screens = [
       ${st.sheet ? sheet({
         title: 'Release these seats?',
         text: [`The ${seats(h.quantity, h.tierName)} go back on sale straight away.`, 'To buy again you join the back of the line.'],
+        extra: html`<div class="sheet-time" data-countdown="${h.expiresAt}"><span>Time to pay</span><span class="mono" data-cd-text>${mmss(h.expiresAt - serverNow())}</span></div>`,
         buttons: [
-          { label: 'Release seats', action: 'release', danger: true, working: st.releasing ? 'Releasing…' : '' },
           { label: 'Keep my seats', action: 'keep' },
+          { label: 'Release seats', action: 'release', danger: true, working: st.releasing ? 'Releasing…' : '' },
         ],
+        close: 'keep',
       }) : ''}`;
     },
     actions: {
@@ -79,8 +81,15 @@ export const screens = [
       async release(ctx, data, rid) {
         ctx.state.releasing = true;
         ctx.render();
-        await api.release(rid);
-        ctx.go(`#/released/${rid}`, { replace: true });
+        try {
+          await api.release(rid);
+          ctx.go(`#/released/${rid}`, { replace: true });
+        } catch (e) {
+          ctx.state.releasing = false;
+          ctx.state.sheet = false;
+          if (e.code !== 'HOLD_NOT_ACTIVE') throw e;
+          await follow(ctx, await api.getHold(rid)); // it ran out or was paid meanwhile
+        }
       },
     },
   },

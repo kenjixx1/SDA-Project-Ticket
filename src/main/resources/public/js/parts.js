@@ -165,9 +165,9 @@ export function statusScreen({ tone, icon, title, text, card, primary, secondary
   <div class="foot">${button(primary)}${secondary ? button({ ...secondary, quiet: true }) : ''}</div>`;
 }
 
-/** The last button closes the sheet, and so does a tap on the dark backdrop. */
-export function sheet({ title, text = [], buttons }) {
-  return html`<div class="sheet-back" data-action="${buttons[buttons.length - 1].action}"></div>
+/** A tap on the dark backdrop runs the close action (default: the last button). extra is drawn between the text and the buttons. */
+export function sheet({ title, text = [], buttons, close = buttons[buttons.length - 1].action, extra = '' }) {
+  return html`<div class="sheet-back" data-action="${close}"></div>
   <div class="sheet" role="dialog" aria-modal="true" aria-label="${title}"><h2>${title}</h2>${text.map((t) => html`<p>${t}</p>`)}
-    <div class="acts">${buttons.map(button)}</div></div>`;
+    ${extra}<div class="acts">${buttons.map(button)}</div></div>`;
 }
