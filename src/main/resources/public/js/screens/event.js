@@ -19,7 +19,7 @@ function saleBlock(ev, v) {
   }
   if (v === 'b') return html`<span class="on"><span class="dot"></span>ON SALE NOW</span>`;
   if (v === 'c') {
-    return html`<span class="label">You are in the queue</span>
+    return html`<span class="label go">You are in the queue</span>
       <span class="big pos">${ev.myPosition ? `Position ${num(ev.myPosition)}` : 'It is your turn'}</span>`;
   }
   if (v === 'd') return html`<span class="stop">SOLD OUT</span><p class="sub">Every ticket has been sold.</p>`;
