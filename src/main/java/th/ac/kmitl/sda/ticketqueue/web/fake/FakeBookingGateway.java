@@ -9,21 +9,30 @@ import th.ac.kmitl.sda.ticketqueue.web.dto.Views.HoldView;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.JoinResult;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.Me;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.OrderView;
+import th.ac.kmitl.sda.ticketqueue.web.dto.Views.PaymentMethod;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.PaymentStart;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.PaymentStatus;
+import th.ac.kmitl.sda.ticketqueue.web.dto.Views.Promotion;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.QueueStatus;
+import th.ac.kmitl.sda.ticketqueue.web.dto.Views.TicketView;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.TierAvailability;
 import th.ac.kmitl.sda.ticketqueue.web.dto.Views.TierPrice;
 
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * An in-memory stand-in for core/. Just enough rules to drive every customer screen.
@@ -47,6 +56,19 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     final Map<String, Event> events = new LinkedHashMap<>();
     final Map<String, Token> tokens = new LinkedHashMap<>();
     int tokenSeq;
+    final Map<String, Reservation> reservations = new LinkedHashMap<>();
+    final Map<String, Payment> payments = new LinkedHashMap<>();
+    final Map<String, Order> orders = new LinkedHashMap<>();
+    int reservationSeq;
+    int paymentSeq;
+    int orderSeq;
+
+    record Provider(String key, String tile, String label, String line) {
+    }
+
+    static final List<Provider> PROVIDERS = List.of(
+            new Provider("promptpay", "PP", "PromptPay", "Scan with your banking app"),
+            new Provider("card", "CARD", "Credit or debit card", "Visa, Mastercard"));
 
     public FakeBookingGateway(FakeClock clock) {
         this.clock = clock;
@@ -122,6 +144,67 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         }
     }
 
+    static final class Reservation {
+        final String id, tokenId, customerId, eventId, tierId;
+        final int quantity, before, after;
+        final long unitPrice, heldAt, expiresAt;
+        String state = "HELD";
+        String paymentId;
+
+        Reservation(String id, String tokenId, String customerId, String eventId, String tierId, int quantity,
+                    long unitPrice, long heldAt, long expiresAt, int before, int after) {
+            this.id = id;
+            this.tokenId = tokenId;
+            this.customerId = customerId;
+            this.eventId = eventId;
+            this.tierId = tierId;
+            this.quantity = quantity;
+            this.unitPrice = unitPrice;
+            this.heldAt = heldAt;
+            this.expiresAt = expiresAt;
+            this.before = before;
+            this.after = after;
+        }
+    }
+
+    static final class Payment {
+        final String id, reservationId, customerId, providerKey;
+        final long amount, requestedAt;
+        String state = "PENDING";
+        boolean answered, approve;
+        long settleAt;
+        String orderId;
+
+        Payment(String id, String reservationId, String customerId, String providerKey, long amount, long requestedAt) {
+            this.id = id;
+            this.reservationId = reservationId;
+            this.customerId = customerId;
+            this.providerKey = providerKey;
+            this.amount = amount;
+            this.requestedAt = requestedAt;
+        }
+    }
+
+    static final class Order {
+        final String id, customerId, tierId, tierName, providerLabel;
+        final EventRef event;
+        final int quantity;
+        final long paid;
+        final List<String> ticketIds = new ArrayList<>();
+
+        Order(String id, String customerId, EventRef event, String tierId, String tierName, int quantity,
+              long paid, String providerLabel) {
+            this.id = id;
+            this.customerId = customerId;
+            this.event = event;
+            this.tierId = tierId;
+            this.tierName = tierName;
+            this.quantity = quantity;
+            this.paid = paid;
+            this.providerLabel = providerLabel;
+        }
+    }
+
     void seed() {
         events.clear();
         tokens.clear();
@@ -144,8 +227,18 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         seedOrders();
     }
 
-    /** Task 3 fills this in with reservations, payments and Kenji's past order. */
     void seedOrders() {
+        reservations.clear();
+        payments.clear();
+        orders.clear();
+        reservationSeq = 1041;
+        paymentSeq = 5000;
+        orderSeq = 9000;
+        EventRef past = new EventRef("bruno-mars-aug", "Bruno Mars", "BRUNO MARS", "Thunder Dome",
+                at(2026, 8, 2, 20, 0));
+        Order o = new Order("O-0001", "kenji", past, "zone-a", "Zone A", 1, 3800, "PromptPay");
+        o.ticketIds.add("TKT-3B17-01");
+        orders.put(o.id, o);
     }
 
     private static Event single(String id, String name, String shortName, String venue, String art,
@@ -206,8 +299,139 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         return t.state.equals("WAITING") ? Math.max(1, START_AHEAD - admittedSoFar(t)) : 0;
     }
 
-    /** Task 3 overrides the body: expires holds and settles payments that are due. */
+    /** Settles payments that are due and expires holds whose 10 minutes are up. */
     void sweep() {
+        for (Reservation r : reservations.values()) {
+            refresh(r);
+        }
+    }
+
+    void refresh(Reservation r) {
+        if (r.paymentId != null) {
+            settle(payments.get(r.paymentId));
+        }
+        if (r.state.equals("HELD") && clock.now() >= r.expiresAt) {
+            r.state = "EXPIRED";
+            tierOf(r).held -= r.quantity;
+        }
+    }
+
+    void settle(Payment p) {
+        if (!p.state.equals("PENDING") || !p.answered || clock.now() < p.settleAt) {
+            return;
+        }
+        Reservation r = reservations.get(p.reservationId);
+        if (!p.approve) {
+            p.state = "DECLINED";
+            return;
+        }
+        if (p.settleAt >= r.expiresAt || !r.state.equals("HELD")) {
+            p.state = "VOIDED";
+            if (r.state.equals("HELD")) {
+                r.state = "EXPIRED";
+                tierOf(r).held -= r.quantity;
+            }
+            return;
+        }
+        Tier t = tierOf(r);
+        p.state = "CAPTURED";
+        r.state = "CONFIRMED";
+        t.held -= r.quantity;
+        t.sold += r.quantity;
+        Order o = new Order("O-" + (++orderSeq), r.customerId, event(r.eventId).ref(), t.id, t.name,
+                r.quantity, p.amount, providerLabel(p.providerKey));
+        for (int n = 1; n <= r.quantity; n++) {
+            o.ticketIds.add(String.format("TKT-%04X-%02d", 0x9F42 + orderSeq - 9001, n));
+        }
+        orders.put(o.id, o);
+        p.orderId = o.id;
+    }
+
+    Tier tierOf(Reservation r) {
+        return event(r.eventId).tier(r.tierId);
+    }
+
+    Reservation ownedHold(String customerId, String reservationId) {
+        Reservation r = reservations.get(reservationId);
+        if (r == null || !r.customerId.equals(customerId)) {
+            throw GatewayException.notFound("Hold");
+        }
+        return r;
+    }
+
+    Payment ownedPayment(String customerId, String paymentId) {
+        Payment p = payments.get(paymentId);
+        if (p == null || !p.customerId.equals(customerId)) {
+            throw GatewayException.notFound("Payment");
+        }
+        return p;
+    }
+
+    boolean available(String providerKey) {
+        if (scenarios.contains(Scenario.ALL_PROVIDERS_DOWN)) {
+            return false;
+        }
+        return !(providerKey.equals("card") && scenarios.contains(Scenario.PROVIDER_DOWN));
+    }
+
+    String providerLabel(String key) {
+        return PROVIDERS.stream().filter(p -> p.key().equals(key)).findFirst().orElseThrow().label();
+    }
+
+    List<Promotion> promotions(Reservation r) {
+        if (r.heldAt < event(r.eventId).saleOpensAt + 30 * 60_000L) {
+            return List.of(new Promotion("Early Bird −10%", Math.round(r.unitPrice * r.quantity * 0.10)));
+        }
+        return List.of();
+    }
+
+    long total(Reservation r) {
+        return r.unitPrice * r.quantity - promotions(r).stream().mapToLong(Promotion::amount).sum();
+    }
+
+    HoldView view(Reservation r) {
+        Tier t = tierOf(r);
+        List<PaymentMethod> methods = PROVIDERS.stream()
+                .map(p -> new PaymentMethod(p.key(), p.tile(), p.label(), p.line(), available(p.key())))
+                .toList();
+        return new HoldView(r.id, r.tokenId, r.state, event(r.eventId).ref(), t.id, t.name, r.quantity,
+                r.unitPrice, promotions(r), total(r), r.expiresAt, r.before, r.after, methods, r.paymentId);
+    }
+
+    PaymentStart start(Payment p) {
+        String display = p.providerKey.equals("promptpay")
+                ? "PROMPTPAY|" + p.id + "|" + p.amount
+                : "Merchant: Event Ticket & Queue";
+        return new PaymentStart(p.id, p.reservationId, p.providerKey, providerLabel(p.providerKey), p.amount, display);
+    }
+
+    PaymentStatus status(Payment p) {
+        return new PaymentStatus(p.id, p.reservationId, p.providerKey, p.state, p.answered, p.orderId);
+    }
+
+    OrderView orderView(Order o, long now) {
+        Event live = events.get(o.event.eventId());
+        String eventState = live == null ? "CLOSED" : state(live);
+        String ticketState = eventState.equals("CANCELLED") ? "CANCELLED" : "VALID";
+        List<TicketView> tickets = new ArrayList<>();
+        for (int i = 0; i < o.ticketIds.size(); i++) {
+            String id = o.ticketIds.get(i);
+            tickets.add(new TicketView(id, i + 1, o.ticketIds.size(), payload(id, o), ticketState));
+        }
+        return new OrderView(o.id, o.event, eventState, o.tierId, o.tierName, o.quantity, o.paid,
+                o.providerLabel, now > o.event.eventDateTime(), tickets);
+    }
+
+    static String payload(String ticketId, Order o) {
+        String body = "EVENTFLOW|" + ticketId + "|" + o.event.eventId() + "|" + o.tierId + "|" + o.customerId;
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec("eventflow-demo-key".getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] digest = mac.doFinal(body.getBytes(StandardCharsets.UTF_8));
+            return body + "|" + HexFormat.of().formatHex(digest, 0, 8);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     // ---------- M-01 to M-04, M-13 ----------
@@ -293,46 +517,127 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         return new Me(customerId, name, customerId.charAt(0) + "•••••@example.com");
     }
 
-    // ---------- M-05 to M-12: filled in by Task 3 ----------
+    // ---------- M-05 to M-12 ----------
 
     @Override
     public synchronized List<TierAvailability> availability(String eventId) {
-        throw new UnsupportedOperationException("Task 3");
+        sweep();
+        return event(eventId).tiers.stream()
+                .map(t -> new TierAvailability(t.id, t.name, t.price, t.remaining(), t.total))
+                .toList();
     }
 
     @Override
-    public synchronized HoldView hold(String customerId, String token, String tierId, int quantity) {
-        throw new UnsupportedOperationException("Task 3");
+    public synchronized HoldView hold(String customerId, String tokenId, String tierId, int quantity) {
+        sweep();
+        Token t = ownedToken(customerId, tokenId);
+        if (scenarios.remove(Scenario.TURN_PASSED) && t.state.equals("ADMITTED")) {
+            t.state = "EXPIRED";
+        }
+        if (!t.state.equals("ADMITTED")) {
+            throw GatewayException.badRequest("NOT_ADMITTED", "This place in line cannot hold seats now");
+        }
+        Event e = event(t.eventId);
+        if (!state(e).equals("ON_SALE")) {
+            throw GatewayException.badRequest("NOT_ON_SALE", "This sale is not open");
+        }
+        Tier tier = e.tier(tierId);
+        if (quantity < 1 || quantity > ORDER_LIMIT) {
+            throw GatewayException.refused("OVER_LIMIT", "At most 4 tickets per person", tier.remaining());
+        }
+        if (e.soldOut()) {
+            throw GatewayException.refused("SOLD_OUT", "Every ticket has been sold", 0);
+        }
+        if (scenarios.remove(Scenario.RACE_LOST)) {
+            tier.sold += Math.min(tier.remaining(), 2);
+            throw GatewayException.refused("RACE_LOST", "Those seats just went to someone else", tier.remaining());
+        }
+        if (tier.remaining() < quantity) {
+            throw GatewayException.refused("NOT_ENOUGH", "Not enough seats left in this tier", tier.remaining());
+        }
+        int before = tier.remaining();
+        tier.held += quantity;
+        long now = clock.now();
+        Reservation r = new Reservation("R-" + (++reservationSeq), t.id, customerId, e.id, tier.id, quantity,
+                tier.price, now, now + HOLD_MS, before, tier.remaining());
+        reservations.put(r.id, r);
+        t.state = "SPENT";
+        return view(r);
     }
 
     @Override
     public synchronized HoldView getHold(String customerId, String reservationId) {
-        throw new UnsupportedOperationException("Task 3");
+        sweep();
+        return view(ownedHold(customerId, reservationId));
     }
 
     @Override
     public synchronized HoldView release(String customerId, String reservationId) {
-        throw new UnsupportedOperationException("Task 3");
+        sweep();
+        Reservation r = ownedHold(customerId, reservationId);
+        if (!r.state.equals("HELD")) {
+            throw GatewayException.badRequest("HOLD_NOT_ACTIVE", "These seats are no longer held");
+        }
+        r.state = "RELEASED";
+        tierOf(r).held -= r.quantity;
+        return view(r);
     }
 
     @Override
     public synchronized PaymentStart startPayment(String customerId, String reservationId, String providerKey) {
-        throw new UnsupportedOperationException("Task 3");
+        sweep();
+        Reservation r = ownedHold(customerId, reservationId);
+        if (!r.state.equals("HELD")) {
+            throw GatewayException.badRequest("HOLD_NOT_ACTIVE", "These seats are no longer held");
+        }
+        Provider provider = PROVIDERS.stream().filter(p -> p.key().equals(providerKey)).findFirst()
+                .orElseThrow(() -> GatewayException.notFound("Payment method"));
+        if (!available(provider.key())) {
+            throw GatewayException.badRequest("PROVIDER_UNAVAILABLE", "This way to pay is not available right now");
+        }
+        if (r.paymentId != null) {
+            Payment last = payments.get(r.paymentId);
+            if (last.state.equals("PENDING") && last.answered) {
+                throw GatewayException.badRequest("PAYMENT_IN_PROGRESS", "A payment for these seats is already being confirmed");
+            }
+            if (last.state.equals("PENDING") && !last.answered && last.providerKey.equals(provider.key())) {
+                return start(last);
+            }
+        }
+        Payment p = new Payment("P-" + (++paymentSeq), r.id, customerId, provider.key(), total(r), clock.now());
+        payments.put(p.id, p);
+        r.paymentId = p.id;
+        return start(p);
     }
 
     @Override
     public synchronized PaymentStatus answerPayment(String customerId, String paymentId, boolean approve) {
-        throw new UnsupportedOperationException("Task 3");
+        sweep();
+        Payment p = ownedPayment(customerId, paymentId);
+        if (p.state.equals("PENDING") && !p.answered) {
+            p.answered = true;
+            p.approve = approve;
+            p.settleAt = clock.now() + (scenarios.contains(Scenario.BANK_SLOW) ? 12_000 : 2_000);
+        }
+        return status(p);
     }
 
     @Override
     public synchronized PaymentStatus paymentStatus(String customerId, String paymentId) {
-        throw new UnsupportedOperationException("Task 3");
+        sweep();
+        return status(ownedPayment(customerId, paymentId));
     }
 
     @Override
     public synchronized List<OrderView> orders(String customerId) {
-        throw new UnsupportedOperationException("Task 3");
+        sweep();
+        long now = clock.now();
+        return orders.values().stream()
+                .filter(o -> o.customerId.equals(customerId))
+                .map(o -> orderView(o, now))
+                .sorted(Comparator.comparing(OrderView::past)
+                        .thenComparingLong(v -> v.past() ? -v.event().eventDateTime() : v.event().eventDateTime()))
+                .toList();
     }
 
     // ---------- dev controls ----------
