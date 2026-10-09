@@ -33,8 +33,10 @@ img{max-width:100%;display:block}
 .card.good{background:linear-gradient(var(--acw),var(--acw)),var(--s1)}
 .card.good b{color:var(--ac)}
 .card.good p{color:var(--tx)}
-.banner{background:var(--s1);border:1px solid var(--l1);border-left:3px solid var(--st);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;text-align:left}
-.banner.good{border-left-color:var(--ac)}
+.banner{background:var(--stw);border:1px solid rgba(255,139,123,.22);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;text-align:left}
+.banner b{color:var(--st)}
+.banner.good{background:var(--acw);border-color:rgba(197,242,90,.22)}
+.banner.good b{color:var(--ac)}
 .banner b{font-weight:600}
 .banner p{margin:0;color:var(--mu);font-size:14px}
 
@@ -159,8 +161,9 @@ img{max-width:100%;display:block}
 .ocard .what span{font:400 12px var(--fm);color:var(--mu)}
 
 /* empty states and status screens (SCR-03, 07, 10, 11, 16, 18) */
-.ring{width:72px;height:72px;border-radius:50%;border:2px solid var(--mu);display:grid;place-items:center;color:var(--mu);font-size:28px}
-.ring.stop{border-color:var(--st);color:var(--st)}
+.ring{width:72px;height:72px;border-radius:50%;border:2px solid var(--mu);display:grid;place-items:center;color:var(--mu);font-size:28px;position:relative}
+.ring.stop{border-color:var(--st);color:var(--st);font-size:0}
+.ring.stop::after{content:"";position:absolute;left:14%;top:50%;width:72%;height:2px;margin-top:-1px;background:var(--st);transform:rotate(-45deg)}
 .ring.go{border-color:var(--ac);color:var(--aci);background:var(--ac);animation:tq-pop .5s both}
 .empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:120px 24px 0}
 .empty .ring{width:64px;height:64px;border:1.5px dashed var(--l2)}
