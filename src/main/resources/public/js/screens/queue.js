@@ -6,8 +6,12 @@ import { html, num, dateShort, banner, liveIndicator, slimHeader, statusScreen }
 export async function joinAgain(ctx, eventId) {
   ctx.state.joining = true;
   ctx.render();
-  const r = await api.join(eventId);
-  ctx.go(`#/queue/${eventId}/${r.token}`);
+  try {
+    const r = await api.join(eventId);
+    ctx.go(`#/queue/${eventId}/${r.token}`);
+  } finally {
+    ctx.state.joining = false;
+  }
 }
 
 const estimate = (q) =>
@@ -37,7 +41,7 @@ export const screens = [
     </section>`,
     async enter(ctx, eventId, token, back) {
       ctx.state.ev = await api.event(eventId);
-      if (back) {
+      if (back && ctx.state.welcome === undefined) {
         ctx.state.welcome = true;
         setTimeout(() => { ctx.state.welcome = false; ctx.render(); }, 5000);
       }
@@ -46,10 +50,10 @@ export const screens = [
     poll: { every: 2000, run: (ctx, eventId, token) => check(ctx, eventId, token) },
     view(st) {
       const { ev, q } = st;
-      const stale = st.offline || contactAge() > 15000;
+      const stale = contactAge() > 15000; // SCR-06d: no update for 15 s, same rule as the live dot
       const almost = q.position <= 50;
       const pct = almost ? 99 : Math.round((q.moved / (q.moved + q.position)) * 100);
-      const ahead = q.position - 1;
+      const ahead = Math.max(0, q.position - 1);
       const card = stale
         ? ['Still holding your place.', 'The server keeps it even if your connection drops.']
         : almost
