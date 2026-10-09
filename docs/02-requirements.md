@@ -48,8 +48,12 @@ from nowhere.
 | FR-02 | Show the customer their current position in the queue and an estimated wait. |
 | FR-03 | Allow at most **one active queue token per customer account per event**. |
 | FR-04 | Restore the same position when a customer reconnects holding an existing token. |
-| FR-05 | Admit tokens to the purchase flow **in the order they were issued**, at a rate the organizer sets. |
+| FR-05 | Admit tokens to the purchase flow **in controlled batches**, **in the order they were issued**. The batch size follows system capacity, set by the organizer as the admission rate (FR-30). |
 | FR-06 | Refuse to issue new tokens once every tier of the event is sold out. |
+
+> **FR-05 in the story.** Every second, the waiting room lets in the next
+> batch of 200 tokens — positions 1–200, then 201–400, and so on. 200 is what
+> the buying engine can serve safely. Chai can lower it if the engine slows.
 
 > **FR-03 exists because of a real cheat.** Without it, Kenji opens the sale in
 > ten browser tabs, gets ten positions, and uses whichever comes up first. Their
@@ -156,7 +160,7 @@ characteristic below has both.
 ### Choosing few, on purpose
 
 Lecture 3.1 warns that supporting too many characteristics *"complicates the
-overall design to little or no benefit"*. So three characteristics **drive**
+overall design to little or no benefit"*. So four characteristics **drive**
 this design. Everything else is supporting.
 
 | | Characteristic | Explicit or implicit |
@@ -164,6 +168,7 @@ this design. Everything else is supporting.
 | **Driving** | NFR-01 Elasticity | Explicit — the brief says "extreme traffic spikes" |
 | **Driving** | NFR-02 Data integrity | Explicit — the brief says "eliminate overselling" |
 | **Driving** | NFR-03 Performance | Implicit — a queue nobody believes is a queue nobody joins |
+| **Driving** | NFR-09 Fairness | Explicit — the brief says admission must "strictly respect FIFO order via queue tokens" |
 | Supporting | NFR-04 Availability | Implicit |
 | Supporting | NFR-05 Fault tolerance | Implicit |
 | Supporting | NFR-06 Security | Implicit |
@@ -222,8 +227,9 @@ test ever producing a different answer.
 1. The hold is taken **atomically** — in one indivisible step, so no two
    requests can both read "10 left" before either writes.
 2. Inventory drops at **hold** time, not payment time (locked decision 1).
-3. One filter in the pipeline owns this, and only that filter touches
-   inventory (see `06-architecture.md`).
+3. One service, `InventoryService`, owns this, and only that service touches
+   inventory. Events announce a hold only after it is saved
+   (see `06-architecture.md`).
 
 > **Atomic** means the step cannot be split in half. Either it fully happened
 > or it fully did not. Like a light switch: there is no halfway.
@@ -250,6 +256,32 @@ outliers are caught:
 
 **Fitness function.** Response times recorded during the NFR-01 load test, and
 checked against this table automatically.
+
+---
+
+### NFR-09 · Fairness  *(driving)*
+
+**Plain meaning.** Whoever joined the queue first gets in first. No skipping.
+
+**FIFO** means *first in, first out*. It is the rule of a normal shop queue.
+
+*Like the ticket machine at a bank counter: number 41 is never called before
+number 40, however loudly 41 complains.*
+
+**Precise metric.** For any two tokens of the same event, if Kenji's token was
+issued before another customer's token, Kenji is admitted **no later than**
+that customer. Zero exceptions.
+
+**Fitness function.** A test that issues 10,000 tokens, runs admission in
+batches of 200, and checks the admitted order against the issued order. It
+passes only when the two orders are identical.
+
+**Design response.**
+
+1. Every token is stamped with the server time it was issued (FR-01).
+2. Admission walks the queue strictly by that stamp, in batches (FR-05).
+3. One token per account per event, so nobody holds several places (FR-03).
+4. Reconnecting gives back the same place, not a new one at the back (FR-04).
 
 ---
 
@@ -344,8 +376,8 @@ A **constraint** is something fixed that the design did not get to choose.
 
 | ID | Constraint | Where it comes from |
 |---|---|---|
-| CON-01 | The architecture must use the **pipeline** style for order processing. | The project brief |
-| CON-02 | The architecture must use the **microkernel** style for payment and promotion plug-ins. | The project brief |
+| CON-01 | *Retired.* Was: "the architecture must use the pipeline style". The brief does not require any style. The event-driven style is now a design decision, traced in §2.7. | — |
+| CON-02 | The architecture must use the **microkernel** style for payment and promotion plug-ins. | The project brief: payment methods and pricing rules must plug in "without altering the core booking engine" |
 | CON-03 | Card details are handled by the payment provider, never stored here. | Standard practice; also keeps NFR-06 achievable |
 | CON-04 | Implementation language is **Java**. | Course convention |
 | CON-05 | Delivery date: **12 October 2026**. | Group Project 2 brief |
@@ -377,7 +409,7 @@ touches. Entity IDs are defined in `05-domain-model.md`.
 
 | Use case | Requirements | Entities touched | Driving NFRs |
 |---|---|---|---|
-| UC-01 Join Waiting Room | FR-01 … FR-06 | E-01 Event, E-03 QueueToken | NFR-01, NFR-03 |
+| UC-01 Join Waiting Room | FR-01 … FR-06 | E-01 Event, E-03 QueueToken | NFR-01, NFR-03, **NFR-09** |
 | UC-02 Select & Hold Tickets | FR-07 … FR-13 | E-02 TicketTier, E-03 QueueToken, E-04 Reservation | **NFR-02**, NFR-03 |
 | UC-03 Checkout & Pay | FR-14 … FR-19 | E-04 Reservation, E-05 Payment | NFR-02, NFR-05, NFR-08 |
 | UC-04 View Digital Ticket | FR-20 … FR-22 | E-04 Reservation, E-06 DigitalTicket | NFR-06 |
@@ -392,9 +424,11 @@ This is the column that makes the Design deliverable defensible.
 | Decision in `06-architecture.md` | Forced by |
 |---|---|
 | Virtual waiting room in front of the booking engine | NFR-01 |
+| Admission in FIFO batches, ordered by token issue time | NFR-09, FR-05 |
 | Atomic hold, inventory reduced at hold time | NFR-02, FR-08, FR-09 |
-| One and only one filter touches inventory | NFR-02 |
-| Pipeline: one-way flow, four filter roles | CON-01, NFR-02 |
+| One and only one service touches inventory | NFR-02 |
+| Event-driven, broker topology: core parts react to events | NFR-01, NFR-05, FR-12, FR-17 |
+| Events published only after the change is saved; the database is the truth | NFR-02, NFR-07 |
 | Microkernel: core engine + two plug-in seams | CON-02, NFR-08 |
 | Compile-based plug-ins, registry lookup | NFR-08 with CON-04 (Java) and project size |
 | Server-owned 10-minute clock | FR-12, NFR-02 |

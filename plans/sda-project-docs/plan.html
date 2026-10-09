@@ -340,7 +340,7 @@
   .gap .fix-line { color: var(--ink); font-size: 15.5px; }
   .gap .fix-line b { color: var(--accent); font-family: var(--display); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
 
-  /* ---------- pipeline diagram ---------- */
+  /* ---------- event flow diagram ---------- */
   .fig {
     background: var(--surface);
     border: 1px solid var(--rule);
@@ -476,7 +476,7 @@
   <section>
     <p class="kicker">Outcome</p>
     <h2>What is true when this is done</h2>
-    <p class="lede">The repo holds seven markdown documents that cover the first three deliverables of Group Project 2 — Problem Description, Requirements Model, and Design — with the six core use cases rewritten as full specifications, the missing behaviours named, and the architecture tied line by line to slides 8.1 and 8.2. An empty Java tree waits for the Implementation deliverable.</p>
+    <p class="lede">The repo holds seven markdown documents that cover the first three deliverables of Group Project 2 — Problem Description, Requirements Model, and Design — with the six core use cases rewritten as full specifications, the missing behaviours named, and the architecture tied line by line to the event-driven and microkernel styles. An empty Java tree waits for the Implementation deliverable.</p>
     <div class="note">
       <p><b>Scope note.</b> Members 4, 5 and 6 are on Lab 9 patterns (Bridge, Mediator, Proxy). That is separate work and nothing here touches it.</p>
     </div>
@@ -543,7 +543,7 @@
 │   ├── 03-prd.md                  <span class="c">product view: users, goals, scope, risks</span>
 │   ├── 04-use-cases.md            <span class="c">7 full use-case specifications</span>
 │   ├── 05-domain-model.md         <span class="c">6 entities, fields, states, relations</span>
-│   ├── 06-architecture.md         <span class="c">pipeline + microkernel, mapped to 8.1 / 8.2</span>
+│   ├── 06-architecture.md         <span class="c">event-driven + microkernel, each decision traced</span>
 │   └── 07-glossary.md             <span class="c">every technical word, defined once</span>
 ├── <b>diagrams/</b>                    <span class="c">use-case, SSD, activity — placeholders for now</span>
 ├── <b>src/</b>main/java/…             <span class="c">empty Java package tree, ready</span>
@@ -669,37 +669,37 @@
 
   <section>
     <p class="kicker">Design</p>
-    <h2>Two styles, mapped to the slides</h2>
-    <p>The brief names both styles but not the parts. <em class="term">06-architecture.md</em> fills them in, using the exact vocabulary from Lecture 8 so the mapping is checkable.</p>
+    <h2>Two styles, one inside the other</h2>
+    <p>The core system is a microkernel. Inside it, the parts talk by events. <em class="term">06-architecture.md</em> names every event, who publishes it and who listens, so the mapping is checkable.</p>
 
     <div class="fig">
-      <div class="fig-title">8.1 — Pipeline: one order, flowing one way</div>
+      <div class="fig-title">Event-driven — the parts announce, the parts that care react</div>
       <div class="pipe">
         <div class="filt">
-          <div class="role">Producer</div>
-          <div class="nm">QueueIntake</div>
-          <div class="ds">Emits an order context when a token is admitted.</div>
+          <div class="role">Event 1</div>
+          <div class="nm">UserAdmitted</div>
+          <div class="ds">The queue admits the next batch. Kenji gets his turn.</div>
         </div>
         <div class="arw">→</div>
         <div class="filt">
-          <div class="role">Tester</div>
-          <div class="nm">AvailabilityHold</div>
-          <div class="ds">Checks stock, takes the atomic hold. Passes only if it got one.</div>
+          <div class="role">Event 2</div>
+          <div class="nm">TicketHeld</div>
+          <div class="ds">The atomic hold succeeded. The 10-minute clock starts.</div>
         </div>
         <div class="arw">→</div>
         <div class="filt">
-          <div class="role">Transformer</div>
-          <div class="nm">Pricing</div>
-          <div class="ds">Applies tier price, discounts and fees.</div>
+          <div class="role">Event 3</div>
+          <div class="nm">PaymentCompleted</div>
+          <div class="ds">PromptPay authorised. Confirm only if the hold is still alive.</div>
         </div>
         <div class="arw">→</div>
         <div class="filt">
-          <div class="role">Consumer</div>
-          <div class="nm">OrderPersistence</div>
-          <div class="ds">Writes the reservation. End of the line.</div>
+          <div class="role">Event 4</div>
+          <div class="nm">OrderConfirmed</div>
+          <div class="ds">Seats move from held to sold. Two tickets are issued.</div>
         </div>
       </div>
-      <p style="font-size:14.5px; color:var(--ink-soft); margin-top:16px; max-width:none">Slide 8.1 lists four risks. The document answers each: filters stay single-purpose, pipes stay one-way, a rejected order leaves through its own consumer rather than a pipe pointing backwards, and the contract between filters is one small record.</p>
+      <p style="font-size:14.5px; color:var(--ink-soft); margin-top:16px; max-width:none">If no payment arrives in 10 minutes, <em class="term">HoldExpired</em> fires instead and the seats go back on sale. Payment and expiry can race; one atomic state change in the reservation decides, so only one ever wins. Broker topology: no central controller, each part does one job.</p>
     </div>
 
     <div class="fig">
@@ -708,7 +708,7 @@
         <div class="core">
           <div class="role">Core system</div>
           <div class="nm">Booking engine</div>
-          <div class="ds">Queue admission, inventory holds, order lifecycle. The happy path — no payment brand and no promotion rule is ever named inside it.</div>
+          <div class="ds">Queue, inventory holds, reservations, booking — talking by events. The happy path — no payment brand and no promotion rule is ever named inside it.</div>
         </div>
         <div class="seam">▲ looked up by key in a plug-in registry ▲</div>
         <div class="plug">
@@ -811,7 +811,7 @@
 
   <footer>
     Approved and built · commit 73ba1f4 · the documents in docs/ are the source of truth<br>
-    Grounded in: SDA Project.pdf · Lecture 3.1 Architecture Characteristics Defined · Lecture 8.1 Pipe &amp; Filter · Lecture 8.2 Microkernel · Lecture 8.5 Group Project 2
+    Grounded in: SDA Project.pdf · Lecture 3.1 Architecture Characteristics Defined · Lecture 8.2 Microkernel · Lecture 8.5 Group Project 2
   </footer>
 
 </div>

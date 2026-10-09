@@ -1,6 +1,6 @@
 # 01 · Problem Description
 
-**Deliverable 1 of 6 — Group Project 2**
+**Deliverable 1 of 6 — Group Project 2 · Project: EventFlow**
 
 ---
 
@@ -177,12 +177,13 @@ design from being judged against work it never promised.
 
 The course is about choosing an architecture and defending the choice.
 
-This problem forces two architectural styles taught in Lecture 8, and each one
-is forced by a different pressure:
+This problem calls for two architectural styles, and each one is forced by a
+different pressure:
 
-- **Pipeline (slide 8.1)** — an order moves through fixed stages in one
-  direction: admitted → checked and held → priced → saved. Each stage does one
-  job. This keeps the overselling logic in exactly one place.
+- **Event-driven** — a purchase is a chain of things that happen at different
+  times: admitted → seats held → paid, or the hold expires 10 minutes later.
+  Each part reacts to an event like `TicketHeld` or `HoldExpired` instead of
+  waiting in one long line. A traffic spike is absorbed rather than passed on.
 - **Microkernel (slide 8.2)** — payment methods and promotion rules change all
   the time and differ per event. They are plug-ins around a core booking
   engine that never learns their names.
