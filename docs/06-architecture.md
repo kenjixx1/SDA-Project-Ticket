@@ -487,7 +487,7 @@ is needed to demonstrate the style.
 ```
 
 This is not a guideline. It is the NFR-08 fitness function: the build fails if
-any class under `core/` imports anything under `plugin/`.
+any class under `core/` imports anything under `plugin/` or `web/`.
 
 `web/` is the presentation layer. It may call `core/`, and `core/` never
 calls it back. `BookingGateway` is **not** a third plug-in seam: it is the

@@ -36,6 +36,9 @@ public final class DevRoutes {
         });
         app.post("/dev/advance", ctx -> {
             long seconds = ctx.bodyAsClass(AdvanceRequest.class).seconds();
+            if (seconds < 0) {
+                throw GatewayException.badRequest("BAD_ADVANCE", "Seconds must be 0 or more");
+            }
             dev.advance(seconds);
             Reply.ok(ctx, g, Map.of("advanced", seconds));
         });

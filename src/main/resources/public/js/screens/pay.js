@@ -59,7 +59,9 @@ async function answer(ctx, rid, pid, approve) {
     ctx.go(`#/confirming/${rid}/${pid}`, { replace: true });
   } catch (e) {
     ctx.state.working = ''; // the tap can be repeated safely (FR-18)
-    throw e;
+    if (e.code !== 'PAYMENT_REPLACED') throw e;
+    const moved = await follow(ctx, await api.getHold(rid));
+    if (!moved) ctx.go(`#/checkout/${rid}`, { replace: true });
   }
 }
 

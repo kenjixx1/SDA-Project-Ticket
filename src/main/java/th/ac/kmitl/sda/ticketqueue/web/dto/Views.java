@@ -27,9 +27,9 @@ public final class Views {
     public record JoinResult(String token, String eventId, int position, boolean isExisting) {
     }
 
-    /** M-04. state: WAITING, ADMITTED, SPENT, EXPIRED. */
+    /** M-04. state: WAITING, ADMITTED, SPENT, EXPIRED. reservationId: the hold this place was used for, when SPENT. */
     public record QueueStatus(String token, String eventId, String state, int position,
-                              int moved, int admitPerSecond) {
+                              int moved, int admitPerSecond, String reservationId) {
     }
 
     /** M-05. */

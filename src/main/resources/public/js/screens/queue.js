@@ -27,7 +27,7 @@ async function check(ctx, eventId, token) {
   } else if (q.state === 'EXPIRED') {
     ctx.go(`#/passed/${eventId}`, { replace: true });
   } else if (q.state === 'SPENT') {
-    ctx.go(`#/event/${eventId}`, { replace: true });
+    ctx.go(q.reservationId ? `#/hold/${q.reservationId}` : `#/event/${eventId}`, { replace: true });
   }
 }
 

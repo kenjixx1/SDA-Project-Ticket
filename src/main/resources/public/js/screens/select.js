@@ -38,11 +38,26 @@ function soldOutView(st) {
   <div class="foot">${button({ label: 'Back to events', action: 'go', quiet: true, data: { to: '#/events' } })}</div>`;
 }
 
+/** Moves away when this place in line can no longer hold seats. Returns true when it moved. */
+async function placeEnded(ctx, eventId, token) {
+  const q = await api.queue(token);
+  if (q.state === 'SPENT') {
+    ctx.go(q.reservationId ? `#/hold/${q.reservationId}` : `#/event/${eventId}`, { replace: true });
+    return true;
+  }
+  if (q.state === 'EXPIRED') {
+    ctx.go(`#/passed/${eventId}`, { replace: true }); // Q-3: the turn ends after 5 minutes
+    return true;
+  }
+  return false;
+}
+
 export const screens = [
   {
     id: 'select',
     pattern: /^\/select\/([^/]+)\/([^/]+)$/,
-    async enter(ctx, eventId) {
+    async enter(ctx, eventId, token) {
+      if (await placeEnded(ctx, eventId, token)) return;
       ctx.state.sel = 0;
       ctx.state.qty = 1;
       await refresh(ctx, eventId);
@@ -51,8 +66,7 @@ export const screens = [
       every: 3000,
       async run(ctx, eventId, token) {
         if (ctx.state.working) return;
-        const q = await api.queue(token);
-        if (q.state === 'EXPIRED') ctx.go(`#/passed/${eventId}`, { replace: true }); // Q-3: the turn ends after 5 minutes
+        await placeEnded(ctx, eventId, token);
       },
     },
     view(st) {
@@ -101,10 +115,13 @@ export const screens = [
         ctx.render();
         try {
           const h = await api.hold(token, tier.tierId, st.qty);
-          ctx.go(`#/hold/${h.reservationId}`);
+          ctx.go(`#/hold/${h.reservationId}`, { replace: true });
         } catch (e) {
           st.working = false;
-          if (e.code === 'NOT_ADMITTED') return ctx.go(`#/passed/${eventId}`);
+          if (e.code === 'NOT_ADMITTED') {
+            if (!(await placeEnded(ctx, eventId, token))) ctx.go(`#/passed/${eventId}`, { replace: true });
+            return;
+          }
           if (e.code === 'NOT_ON_SALE') return ctx.go(`#/event/${eventId}`);
           if (e.status !== 409) throw e;
           await refresh(ctx, eventId);

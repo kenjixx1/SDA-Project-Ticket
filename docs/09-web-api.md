@@ -22,6 +22,10 @@ M-06 and gets back reservation **R-1042**, which expires at **10:16:20**.
 | **JSON** | A plain text format for data: names and values in curly brackets. |
 | **Envelope** | The fixed outer shape every answer has, so the page always knows where to look. |
 | **Gateway** | The one Java interface, `BookingGateway`, that the endpoints call. Today a fake fills it. Later `core/` fills it. |
+| **Epoch milliseconds** | A time written as one number: milliseconds since 1 January 1970, UTC. `1790823980000` is 10:06:20 on 1 October 2026 in Bangkok. |
+| **HoldView** | The shape of the answer that describes one hold: tier, quantity, prices, end time and ways to pay. |
+| **PaymentStatus** | The shape of the answer that describes one payment attempt and how it ended. |
+| **C-09** | The "No connection." banner, a shared part described in `08-screen-requirements.md` §8.4. |
 
 ---
 
@@ -37,7 +41,7 @@ Every answer has the server's clock, `serverNow`, in epoch milliseconds. The
 page draws countdowns from it, never from the phone's clock (locked decision 2).
 
 ```json
-{ "serverNow": 1790827190000, "clockRate": 1, "data": { "...": "..." } }
+{ "serverNow": 1790823980000, "clockRate": 1, "data": { "...": "..." } }
 ```
 
 `clockRate` is how fast the server clock runs. The real system always sends 1.
@@ -46,7 +50,7 @@ The demo fake can send 0 (paused) up to 100.
 A refusal or error:
 
 ```json
-{ "serverNow": 1790827190000, "clockRate": 1,
+{ "serverNow": 1790823980000, "clockRate": 1,
   "error": { "code": "NOT_ENOUGH", "message": "Not enough seats left in this tier", "remaining": 1 } }
 ```
 
@@ -65,10 +69,10 @@ A refusal or error:
 | M-01 | `GET /api/events` | | list of `{eventId, name, shortName, venue, eventDateTime, saleOpensAt, state, fromPrice, artwork, soldOut}` | SCR-01 |
 | M-02 | `GET /api/events/{eventId}` | | event fields + `tiers[{tierId, name, price}]` + `myToken` + `myPosition` | SCR-05 |
 | M-03 | `POST /api/events/{eventId}/queue` | | `{token, eventId, position, isExisting}` | SCR-05, "join again" |
-| M-04 | `GET /api/queue/{token}` | | `{token, eventId, state, position, moved, admitPerSecond}`. `state` is `WAITING`, `ADMITTED`, `SPENT` or `EXPIRED` | SCR-06 every 2 s |
+| M-04 | `GET /api/queue/{token}` | | `{token, eventId, state, position, moved, admitPerSecond, reservationId}`. `state` is `WAITING`, `ADMITTED`, `SPENT` or `EXPIRED`. When SPENT, reservationId names the hold | SCR-06 every 2 s |
 | M-05 | `GET /api/events/{eventId}/availability` | | list of `{tierId, name, price, remaining, total}` | SCR-08 |
 | M-06 | `POST /api/holds` | `{token, tierId, quantity}` | **201** `HoldView`, or **409** with `code` `NOT_ENOUGH`, `RACE_LOST`, `SOLD_OUT`, `OVER_LIMIT` and `remaining` | SCR-08 |
-| M-07 | `GET /api/holds/{reservationId}` | | `HoldView` | SCR-09 to SCR-14, SCR-10, 11, 18 |
+| M-07 | `GET /api/holds/{reservationId}` | | `HoldView` | SCR-09 to SCR-14, SCR-18 |
 | M-08 | `DELETE /api/holds/{reservationId}` | | `HoldView` with `state` `RELEASED` | SCR-09b |
 | M-09 | `POST /api/holds/{reservationId}/payments` | `{providerKey}` | **201** `{paymentId, reservationId, providerKey, providerLabel, amount, display}` | SCR-12, 13b, 14b |
 | M-10 | `POST /api/payments/{paymentId}/answer` | `{approve}` | `PaymentStatus`. Sending it twice changes nothing (FR-18) | SCR-13, SCR-14 |
@@ -81,6 +85,8 @@ venue, eventDateTime}, tierId, tierName, quantity, unitPrice,
 promotions[{name, amount}], totalAmount, expiresAt, remainingBefore,
 remainingAfter, paymentMethods[{key, tile, label, line, available}],
 paymentId}`. `state` is `HELD`, `CONFIRMED`, `EXPIRED` or `RELEASED`.
+
+`PaymentStatus` = `{paymentId, reservationId, providerKey, state, answered, orderId}`. Answering a payment that a newer one replaced is refused with **400** `PAYMENT_REPLACED`.
 
 **Story values.** Kenji holds 2 VIP at 10:06:20: `unitPrice` 6500,
 `promotions` `[{"name":"Early Bird −10%","amount":1300}]`, `totalAmount`

@@ -203,6 +203,30 @@ class FakeBookingTest {
     }
 
     @Test
+    void aReplacedPaymentCannotBeAnswered() {
+        HoldView h = gw.hold("kenji", admit("kenji").get(0), "vip", 2);
+        var first = gw.startPayment("kenji", h.reservationId(), "promptpay");
+        var second = gw.startPayment("kenji", h.reservationId(), "card");
+        assertEquals("VOIDED", gw.paymentStatus("kenji", first.paymentId()).state());
+        var e = assertThrows(GatewayException.class, () -> gw.answerPayment("kenji", first.paymentId(), true));
+        assertEquals("PAYMENT_REPLACED", e.code);
+        gw.answerPayment("kenji", second.paymentId(), true);
+        clock.advance(2_000);
+        assertEquals("CAPTURED", gw.paymentStatus("kenji", second.paymentId()).state());
+    }
+
+    @Test
+    void anApprovalDueBeforeExpirySettlesEvenIfNobodyAsksUntilLater() {
+        HoldView h = gw.hold("kenji", admit("kenji").get(0), "vip", 2);
+        var start = gw.startPayment("kenji", h.reservationId(), "promptpay");
+        clock.advance(590_000);
+        gw.answerPayment("kenji", start.paymentId(), true);  // settles at 592 s, before the 600 s expiry
+        clock.advance(11_000);                               // nobody asks until 601 s
+        assertEquals("CAPTURED", gw.paymentStatus("kenji", start.paymentId()).state());
+        assertEquals("CONFIRMED", gw.getHold("kenji", h.reservationId()).state());
+    }
+
+    @Test
     void kenjiStartsWithOnePastOrder() {
         List<OrderView> orders = gw.orders("kenji");
         assertEquals(1, orders.size());

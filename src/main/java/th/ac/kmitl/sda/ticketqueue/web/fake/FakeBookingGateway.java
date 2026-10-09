@@ -504,8 +504,10 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
                 && (t.state.equals("WAITING") || t.state.equals("ADMITTED"))) {
             t.state = "EXPIRED";
         }
+        String reservationId = reservations.values().stream()
+                .filter(r -> r.tokenId.equals(t.id)).map(r -> r.id).findFirst().orElse(null);
         return new QueueStatus(t.id, t.eventId, t.state, position(t), START_MOVED + admittedSoFar(t),
-                ADMIT_PER_SECOND);
+                ADMIT_PER_SECOND, reservationId);
     }
 
     @Override
@@ -604,6 +606,12 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
                 return start(last);
             }
         }
+        if (r.paymentId != null) {
+            Payment replaced = payments.get(r.paymentId);
+            if (replaced.state.equals("PENDING") && !replaced.answered) {
+                replaced.state = "VOIDED"; // a newer way to pay replaced it; it can no longer be answered
+            }
+        }
         Payment p = new Payment("P-" + (++paymentSeq), r.id, customerId, provider.key(), total(r), clock.now());
         payments.put(p.id, p);
         r.paymentId = p.id;
@@ -614,6 +622,9 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     public synchronized PaymentStatus answerPayment(String customerId, String paymentId, boolean approve) {
         sweep();
         Payment p = ownedPayment(customerId, paymentId);
+        if (!p.id.equals(reservations.get(p.reservationId).paymentId)) {
+            throw GatewayException.badRequest("PAYMENT_REPLACED", "This way to pay was replaced by a newer one");
+        }
         if (p.state.equals("PENDING") && !p.answered) {
             p.answered = true;
             p.approve = approve;

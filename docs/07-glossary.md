@@ -16,6 +16,15 @@ of the solution, not people with goals.
 
 ---
 
+### Adapter
+A small piece of code that lets one part talk to another part whose shape does not fit it directly.
+
+*A travel plug adapter: the hair dryer stays the same, only the plug shape changes.*
+
+**Example:** `BookingGateway` is the presentation layer's adapter. The pages talk to it; behind it sits the fake today and `core/` later.
+
+---
+
 ### Admission window
 How long an admitted customer has to place a hold before their queue token
 expires. **5 minutes** (ASM-07).
@@ -181,6 +190,8 @@ What a list screen shows when the list has nothing in it. It says why it is empt
 
 ### Endpoint
 One address on the server that answers one kind of message.
+
+*A counter window at the post office: each window does one job.*
 
 **Example:** `POST /api/holds` is the endpoint Kenji's page calls to hold 2 VIP seats.
 
@@ -362,6 +373,8 @@ INV-01 is this project's most important line.
 ### JSON
 A plain text format for sending data: names and values inside curly brackets.
 
+*A labelled form: every value sits next to its name.*
+
 **Example:** `{"tierId": "vip", "quantity": 2}` is the body of Kenji's hold message.
 
 ---
@@ -432,6 +445,15 @@ What is true after a use case finishes. Written for both outcomes — success
 
 ### Precondition
 What must already be true before a use case can start.
+
+---
+
+### Presentation layer
+The part of the system the customer sees and touches, plus the code that carries their taps to the server. Here: the pages in `resources/public/` and the `web/` routes.
+
+*The shop counter and the person serving at it. The kitchen behind is a different layer.*
+
+**Example:** when Kenji taps **Hold these seats**, the presentation layer sends M-06 and shows SCR-09 with the answer.
 
 ---
 
