@@ -146,7 +146,7 @@ exists to point, not to hold.
 | `E-nn` | Domain entity | `docs/05` |
 | `INV-nn` | Invariant — a rule that must always hold | `docs/05` |
 
-**One story runs through every document**: BLACKPINK at Impact Arena, Kenji
+**One story runs through every document**: The 1975 at Impact Arena, Kenji
 buying 2 × VIP, Chai running the sale. The numbers are fixed in `AGENTS.md` §2
 so no document contradicts another.
 

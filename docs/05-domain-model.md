@@ -68,7 +68,7 @@ Read it as a sentence:
 | Field | Type | Meaning |
 |---|---|---|
 | `eventId` | id | Unique. Never reused. |
-| `name` | text | *BLACKPINK — Bangkok* |
+| `name` | text | *The 1975 Bangkok* |
 | `venue` | text | *Impact Arena* |
 | `eventDateTime` | timestamp | *14 Nov 2026, 19:00* |
 | `saleOpensAt` | timestamp | *1 Oct 2026, 10:00:00* |

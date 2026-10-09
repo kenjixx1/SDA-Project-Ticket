@@ -315,7 +315,7 @@ sitting at a laptop.
 
 Must show:
 
-- The event name and date — *BLACKPINK — Bangkok · Impact Arena, 14 Nov 2026*
+- The event name and date — *The 1975 Bangkok · Impact Arena, 14 Nov 2026*
 - **Their position, as the largest thing on the screen** — *4,182*
 - A progress bar showing movement
 - An estimated wait — *~6 min* — clearly marked as approximate

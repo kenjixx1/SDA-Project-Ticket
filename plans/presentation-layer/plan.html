@@ -95,7 +95,7 @@ td .files{font:12px var(--mono);color:var(--muted)}
   </div>
   <div class="stats">
     <div class="stat"><b>13</b><span>tasks</span></div>
-    <div class="stat"><b>38</b><span>JUnit tests</span></div>
+    <div class="stat"><b>39</b><span>JUnit tests</span></div>
     <div class="stat"><b>35</b><span>screenshot checks</span></div>
     <div class="stat"><b>18</b><span>customer screens</span></div>
   </div>
@@ -14913,17 +14913,17 @@ td .files{font:12px var(--mono);color:var(--muted)}
     <tbody>
       <tr><td class="n java">1</td><td>Maven build, WebServer serves a page, the core-imports rule</td><td class="files">pom.xml, web/WebServer.java</td><td>2 tests pass. <code>/api/health</code> answers</td></tr>
       <tr><td class="n java">2</td><td>BookingGateway, the reply records, fake clock, fake events and queue</td><td class="files">web/BookingGateway.java, dto/Views.java, fake/*</td><td>11 more tests: position 4,182 moves 12 a second, turn passes after 5 min</td></tr>
-      <tr><td class="n java">3</td><td>Fake holds, payments, orders</td><td class="files">fake/FakeBookingGateway.java</td><td>15 more tests: 10-minute expiry, charged once, void after expiry, race lost</td></tr>
-      <tr><td class="n java">4</td><td>13 messages over HTTP, the envelope, dev routes, the switch</td><td class="files">routes/*, dto/Requests.java</td><td>10 contract tests. 38 tests in total</td></tr>
+      <tr><td class="n java">3</td><td>Fake holds, payments, orders</td><td class="files">fake/FakeBookingGateway.java</td><td>16 more tests: 10-minute expiry, charged once, void after expiry, race lost, turn passed</td></tr>
+      <tr><td class="n java">4</td><td>13 messages over HTTP, the envelope, dev routes, the switch</td><td class="files">routes/*, dto/Requests.java</td><td>10 contract tests. 39 tests in total</td></tr>
       <tr><td class="n docs">D</td><td>Traceability docs</td><td class="files">docs/09 (new), 02, 06, 07, 08, src/README, README</td><td>ASM-07/08, 6 glossary words, web/ in §6.5, lime and coral in §8.3</td></tr>
       <tr><td class="n web">5</td><td>Page skeleton: parts C-01 to C-09, router, polling, dev panel, screenshot walk</td><td class="files">public/index.html, css/app.css, js/api.js, parts.js, app.js, dev.js, e2e/walk.mjs</td><td>Page loads, dev panel shows, no console errors</td></tr>
       <tr><td class="n web">6</td><td>SCR-05 Event, 6 variants</td><td class="files">js/screens/event.js</td><td>Shots 05a to 05f. Switches to on-sale at 10:00 by itself</td></tr>
       <tr><td class="n web">7</td><td>SCR-06 Queue, SCR-07 Turn passed</td><td class="files">js/screens/queue.js</td><td>Shots 06a, 06b, 06c, 07. Reconnecting after 15 s</td></tr>
-      <tr><td class="n web">8</td><td>SCR-08 Select tickets</td><td class="files">js/screens/select.js</td><td>Shots 08a, 08d, 08g. Hand checks 08b, 08c, 08e, 08f</td></tr>
+      <tr><td class="n web">8</td><td>SCR-08 Select tickets</td><td class="files">js/screens/select.js</td><td>Shots 08a, 08d, 08g. Hand checks 08b, 08c, 08e, 08f and turn passed</td></tr>
       <tr><td class="n web">9</td><td>SCR-09 Held, SCR-10 Released, SCR-11 Ran out</td><td class="files">js/screens/hold.js</td><td>Shots 09a, 10, 11. Timer at ×100 lands on SCR-11</td></tr>
       <tr><td class="n web">10</td><td>SCR-12 to SCR-15 checkout and pay, SCR-18 Expired</td><td class="files">js/screens/pay.js</td><td>11 shots. Double tap charges once. Reload stays on SCR-15</td></tr>
       <tr><td class="n web">11</td><td>SCR-01 to SCR-04 tabs, SCR-16 Confirmed, SCR-17 Ticket</td><td class="files">js/screens/shell.js, tickets.js</td><td>8 shots. Tab bar and sign-out sheet work</td></tr>
-      <tr><td class="n web">12</td><td>Full check</td><td class="files">no new files</td><td>38 tests, 35 shots, 1 full purchase by hand, 2 buyers race for the last 4 VIP</td></tr>
+      <tr><td class="n web">12</td><td>Full check</td><td class="files">no new files</td><td>39 tests, 35 shots, 1 full purchase by hand, 2 buyers race for the last 4 VIP</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -14943,11 +14943,12 @@ td .files{font:12px var(--mono);color:var(--muted)}
   <div class="pair">
     <div class="card"><h3>Added beyond the spec</h3><ul>
       <li><code>/dev/advance</code> jumps the fake clock <span>so screenshots do not wait 10 real minutes</span></li>
+      <li>Every answer also carries <code>clockRate</code> <span>so countdowns follow the fake's ×10 or ×100 clock</span></li>
       <li>Reply records live in 2 files, <code>Views.java</code> and <code>Requests.java</code> <span>instead of 1 file each</span></li>
       <li>The QR is a look-alike pattern <span>(not scannable). The signed payload is real text</span></li>
     </ul></div>
     <div class="card"><h3>Left as is</h3><ul>
-      <li><code>AGENTS.md</code> §2 still says BLACKPINK <span>(Q-2 said the story table is a separate decision)</span></li>
+      <li>The story event is now The 1975 Bangkok in every doc <span>(was BLACKPINK, switched on 10 Oct)</span></li>
       <li>The organizer console, SCR-30 to SCR-40 <span>(a later spec)</span></li>
       <li>Swipe between tickets <span>(dots work instead)</span></li>
     </ul></div>

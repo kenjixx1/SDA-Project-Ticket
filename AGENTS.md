@@ -40,7 +40,8 @@ documents harder to follow, and nothing builds up.
 
 | Thing | Value |
 |---|---|
-| Event | BLACKPINK — Bangkok |
+| Event | The 1975 Bangkok |
+| Other events (lists only) | Bruno Mars · Thunder Dome · from ฿1,200, Alan Walker · UOB Live · from ฿2,400, Marshmello · Moonstar Studio · from ฿1,500 |
 | Venue / date | Impact Arena, 14 November 2026 |
 | Sale opens | 10:00:00, 1 October 2026 |
 | People at the door | ~40,000 |

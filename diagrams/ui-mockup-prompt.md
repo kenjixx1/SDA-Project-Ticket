@@ -31,7 +31,7 @@ Mobile first. 390 x 844 (iPhone-class). Portrait. One column.
 Thumb-reachable primary action at the bottom.
 
 THE EVENT (use these exact values, never placeholders)
-  Artist / event : BLACKPINK — Bangkok
+  Artist / event : The 1975 Bangkok
   Venue          : Impact Arena
   Event date     : 14 November 2026
   Sale opened    : 1 October 2026, 10:00:00
@@ -78,7 +78,7 @@ That is the design problem: if it does not visibly move, they refresh, and
 every refresh makes the spike worse for everyone.
 
 MUST SHOW
-1. Event header: "BLACKPINK — Bangkok", then "Impact Arena · 14 Nov 2026".
+1. Event header: "The 1975 Bangkok", then "Impact Arena · 14 Nov 2026".
 2. Their position in the queue: 4,182. This is the LARGEST element on the
    screen. Use tabular figures so the digits do not jump as it counts down.
 3. A progress bar showing how far through the queue they are (about 62%).
@@ -146,7 +146,7 @@ SCREEN: Confirmed
 
 MUST SHOW
 1. A calm success state. A tick, not confetti.
-2. What they bought: 2 x VIP, BLACKPINK — Bangkok, Impact Arena,
+2. What they bought: 2 x VIP, The 1975 Bangkok, Impact Arena,
    14 November 2026.
 3. Total paid: ฿13,000, paid by PromptPay.
 4. TWO SEPARATE TICKETS, not one card saying "x2". Two people walk through

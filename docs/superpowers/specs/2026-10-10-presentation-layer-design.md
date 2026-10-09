@@ -122,7 +122,7 @@ example `{ screen: "held", hold: {...}, serverOffset: 120 }`. A screen is a
 function that takes the state and returns HTML.
 
 **Routes in the address bar.** Each screen has an address after `#`, for
-example `#/event/blackpink`, `#/queue/Q-123`, `#/hold/R-1042`. So the back
+example `#/event/the-1975`, `#/queue/Q-123`, `#/hold/R-1042`. So the back
 button and reload work. On reload, the page asks the server where things
 stand (M-04, M-07 or M-11) and lands on the right screen. That covers SCR-15
 "reopening comes back here".
@@ -231,6 +231,6 @@ Answered by Kenji on 10 October 2026.
 | # | Question | Answer |
 |---|---|---|
 | Q-1 | Build tool | **Maven**, Java 17. The teammate's `core/` uses the same `pom.xml`. |
-| Q-2 | Event name | **The new design's events**: The 1975 Bangkok (headline), Bruno Mars, Alan Walker, Marshmello, with their artwork. The 1975 uses the story's venue, date, tiers and prices. `AGENTS.md` §2 still says BLACKPINK; changing the story table is a separate decision, not part of this spec. |
+| Q-2 | Event name | **The new design's events**: The 1975 Bangkok (headline), Bruno Mars, Alan Walker, Marshmello, with their artwork. The 1975 uses the story's venue, date, tiers and prices. `AGENTS.md` §2 and every document were switched to The 1975 Bangkok on 10 October 2026. |
 | Q-3 | Time on SCR-08 before SCR-07 | **5 minutes** in the fake. Reached in the demo through the `TURN_PASSED` scenario. |
 | Q-4 | Message list agreed | **Yes.** `docs/09-web-api.md` is written in step 2 and sent to the teammate. |
