@@ -66,7 +66,7 @@ removed, 42 buyers got the last 10 seats and the test failed.
 Matches `docs/06-architecture.md` §6.5.
 
 ```
-th.ac.kmitl.sda.ticketqueue
+eventflow
 ├── core/           THE CORE SYSTEM — knows no plug-in by name
 │   ├── event/      the event channel (EventBus) + every event type
 │   ├── queue/      the waiting room
@@ -92,6 +92,6 @@ fails the build when it is broken. See `docs/06-architecture.md` §6.5.
 
 ## Conventions
 
-- Java (CON-04), package root `th.ac.kmitl.sda.ticketqueue`
+- Java (CON-04), package root `eventflow`
 - Plug-ins are **compile-based** — a registry map, not runtime loading
 - Payment providers are **simulated**. No real API keys, no network calls.

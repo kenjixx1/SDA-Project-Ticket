@@ -268,7 +268,7 @@ that must never break.
 
 ### The core system
 
-**`th.ac.kmitl.sda.ticketqueue.core`** — the booking engine.
+**`eventflow.core`** — the booking engine.
 
 It owns:
 - queue management and admission (the waiting room),
@@ -291,7 +291,7 @@ contracts below are small interfaces, so a plug-in has nothing to talk to
 except the core.
 
 ```java
-package th.ac.kmitl.sda.ticketqueue.contract;
+package eventflow.contract;
 
 /** Seam 1 — how money is taken. One implementation per payment method. */
 public interface PaymentProvider {
@@ -396,10 +396,10 @@ Everywhere else, the two styles do not touch.
 
 ## 6.5 Java package layout
 
-Package root: `th.ac.kmitl.sda.ticketqueue` (CON-04).
+Package root: `eventflow` (CON-04).
 
 ```
-th.ac.kmitl.sda.ticketqueue
+eventflow
 ├── core/                     ◄── THE CORE SYSTEM. Knows no plug-in by name.
 │   ├── event/
 │   │   ├── DomainEvent.java          the shared event interface

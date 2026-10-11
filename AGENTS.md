@@ -171,7 +171,7 @@ Slices 1 and 2 of `docs/03-prd.md` §3.6 are built. Run `./run.sh test` before e
 commit that touches `src/`; all tests must pass.
 
 - **Language:** Java. The course uses Java in almost every lab.
-- **Package root:** `th.ac.kmitl.sda.ticketqueue`
+- **Package root:** `eventflow`
 - **Layout:** `src/main/java/...` and `src/test/java/...`
 - The package structure follows `docs/06-architecture.md`. Read it first.
 - Plug-ins are **compile-based** — a registry map, not runtime loading.

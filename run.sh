@@ -14,11 +14,11 @@ javac --release 17 -encoding UTF-8 -d "$OUT/main" $(find src/main/java -name '*.
 
 case "${1:-test}" in
   demo)
-    java -cp "$OUT/main" th.ac.kmitl.sda.ticketqueue.EventFlowDemo
+    java -cp "$OUT/main" eventflow.EventFlowDemo
     ;;
   test)
     javac --release 17 -encoding UTF-8 -cp "$OUT/main" -d "$OUT/test" $(find src/test/java -name '*.java')
-    java -cp "$OUT/main:$OUT/test" th.ac.kmitl.sda.ticketqueue.TestRunner
+    java -cp "$OUT/main:$OUT/test" eventflow.TestRunner
     ;;
   *)
     echo "usage: ./run.sh [test|demo]" >&2
