@@ -96,7 +96,7 @@ activity diagram, not in the use case diagram.
 1. Kenji asks to join the sale for **The 1975 Bangkok**.
 2. The system checks they have no active queue token for this event.
 3. The system issues a **queue token** and puts it at the back of the queue.
-4. The system shows their **position 4,182** and an estimated wait of ~6 minutes.
+4. The system shows their **position 4,182** and an estimated wait of about 21 seconds.
 5. The system refreshes their position at least every 5 seconds while they wait.
 6. Their token reaches the front. The admission rate allows another customer in,
    so the system admits them. **UC-02 begins.**
@@ -442,13 +442,13 @@ Zone B    5,000       96   2,884        2,020
 REVENUE   ฿14,691,600   (confirmed orders only)
 ```
 
-> **Why the admission rate is 12 per second, not a bigger number.**
-> The rate is not "as fast as the servers cope". It is tied to the hold
-> window: 7,500 seats divided by a 10-minute hold is about 12 customers per
-> second. Admit faster and the extra people arrive to find every seat already
-> held by someone still inside their ten minutes, which is the "sold out after
-> I was let in" experience the queue exists to prevent. This is also what makes
-> UC-01's estimate honest: position 4,182 at 12 per second is about 6 minutes.
+> **Why the admission rate starts at 200 per second.**
+> 200 is the booking engine's default (`QueueService.DEFAULT_ADMISSION_RATE`),
+> and the team chose to keep it on 11 October 2026. Kenji at position 4,182
+> waits about 21 seconds. The risk of a high rate: people can be let in faster
+> than seats free up, and find every seat already held by someone still inside
+> their ten minutes. Chai can lower it in SCR-38. The helper there works out
+> the careful number: 7,500 seats ÷ 600 seconds of hold ≈ 12 per second.
 
 > **Why "held" is its own column.** Those 12 VIP seats are not sold and not
 > available. They are in somebody's ten minutes. If Chai only saw *sold* and

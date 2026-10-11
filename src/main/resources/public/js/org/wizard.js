@@ -5,7 +5,7 @@ import { html, button, num } from '../parts.js';
 import { field, toEpoch, dateInput, timeInput, dateTime } from './parts.js';
 import { BKK, pad, pickerKit } from './pickers.js';
 
-const BLANK = { name: '', venue: '', evDate: '', evTime: '', saleDate: '', saleTime: '', rate: '12', artwork: '' };
+const BLANK = { name: '', venue: '', evDate: '', evTime: '', saleDate: '', saleTime: '', rate: '200', artwork: '' };
 const MAX = { name: 40, venue: 30 };
 // One error line per group: the event and the sale each have a date picker and a time picker.
 const GROUP = { name: 'name', venue: 'venue', evDate: 'ev', evTime: 'ev', saleDate: 'sale', saleTime: 'sale', rate: 'rate' };
@@ -185,7 +185,7 @@ function detailsView(st) {
       <aside class="wiz-help">
         ${artBox(st, shown('art'))}
         <span class="label">ADMISSION RATE</span>
-        <p>How many people the queue lets in each second. Work it out from your seats and the 10-minute hold: 7,500 seats ÷ 600 seconds of hold ≈ 12 per second. Faster than this and people get in only to find every seat already held.</p>
+        <p>How many people the queue lets in each second. The booking engine starts at 200. Lower it if people get in only to find every seat already held.</p>
         <p>You can change it later, even while the sale is on.</p>
       </aside>
     </div>

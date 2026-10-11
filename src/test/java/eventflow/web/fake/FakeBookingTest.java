@@ -34,7 +34,7 @@ class FakeBookingTest {
         for (String c : customers) {
             tokens.add(gw.joinQueue(c, "the-1975").token());
         }
-        clock.advance(350_000);
+        clock.advance(30_000);
         return tokens;
     }
 

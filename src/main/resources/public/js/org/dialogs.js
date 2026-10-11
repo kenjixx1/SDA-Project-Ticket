@@ -244,7 +244,7 @@ function rateSheet(e, d) {
   });
 }
 
-/** "At 12 per second, the 31,208 people now waiting are through in about 43 minutes." */
+/** "At 200 per second, the 23,768 people now waiting are through in about 2 minutes." */
 const preview = (e, rate) => {
   if (rate === null || rate < 1) return '';
   const m = Math.ceil(e.waiting / rate / 60);
@@ -265,6 +265,7 @@ function closeSheet(e, d) {
       { label: 'Close the sale', action: 'dlgCloseSale', danger: true, working: d.working ? 'Closing' : '' },
     ],
     close: 'dlgClose',
+    extra: d.err ? html`<span class="err" role="alert">${d.err.message}</span>` : '',
   });
 }
 
@@ -335,6 +336,7 @@ async function closeSale(ctx, id) {
     d.working = false;
     if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
     d.err = { key: null, message: e.message };
+    ctx.render();
   }
 }
 

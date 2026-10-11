@@ -526,8 +526,8 @@ goes wrong, so nobody has to think under pressure.
 
 *Like the fire-drill card on a hotel door.*
 
-**Example:** "Waiting number not going down → raise the admission rate towards
-12 per second" (`10-operation.md` §10.5).
+**Example:** "People let in, then told the seats just went → lower the admission
+rate in SCR-38" (`10-operation.md` §10.5).
 
 ---
 

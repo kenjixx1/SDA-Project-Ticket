@@ -51,6 +51,7 @@ img{max-width:100%;display:block}
 .banner.good b{color:var(--ac)}
 .banner b{font-weight:600}
 .banner p{margin:0;color:var(--mu);font-size:14px}
+.core-note{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;width:min(440px,calc(100vw - 32px));background:var(--s1, #111)}
 .foot{position:static;transform:none;width:auto;max-width:1200px;margin:0 auto;padding:0 40px 70px;display:flex;flex-direction:column;gap:10px}
 .foot.bare{border-top:0;background:none}
 .btn{height:54px;width:100%;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 17px/1 var(--f);display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 30px -8px rgba(197,242,90,.45);transition:transform .15s}

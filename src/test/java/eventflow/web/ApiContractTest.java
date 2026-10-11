@@ -44,7 +44,7 @@ class ApiContractTest {
     private String admittedToken() {
         clock.advance(60_000);
         String token = fake.joinQueue("kenji", "the-1975").token();
-        clock.advance(350_000);
+        clock.advance(30_000);
         return token;
     }
 
@@ -101,7 +101,7 @@ class ApiContractTest {
             JsonNode q = body(client.get("/api/queue/" + token, as("kenji"))).get("data");
             assertEquals("WAITING", q.get("state").asText());
             assertEquals(4182, q.get("position").asInt());
-            assertEquals(12, q.get("admitPerSecond").asInt());
+            assertEquals(200, q.get("admitPerSecond").asInt());
             assertEquals(404, client.get("/api/queue/" + token, as("mint")).code());
         });
     }

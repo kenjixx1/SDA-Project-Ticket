@@ -10,8 +10,8 @@ do when something goes wrong.
 know what to do if the milk runs out.*
 
 **Real example.** At 09:59:30 Chai has The 1975 Bangkok published. At 10:00
-the sale opens, 31,208 people are waiting by 10:06:20, the queue lets in 12 per
-second, and every VIP, Zone A and Zone B seat is held or sold without one seat
+the sale opens, 23,768 people are still waiting at 10:01:00, the queue lets in 200
+per second, and every VIP, Zone A and Zone B seat is held or sold without one seat
 being sold twice. This document is how that morning is run.
 
 ---
@@ -68,6 +68,9 @@ being sold twice. This document is how that morning is run.
 | Kenji, the customer | `http://localhost:7070/?dev` |
 | Chai, the organizer | `http://localhost:7070/organizer.html?dev` |
 
+To run the pages on the real booking engine instead: `ENGINE=core mvn -q compile exec:java`
+(see §10.7).
+
 `?dev` shows the **demo controls** in the corner. They exist only for the fake
 engine.
 
@@ -88,14 +91,14 @@ To run on another port: `PORT=7071 mvn -q compile exec:java`.
 
 | Time | Who | Step | Screen |
 |---|---|---|---|
-| Day before | Chai | Create The 1975 Bangkok, add VIP ฿6,500 × 500, Zone A ฿3,800 × 2,000, Zone B ฿1,900 × 5,000, set 12 per second, publish | SCR-30 → SCR-33 |
+| Day before | Chai | Create The 1975 Bangkok, add VIP ฿6,500 × 500, Zone A ฿3,800 × 2,000, Zone B ฿1,900 × 5,000, keep 200 per second, publish | SCR-30 → SCR-33 |
 | Day before | Team | Run both test suites. Both must pass before the sale | — |
 | 09:59:30 | Chai | Open the event page. State reads `SCHEDULED` | SCR-34b |
 | 09:59:30 | Kenji | Event page shows the countdown to 10:00 | SCR-05a |
 | 10:00:00 | System | State turns `ON SALE`. The Join button turns on | SCR-05b |
-| 10:00:30 | Kenji | Joins the queue. Position 4,182, about 6 minutes | SCR-06a |
+| 10:00:30 | Kenji | Joins the queue. Position 4,182, about 21 seconds | SCR-06a |
 | 10:00 onward | Chai | Opens the live dashboard and watches it | SCR-40 |
-| 10:06 | Kenji | Admitted. Holds 2 × VIP. 10 minutes start | SCR-08 → SCR-09 |
+| 10:00:51 | Kenji | Admitted. Holds 2 × VIP. 10 minutes start | SCR-08 → SCR-09 |
 | 10:07 | Kenji | Pays by PromptPay. Gets 2 tickets | SCR-12 → SCR-17 |
 | Sold out, or Chai decides | Chai | Close the sale. People inside their 10 minutes keep them | SCR-39 → SCR-34d |
 | Last hold ends | System | State turns `CLOSED`. Dashboard reads *Final* | SCR-34e, SCR-40c |
@@ -112,8 +115,8 @@ To run on another port: `PORT=7071 mvn -q compile exec:java`.
 | Customers: the card method reads **"Not available right now"** | The card provider stopped answering (try it: scenario `PROVIDER_DOWN`) | Nothing. PromptPay still works. The sale is **degraded**, not stopped (NFR-05) |
 | Customers: **"Payment is not available right now."** on every method | No provider answers (`ALL_PROVIDERS_DOWN`) | Queue and holds still work. Holds expire after 10 minutes and seats go back. Close the sale if it lasts |
 | Customers stuck on **"Confirming your payment"** | The bank is slow (`BANK_SLOW`) | Nothing. If the bank answers after the 10 minutes end, the payment is voided and the customer is not charged (FR-17) |
-| Waiting number not going down | Admission rate too low | Raise it in SCR-38. Keep it near seats ÷ 600 s: 7,500 ÷ 600 ≈ 12 per second |
-| People admitted, then **"those seats just went"** | Admission rate too high: people get in only to find every seat held | Lower it in SCR-38, back towards 12 per second |
+| Waiting number not going down | Admission rate too low | Raise it in SCR-38 |
+| People admitted, then **"those seats just went"** | Admission rate too high: people get in only to find every seat held | Lower it in SCR-38. The careful number is seats ÷ 600 s: 7,500 ÷ 600 ≈ 12 per second |
 | A price is wrong after 10:00 | Prices are frozen while the sale is on (FR-26) | Cannot change. Add seats or a new tier instead (FR-27) |
 | Need fewer VIP seats | Allowed only down to sold + held (FR-28) | The dialog shows the lowest allowed number, e.g. *"VIP: 476 sold and 12 held. Cannot reduce below 488."* |
 | The Java program stopped | Crash or restart | **The sale is lost**, because data is in memory (ASM-08). Restart and re-create the event. A database behind `core/` removes this risk (`06-architecture.md`, Data topology) |
@@ -155,20 +158,28 @@ from other machines. That test is not built yet.
 
 ## 10.7 Switching the pages to the real engine
 
-**Today the pages talk to the fake engine. One place decides that.**
+**The pages talk to the fake engine unless `ENGINE=core` is set. One place decides that.**
 
-- In `WebServer.main`, the lines marked `THE SWITCH` choose the engine.
-- Two doors must switch: `BookingGateway` (Kenji's pages) and
-  `OrganizerGateway` (Chai's pages).
-- Before switching, run `ApiContractTest` and `OrgApiContractTest` against the
-  new gateway. They are written so the same checks pass on the fake and on
-  `core/`.
+- In `WebServer.main`, the lines marked `THE SWITCH` read `ENGINE`.
+- `ENGINE=core` starts `RealEngine`: the real `core/` plus the gateway's own
+  records for what core does not keep yet (drafts, pictures, event state,
+  payments, orders). Both doors sit on it: `CoreBookingGateway` (Kenji's pages)
+  and `CoreOrganizerGateway` (Chai's pages).
+- Core runs on the demo clock, so speed and +10 min still work. A scenario is
+  refused with `NOT_IN_CORE`, because core has nothing to fake.
+- `core/` itself is not changed by any of this.
 
-| Part of the sale | Ready in `core/` today? |
+| On `ENGINE=core` | Calls |
 |---|---|
-| Queue, hold, PromptPay happy path | Yes, Slices 1 and 2 |
-| Card payment, early bird, failed payments, tickets, dashboard | No, Slice 3 |
-| Organizer rules: frozen prices, close sale, edit tiers | No |
+| Answered by core | M-03 join · M-04 place in line · M-05 seats left · M-06 hold · O-06 add a tier · O-09 admission rate |
+| Core, finished by the gateway | M-02 one event · M-07 my hold · M-09, M-10, M-11 pay in 3 steps over core's one-step checkout · O-02 create · O-03 one event · O-05 set tiers · O-08 publish |
+| Stand-in made by the gateway | M-01 events list · M-12 orders, with tickets marked `UNSIGNED` (signing is Slice 3) · M-13 who am I · O-01 my events · O-11 dashboard |
+| Refused, `409 NOT_IN_CORE` | M-08 give seats back early · O-04 and O-07 after publishing · O-10 close the sale |
+
+- Card payment shows *Not available right now*: core has only the PromptPay plug-in.
+- No Early Bird discount: pricing rules are Slice 3.
+- When core adds a missing piece, one gateway method switches from refusing
+  to calling core.
 
 ---
 

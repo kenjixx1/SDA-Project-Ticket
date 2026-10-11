@@ -308,7 +308,7 @@ class FakeOrganizerTest {
     void cannotReduceBelowHeldPlusSold() {
         clock.advance(60_000);
         String token = gw.joinQueue("kenji", "the-1975").token();
-        clock.advance(350_000);
+        clock.advance(30_000);
         gw.hold("kenji", token, "vip", 2);
 
         OrgTier vip = row(org.getEvent("chai", "the-1975"), "vip");
@@ -369,7 +369,7 @@ class FakeOrganizerTest {
     void closeSaleKeepsLiveHolds() {
         clock.advance(60_000);
         String token = gw.joinQueue("kenji", "the-1975").token();
-        clock.advance(350_000);
+        clock.advance(30_000);
         HoldView hold = gw.hold("kenji", token, "vip", 2);
 
         OrgEvent closing = org.closeSale("chai", "the-1975");
@@ -442,7 +442,7 @@ class FakeOrganizerTest {
         assertEquals("UOB Live", updated.venue());
         assertEquals("The 1975 Bangkok", updated.name());
         assertEquals(FakeBookingGateway.SALE_OPENS, updated.saleOpensAt());
-        assertEquals(12, updated.admitPerSecond());
+        assertEquals(200, updated.admitPerSecond());
     }
 
     @Test
@@ -450,7 +450,7 @@ class FakeOrganizerTest {
         clock.advance(60_000);
         String mint = gw.joinQueue("mint", "the-1975").token();
         String kenji = gw.joinQueue("kenji", "the-1975").token();
-        clock.advance(350_000);
+        clock.advance(30_000);
         gw.hold("kenji", kenji, "vip", 2);
 
         assertEquals("CLOSING", org.closeSale("chai", "the-1975").state());
@@ -461,14 +461,14 @@ class FakeOrganizerTest {
 
     @Test
     void dashboardAddsUp() {
-        clock.advance(410_000); // 10:06:20, 380 seconds after the sale opened
+        clock.advance(90_000); // 10:01:00, 60 seconds after the sale opened
 
         Dashboard d = org.dashboard("chai", "the-1975");
         assertEquals("the-1975", d.eventId());
         assertEquals("The 1975 Bangkok", d.name());
         assertEquals("ON_SALE", d.state());
-        assertEquals(31_208, d.waiting());
-        assertEquals(12, d.admitPerSecond());
+        assertEquals(23_768, d.waiting());
+        assertEquals(200, d.admitPerSecond());
         assertNull(d.closedAt());
         assertEquals(3, d.tiers().size());
 
@@ -493,7 +493,7 @@ class FakeOrganizerTest {
     void dashboardRevenueCountsPaidOrders() {
         clock.advance(60_000);
         String token = gw.joinQueue("kenji", "the-1975").token();
-        clock.advance(350_000);
+        clock.advance(30_000);
         HoldView hold = gw.hold("kenji", token, "vip", 1);
         var payment = gw.startPayment("kenji", hold.reservationId(), "promptpay");
         gw.answerPayment("kenji", payment.paymentId(), true);

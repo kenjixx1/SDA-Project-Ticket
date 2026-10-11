@@ -1,0 +1,192 @@
+<title>Core Gateway Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column. Headline + a 24-cell coverage strip, a timeline, the core diagram, then the call-by-call map and what to ask for. Dark-first, the app's look 1a. */
+:root{
+  --bg:#000;--s1:#111112;--s2:#1A1A1C;--s3:#252527;--l1:rgba(255,255,255,.08);--l2:rgba(255,255,255,.18);
+  --tx:#F2F2F2;--mu:#8F8F94;--ac:#C5F25A;--acw:rgba(197,242,90,.09);--st:#FF8B7B;--stw:rgba(255,139,123,.11);--am:#E9C46A;--amw:rgba(233,196,106,.1);
+  --f:'Instrument Sans',system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,Menlo,monospace;color-scheme:dark}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#F7F7F4;--s1:#FFFFFF;--s2:#F0F0EC;--s3:#E3E3DE;--l1:rgba(0,0,0,.08);--l2:rgba(0,0,0,.18);--tx:#141414;--mu:#5E5E63;--ac:#4E7A00;--acw:rgba(110,160,0,.10);--st:#C2412E;--stw:rgba(194,65,46,.09);--am:#8A6500;--amw:rgba(160,120,0,.10);color-scheme:light}}
+:root[data-theme="light"]{--bg:#F7F7F4;--s1:#FFFFFF;--s2:#F0F0EC;--s3:#E3E3DE;--l1:rgba(0,0,0,.08);--l2:rgba(0,0,0,.18);--tx:#141414;--mu:#5E5E63;--ac:#4E7A00;--acw:rgba(110,160,0,.10);--st:#C2412E;--stw:rgba(194,65,46,.09);--am:#8A6500;--amw:rgba(160,120,0,.10);color-scheme:light}
+body{background:var(--bg);color:var(--tx);font:400 16px/1.55 var(--f);margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:48px 90px;display:flex;flex-direction:column;gap:58px}
+.eyebrow{font:600 11.5px/1 var(--fm);letter-spacing:.14em;color:var(--mu);text-transform:uppercase}
+h1{font:700 clamp(32px,5vw,52px)/1.04 var(--f);letter-spacing:-.03em;margin:12px 0 14px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--st)}
+h2{font:600 26px/1.15 var(--f);letter-spacing:-.02em;margin:0;text-wrap:balance}
+p{margin:0;max-width:68ch}
+.lead{font-size:18px;color:var(--mu)}.lead b{color:var(--tx)}
+section{display:flex;flex-direction:column;gap:18px}
+.sub{color:var(--mu)}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.chip{display:inline-block;font:600 10.5px/1 var(--fm);letter-spacing:.06em;padding:5px 9px;border-radius:999px;white-space:nowrap}
+.ok{background:var(--acw);color:var(--ac)}.part{background:var(--amw);color:var(--am)}.no{background:var(--stw);color:var(--st)}
+/* coverage strip: 24 cells, one per call */
+.cover{display:flex;flex-direction:column;gap:12px}
+.cells{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:4px}
+.cells span{height:44px;border-radius:7px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font:600 9px/1 var(--fm);color:var(--bg)}
+.cells .c-ok{background:var(--ac)}.cells .c-part{background:var(--am)}.cells .c-no{background:var(--st)}
+.key{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;color:var(--mu)}
+.key b{font:600 22px/1 var(--fm);color:var(--tx);margin-right:6px}
+.key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:1px}
+@media (max-width:640px){.cells{grid-template-columns:repeat(12,minmax(0,1fr))}}
+/* timeline */
+.tl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ev{background:var(--s1);border:1px solid var(--l1);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.ev .d{font:600 12px/1 var(--fm);color:var(--mu)}
+.ev b{font-size:15px}
+.ev.now{border-style:dashed;border-color:var(--l2)}
+.ev.now b{color:var(--mu)}
+@media (max-width:760px){.tl{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* diagram */
+.frame{border:1px solid var(--l1);border-radius:20px;overflow:hidden;background:var(--s1)}
+.frame iframe{display:block;width:100%;height:75vh;border:0}
+/* call map */
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:minmax(0,1fr)}}
+.calls{background:var(--s1);border:1px solid var(--l1);border-radius:18px;overflow:hidden;min-width:0}
+.calls h3{margin:0;padding:16px 18px;font:600 16px/1.2 var(--f);border-bottom:1px solid var(--l1);display:flex;justify-content:space-between;gap:10px}
+.calls h3 span{font:500 12px/1.4 var(--fm);color:var(--mu)}
+.row{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:10px;align-items:start;padding:11px 18px;border-top:1px solid var(--l1);font-size:14px}
+.row:first-of-type{border-top:0}
+.row .id{font:600 12px/1.6 var(--fm);color:var(--mu)}
+.row .w b{display:block;font-weight:600}
+.row .w span{color:var(--mu);font-size:13px}
+/* asks */
+ol.asks{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;counter-reset:a}
+ol.asks li{counter-increment:a;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;background:var(--s1);border:1px solid var(--l1);border-radius:16px;padding:16px 18px}
+ol.asks li::before{content:counter(a);font:600 22px/1 var(--fm);color:var(--mu)}
+ol.asks b{display:block}
+ol.asks span{color:var(--mu);font-size:14.5px}
+.term{background:var(--s1);border:1px solid var(--l1);border-radius:16px;padding:16px 18px;font-size:14.5px;color:var(--mu)}
+.term b{color:var(--tx)}
+.foot{color:var(--mu);font-size:13px;border-top:1px solid var(--l1);padding-top:18px}
+/* plan additions */
+:root{--bl:#7FB8FF;--blw:rgba(127,184,255,.11)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bl:#1F5FB0;--blw:rgba(31,95,176,.09)}}
+:root[data-theme="light"]{--bl:#1F5FB0;--blw:rgba(31,95,176,.09)}
+.cells .c-sb{background:var(--bl)}
+.sb{background:var(--blw);color:var(--bl)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:stretch}
+.box{background:var(--s1);border:1px solid var(--l1);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px;min-width:0;position:relative}
+.box b{font-size:15px}.box span{color:var(--mu);font-size:13px}
+.box.new{border-color:var(--ac)}
+.box.new::after{content:"NEW";position:absolute;top:10px;right:12px;font:600 9.5px/1 var(--fm);color:var(--ac);letter-spacing:.08em}
+.box .alt{border-top:1px dashed var(--l2);padding-top:6px;margin-top:2px}
+@media (max-width:820px){.flow{grid-template-columns:minmax(0,1fr)}}
+.steps{display:flex;flex-direction:column;gap:0;background:var(--s1);border:1px solid var(--l1);border-radius:18px;overflow:hidden}
+.step{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;padding:12px 18px;border-top:1px solid var(--l1);font-size:14.5px;align-items:start}
+.step:first-child{border-top:0}
+.step .t{font:600 12px/1.6 var(--fm);color:var(--mu)}
+.step .w span{color:var(--mu);font-size:13px;display:block}
+.tasks{width:100%;border-collapse:collapse;font-size:14px}
+.tasks th{text-align:left;font:600 11px/1 var(--fm);letter-spacing:.08em;color:var(--mu);padding:10px 12px;border-bottom:1px solid var(--l2)}
+.tasks td{padding:11px 12px;border-bottom:1px solid var(--l1);vertical-align:top}
+.tasks td span{display:block;color:var(--mu);font-size:13px}
+.scroll{overflow-x:auto;background:var(--s1);border:1px solid var(--l1);border-radius:18px}
+.lanes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:820px){.lanes{grid-template-columns:minmax(0,1fr)}}
+.lane{background:var(--s1);border:1px solid var(--l1);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.lane b{font-size:15px}.lane span{color:var(--mu);font-size:13.5px}
+.lane .mono{font-size:12px;color:var(--mu);word-break:break-word}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">EventFlow · plan for review · 11 Oct 2026 · docs/superpowers/plans/2026-10-11-core-gateway.md</div>
+  <h1>Run the pages on the real engine. <em style="color:var(--ac)">20 of 24 calls</em> will work on core.</h1>
+  <p class="lead"><b>A switch, <span class="mono">ENGINE=core</span>, puts the real booking engine behind the same pages.</b> Our gateway fills the gaps core leaves. The fake engine stays the default, so the demo cannot break. The admission rate becomes 200 per second everywhere.</p>
+</header>
+
+<section class="cover">
+  <div class="eyebrow">Our 24 calls after this plan · each square is one</div>
+  <div class="cells" aria-label="13 customer calls then 11 organizer calls">
+    <span class="c-sb">M01</span><span class="c-part">M02</span><span class="c-ok">M03</span><span class="c-ok">M04</span><span class="c-ok">M05</span><span class="c-ok">M06</span><span class="c-part">M07</span><span class="c-no">M08</span><span class="c-part">M09</span><span class="c-part">M10</span><span class="c-part">M11</span><span class="c-sb">M12</span><span class="c-sb">M13</span>
+    <span class="c-sb">O01</span><span class="c-part">O02</span><span class="c-part">O03</span><span class="c-no">O04</span><span class="c-part">O05</span><span class="c-ok">O06</span><span class="c-no">O07</span><span class="c-part">O08</span><span class="c-ok">O09</span><span class="c-no">O10</span><span class="c-sb">O11</span>
+  </div>
+  <div class="key">
+    <span><i style="background:var(--ac)"></i><b>6</b>straight to core</span>
+    <span><i style="background:var(--am)"></i><b>9</b>core, finished by our gateway</span>
+    <span><i style="background:var(--bl)"></i><b>5</b>stand-in, made by our gateway</span>
+    <span><i style="background:var(--st)"></i><b>4</b>refused with <span class="mono">NOT_IN_CORE</span></span>
+  </div>
+  <p class="sub">O-04 and O-07 still work on a draft. They are refused only after the event is published, because core cannot change a published event or tier yet.</p>
+</section>
+
+<section>
+  <div class="eyebrow">One example · Kenji on the real engine · demo clock</div>
+  <h2>Kenji buys 2 × VIP, and core does the real work</h2>
+  <div class="steps">
+    <div class="step"><span class="t">10:00:00</span><span class="w"><b>The sale opens</b><span>Our gateway sees the time and calls core&rsquo;s <span class="mono">openSale</span>. Core cannot wait until 10:00 by itself.</span></span><span class="chip part">GATEWAY + CORE</span></div>
+    <div class="step"><span class="t">10:00:30</span><span class="w"><b>Kenji joins the queue</b><span>Core&rsquo;s <span class="mono">QueueService.join</span> gives him a token, place 1.</span></span><span class="chip ok">CORE</span></div>
+    <div class="step"><span class="t">10:00:31</span><span class="w"><b>He is let in</b><span>One admission batch per second, 200 people each. He is first, so 1 second.</span></span><span class="chip ok">CORE</span></div>
+    <div class="step"><span class="t">10:00:40</span><span class="w"><b>Holds 2 × VIP · ฿13,000</b><span>Core locks the seats. Its 10-minute clock starts. VIP shows 498 left.</span></span><span class="chip ok">CORE</span></div>
+    <div class="step"><span class="t">10:01:10</span><span class="w"><b>Pays by PromptPay</b><span>The pages expect 3 steps (start, answer, status). Core pays in 1. Our gateway keeps the payment and calls core&rsquo;s <span class="mono">checkout</span> once, on &ldquo;I&rsquo;ve paid&rdquo;.</span></span><span class="chip part">GATEWAY + CORE</span></div>
+    <div class="step"><span class="t">10:01:10</span><span class="w"><b>My tickets shows 2 tickets</b><span>Core confirmed the order. Tickets are Slice 3, so our gateway numbers them, marked <span class="mono">UNSIGNED</span>.</span></span><span class="chip sb">STAND-IN</span></div>
+    <div class="step"><span class="t">any time</span><span class="w"><b>Card · &ldquo;Not available right now&rdquo;</b><span>Core has no card plug-in. PromptPay only.</span></span><span class="chip no">NOT IN CORE</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">How it fits together</div>
+  <h2>One switch picks the engine. Nothing in core changes.</h2>
+  <div class="flow">
+    <div class="box"><b>The pages</b><span>Kenji&rsquo;s shop and Chai&rsquo;s console. Unchanged.</span></div>
+    <div class="box"><b>Web routes</b><span>Same 24 calls, same reply shape.</span></div>
+    <div class="box new"><b>THE SWITCH</b><span><span class="mono">WebServer.main</span> reads <span class="mono">ENGINE</span>.</span><span class="alt">not set → the fake (today)<br><span class="mono">core</span> → the two core gateways</span></div>
+    <div class="box new"><b>RealEngine</b><span>Core plus our own records: drafts, pictures, event state, payments, orders. Runs on the demo clock.</span></div>
+    <div class="box"><b>core/</b><span>Queue, holds, expiry, PromptPay checkout. The teammate&rsquo;s code. <b style="font-size:13px">Not edited.</b></span></div>
+  </div>
+  <p class="sub">Simple drawing of the plan, not a full architecture diagram. <span class="mono">CoreBookingGateway</span> (Kenji) and <span class="mono">CoreOrganizerGateway</span> (Chai) both sit on the one <span class="mono">RealEngine</span>, the same way both fakes share one memory today.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Who does what · lanes run at the same time</div>
+  <h2>2 lanes, then a join</h2>
+  <div class="lanes">
+    <div class="lane"><span class="chip ok" style="align-self:flex-start">LANE A</span><b>Rate 200 everywhere</b><span>The fake engine, its tests, the wizard&rsquo;s default and help line, and docs 04, 07, 08, 10.</span><span class="mono">Task 1 · DeepSeek</span></div>
+    <div class="lane"><span class="chip part" style="align-self:flex-start">LANE B</span><b>The core gateway</b><span>All new files in <span class="mono">web/real/</span>, plus <span class="mono">OrgChecks</span> so both engines refuse bad input the same way.</span><span class="mono">Tasks 2 → 3 → 4 → 5 · DeepSeek</span></div>
+    <div class="lane"><span class="chip sb" style="align-self:flex-start">JOIN</span><b>Switch, docs, screenshots</b><span>Merge, add <span class="mono">ENGINE=core</span>, update docs 09 and 10, click through every page on core.</span><span class="mono">Task 6 · Claude</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Tasks at a glance</div>
+  <div class="scroll"><table class="tasks">
+    <tr><th>#</th><th>TASK</th><th>FILES</th><th>TESTS AFTER</th></tr>
+    <tr><td class="mono">1</td><td><b>Admission rate 200</b><span>Fake constant 12 → 200. Tests that waited 350 s now wait 30 s. Kenji&rsquo;s wait reads about 21 seconds.</span></td><td class="mono">FakeBookingGateway, 5 test files, wizard.js, dialogs.js, 4 docs</td><td class="mono">86</td></tr>
+    <tr><td class="mono">2</td><td><b>RealEngine</b><span>Core on the demo clock. Seeds the 4 story events. Opens sales at their time, lets one batch in per second, ends old holds.</span></td><td class="mono">OrgChecks, EngineClock, RealEngine</td><td class="mono">92</td></tr>
+    <tr><td class="mono">3</td><td><b>Browse, queue, hold</b><span>M-01 to M-07, M-13 on core.</span></td><td class="mono">CoreBookingGateway</td><td class="mono">102</td></tr>
+    <tr><td class="mono">4</td><td><b>Pay and orders</b><span>PromptPay through core&rsquo;s checkout. Card refused. Give seats back early refused.</span></td><td class="mono">CoreBookingGateway</td><td class="mono">109</td></tr>
+    <tr><td class="mono">5</td><td><b>Organizer</b><span>Drafts kept in the gateway. Publish creates the event in core.</span></td><td class="mono">CoreOrganizerGateway</td><td class="mono">120</td></tr>
+    <tr><td class="mono">6</td><td><b>Join</b><span>The switch, an HTTP contract test, docs, screenshots of every page on core.</span></td><td class="mono">WebServer, CoreApiContractTest, docs 09, 10, AGENTS.md</td><td class="mono">123</td></tr>
+  </table></div>
+  <p class="sub">Core&rsquo;s own suite (<span class="mono">./run.sh test</span>, 31 tests) must stay green after every task.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Decisions already made in the plan</div>
+  <h2>What is hard to undo</h2>
+  <ol class="asks">
+    <li><div><b>Core is not edited. Every gap is filled in our gateway.</b><span>Core is the teammate&rsquo;s code. When they add &ldquo;release a hold&rdquo; or &ldquo;close a sale&rdquo;, one gateway method switches from refusing to calling core.</span></div></li>
+    <li><div><b>A draft lives only in our gateway</b><span>Core has no drafts, and cannot remove a tier. So the event is created in core only on Publish. Before that, Chai can change anything.</span></div></li>
+    <li><div><b>&ldquo;Not built yet&rdquo; is a 409 with code <span class="mono">NOT_IN_CORE</span>, never a 5xx</b><span>Our router treats any 5xx as &ldquo;you are offline&rdquo;. A 409 shows the message on the page instead.</span></div></li>
+    <li><div><b>Core runs on the demo clock</b><span>The demo panel&rsquo;s speed and +10 min still work on core. Scenario buttons (race lost, bank slow, and so on) are refused, because core has nothing to fake.</span></div></li>
+    <li><div><b>200 per second undoes a recorded decision</b><span><span class="mono">docs/08</span> lists &ldquo;200 → 12&rdquo; as change 8, with the reason. The plan rewrites that row to say the team went back to 200 on 11 Oct, and the SCR-38 helper still shows the careful number, 7,500 ÷ 600 ≈ 12.</span></div></li>
+  </ol>
+</section>
+
+<section>
+  <div class="eyebrow">Open questions · my default in bold</div>
+  <h2>4 things to confirm</h2>
+  <ol class="asks">
+    <li><div><b>Wizard help line → &ldquo;The booking engine starts at 200. Lower it if people get in only to find every seat already held.&rdquo;</b><span>The old line worked out 12 per second. Default: use the new line.</span></div></li>
+    <li><div><b>Leave the design&rsquo;s sample text &ldquo;about 6 min&rdquo; in docs/08</b><span>It is design sample data, and the live page computes the real wait anyway. Default: leave it.</span></div></li>
+    <li><div><b>Show unsigned stand-in tickets on core</b><span>The other choice is to refuse My tickets on core. Default: show them, marked UNSIGNED, so the buying story ends on a ticket.</span></div></li>
+    <li><div><b>Present the demo on the fake engine</b><span>The fake shows every screen and hard case. Core shows the real engine with gaps. Default: present on the fake, then show <span class="mono">ENGINE=core</span> as a short extra.</span></div></li>
+  </ol>
+</section>
+
+<p class="foot">This page is an overview. The execution source of truth is <span class="mono">docs/superpowers/plans/2026-10-11-core-gateway.md</span> (6 tasks, full code and tests). Nothing has been built yet.</p>
+</div>

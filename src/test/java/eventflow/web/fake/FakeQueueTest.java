@@ -66,10 +66,10 @@ class FakeQueueTest {
         clock.advance(10_000);
         var q = gw.queueStatus("kenji", join.token());
         assertEquals("WAITING", q.state());
-        assertEquals(4182 - 120, q.position());
-        assertEquals(6823 + 120, q.moved());
+        assertEquals(4182 - 2000, q.position());
+        assertEquals(6823 + 2000, q.moved());
 
-        clock.advance(340_000);
+        clock.advance(11_000);
         assertEquals("ADMITTED", gw.queueStatus("kenji", join.token()).state());
     }
 

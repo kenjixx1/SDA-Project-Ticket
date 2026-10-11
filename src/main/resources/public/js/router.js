@@ -77,6 +77,13 @@ export function startApp({ screens, chrome = () => '' }) {
         render(me);
         return false;
       }
+      // ENGINE=core: a step the booking engine does not have yet. Say so and keep the screen.
+      if (e instanceof ApiError && e.code === 'NOT_IN_CORE' && me.loaded) {
+        me.state.notice = e.message;
+        render(me);
+        setTimeout(() => { if (me.alive && me.state.notice === e.message) { me.state.notice = null; render(me); } }, 6000);
+        return false;
+      }
       console.error(e);
       me.state.error = e instanceof ApiError && e.status === 404 ? 'missing' : 'failed';
       me.loaded = true;
@@ -93,7 +100,10 @@ export function startApp({ screens, chrome = () => '' }) {
     else if (!me.loaded) body = me.def.loading ? me.def.loading() : skeleton();
     else body = me.def.view(me.state, me.ctx);
     const top = me.state.offline && !me.def.ownOffline ? offlineBanner(!me.def.poll) : '';
-    appEl.innerHTML = String(html`${chrome(me.path)}${top}${body}`);
+    const note = me.state.notice
+      ? html`<div class="banner core-note" role="status"><b>Not in the booking engine yet</b><p>${me.state.notice}</p></div>`
+      : '';
+    appEl.innerHTML = String(html`${chrome(me.path)}${top}${body}${note}`);
     if (me.loaded && !me.animated) {
       me.animated = true;
       appEl.querySelector('.screen')?.classList.add('enter');
