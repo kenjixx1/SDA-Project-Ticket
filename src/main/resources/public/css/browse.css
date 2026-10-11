@@ -9,8 +9,6 @@
 .pick.sel{border:2px solid var(--ac);padding:15px 17px;background:linear-gradient(var(--acw),var(--acw)),var(--s1)}
 .pick.sel .price{color:var(--ac)}
 .pick:disabled{opacity:.45;cursor:default}
-.pick.method{grid-template-columns:auto 1fr auto}
-.pick .tile{width:44px;height:44px;border-radius:12px;background:var(--s3);display:grid;place-items:center;font:600 11px/1 var(--fm);grid-row:span 2}
 
 .stepper{display:flex;align-items:center;gap:18px}
 .stepper button{width:44px;height:44px;border-radius:50%;border:1px solid var(--l2);font-size:20px;display:grid;place-items:center}
@@ -31,10 +29,6 @@
 .qbar i{display:block;height:100%;background:var(--ac);border-radius:4px;box-shadow:0 0 14px var(--ac);transition:width 1s ease}
 .qmeta{display:flex;justify-content:space-between;font:500 13px var(--fm);color:var(--mu)}
 .qmeta .eta{color:var(--ac)}
-.slim{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--l1)}
-.slim img,.slim .ph{width:40px;height:40px;border-radius:10px;object-fit:cover;background:var(--s3)}
-.slim b{font:700 17px/1.2 var(--f);display:block}
-.slim span{font:400 12px var(--fm);color:var(--mu)}
 
 /* SCR-05 event */
 .poster{position:relative;margin:-24px -20px 0;aspect-ratio:780/560;max-height:320px;overflow:hidden;background:var(--s2)}
@@ -105,7 +99,6 @@
 .menu{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r)}
 .menu button{width:100%;text-align:left;padding:16px 18px;font-weight:500}
 .menu button.stop{color:var(--st)}
-.flash{position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.85);z-index:30;font:600 30px var(--f);color:var(--ac);animation:tq-fade .2s both}
 @media (hover:hover){
   .pick:not(:disabled):hover{border-color:var(--l2);background:var(--s2)}
   .pick.sel:not(:disabled):hover{border-color:var(--ac)}

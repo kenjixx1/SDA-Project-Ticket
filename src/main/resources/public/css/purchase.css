@@ -53,3 +53,6 @@
 .provider .btn.ok{background:#1A1A1C;color:#FFFFFF}
 .provider .btn.no{background:transparent;color:#1A1A1C;border:1px solid #C9C9D0}
 .spinner{width:56px;height:56px;border-radius:50%;border:3px solid var(--acw);border-top-color:var(--ac);animation:tq-spin 1.4s linear infinite}
+/* payment method rows (SCR-12) */
+.pick.method{grid-template-columns:auto 1fr auto}
+.pick .tile{width:44px;height:44px;border-radius:12px;background:var(--s3);display:grid;place-items:center;font:600 11px/1 var(--fm);grid-row:span 2}
