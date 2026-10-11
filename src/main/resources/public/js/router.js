@@ -44,6 +44,7 @@ export function startApp({ screens, chrome = () => '' }) {
     if (def.poll) {
       me.timer = setInterval(async () => {
         if (!me.loaded || me.busy || me.state.error) return;
+        if (def.poll.paused && def.poll.paused(me.state)) return; // e.g. while a dialog is open, so typing keeps focus
         me.busy = true;
         await guard(me, () => def.poll.run(me.ctx, ...params));
         me.busy = false;
