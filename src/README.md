@@ -9,6 +9,12 @@
 
 Slice 3 (more plug-ins, tickets, dashboard) is not built yet.
 
+**The presentation layer is built too** (`web/` and `resources/public/`). It
+runs on a fake booking engine for now; see `docs/09-web-api.md`. Run it with
+`mvn -q compile exec:java` and open http://localhost:7070/ (Kenji, the customer)
+or http://localhost:7070/organizer.html (Chai, the organizer). Add `?dev` to
+either address for the demo controls.
+
 ## How to run
 
 Needs only a JDK, version 17 or newer. No Maven, no Gradle, no libraries.
@@ -57,7 +63,7 @@ removed, 42 buyers got the last 10 seats and the test failed.
 - `PricingRule` plug-ins and `PricingService` (Slice 3)
 - `ticket/` — digital tickets and `TicketIssued` (Slice 3)
 - `SalesDashboardService` (Slice 3)
-- A database and a web API. Everything is in memory.
+- A real database. Everything is in memory (ASM-08).
 
 `QueueLoadTest` measures the code in one Java process, not over a network.
 
@@ -78,17 +84,22 @@ eventflow
 │   ├── payment/    PromptPay, Stripe  (simulated — ASM-04)
 │   └── pricing/    EarlyBird, StudentDiscount, FanClubPresale
 ├── ticket/         issuing digital tickets
-└── admin/          organizer: event management + dashboard
+├── admin/          organizer: event management + dashboard
+└── web/            presentation layer: routes, BookingGateway, the fake (docs/09)
+
+src/main/resources/public/   the customer screens (plain HTML, CSS, JavaScript)
 ```
 
 ## The one rule the build must enforce
 
 ```
 core/  ──MUST NEVER import──►  plugin/
+core/  ──MUST NEVER import──►  web/
 ```
 
 This is the NFR-08 fitness function. It is not a guideline — `ArchitectureTest`
-fails the build when it is broken. See `docs/06-architecture.md` §6.5.
+(run by `./run.sh test`) and `ArchitectureRuleTest` (run by `mvn test`) fail the
+build when it is broken. See `docs/06-architecture.md` §6.5.
 
 ## Conventions
 

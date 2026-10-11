@@ -1,0 +1,208 @@
+/* Purchase screens SCR-09 to SCR-18. Owned by Lane C.
+   Shapes and sizes come from design/Ticket App Web.dc.html: the "Timed" block (319-414),
+   SCR-16 Confirmed (415-443), SCR-17 Ticket (444-489) and the release dialog (494-505). */
+
+/* SCR-09 / SCR-12: the "Timed" block, one column for content and one for the clock */
+.screen.timed{max-width:1180px;padding:40px 40px 70px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start}
+.screen.timed .col{display:flex;flex-direction:column;gap:16px}
+.screen.timed .head{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
+.screen.timed .title{font:600 40px/1.05 var(--f);letter-spacing:-.02em}
+.screen.timed .sub{font:400 16px/1.45 var(--f)}
+.screen.timed .label{font-size:12px;margin-top:10px}
+.screen.timed .side{position:sticky;top:0;display:flex;flex-direction:column;gap:14px}
+.screen.timed .side .btn{height:56px;font-size:16px}
+.screen.timed .side .btn.quiet{height:52px;font:500 15px/1 var(--f)}
+/* line 405: the quiet way out under "I have paid" */
+.screen.timed .side .textlink{height:40px;font:500 14px/1 var(--f);text-decoration:underline;text-underline-offset:3px}
+/* the coral banner (line 334): no border, the second line in white */
+.screen.timed .banner{padding:14px 18px;border:0;border-radius:var(--rb);gap:3px}
+.screen.timed .banner b{font:600 15px/1.3 var(--f);color:var(--st)}
+.screen.timed .banner p{font:400 14px/1.35 var(--f);color:var(--tx)}
+/* the lime card that says the seats just dropped (line 345) */
+.screen.timed .card.good{background:var(--acw);border:0;padding:18px 22px;gap:5px}
+.screen.timed .card.good b{font:600 15px/1.3 var(--f)}
+.screen.timed .card.good p{font-size:14px;line-height:1.45}
+/* "Do not close this page." (line 408), on SCR-13 and SCR-15 */
+.card.note{padding:18px 20px;gap:5px}
+.card.note b{font:600 15px/1.3 var(--f)}
+.card.note p{font:400 14px/1.45 var(--f)}
+/* SCR-09b: the release dialog is the only user of .sheet-time (line 499).
+   The row is font:500 13px/1, the value 600 17px/1, so it stands 37px tall. */
+.sheet-time{align-items:center;padding:10px 0;margin-top:0;font-weight:500;line-height:1}
+.sheet-time .mono{font-size:17px}
+/* A coral outline button inside a dialog is the lighter 500 (lines 501 and 512). */
+.sheet .acts .btn.danger{font-weight:500}
+
+/* C-02 countdown */
+.countdown{position:relative;overflow:hidden;border:1.5px solid var(--ac);border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(135deg,var(--acw),transparent 60%)}
+.countdown .top{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.countdown .lbl{display:flex;align-items:center;gap:8px;color:var(--ac);font:500 14px/1 var(--f)}
+.countdown .lbl i{position:relative;width:7px;height:7px;border-radius:50%;background:var(--ac)}
+.countdown .lbl i::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ac);animation:tq-ripple 1s ease-out infinite}
+.countdown .v{font:600 56px/1 var(--fm);letter-spacing:-.02em;color:var(--ac);font-variant-numeric:tabular-nums}
+.bar{height:3px;border-radius:3px;background:var(--s2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:3px;transition:width .3s linear}
+@keyframes tq-ripple{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.4);opacity:0}}
+
+/* C-03 order summary, and the ticket detail rows */
+.rows{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:6px 24px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--l1)}
+.row:last-child{border-bottom:0}
+.row .k{color:var(--mu)}
+.row .v{font:500 15px/1 var(--fm);text-align:right}
+.row .v.txt{font:600 15px/1 var(--f)}
+.row.sum{padding:14px 0 12px}
+.row.sum .k{color:var(--tx);font-weight:600;font-size:16px}
+.row.sum .v{font:600 30px/1 var(--f);letter-spacing:-.02em}
+/* The promotion lines are lime (line 341). parts.js orderSummary draws them after the first
+   three rows and before the Total row, which is the only row carrying .sum. */
+.screen.timed .rows .row:nth-child(n+4):not(.sum) .k,
+.screen.timed .rows .row:nth-child(n+4):not(.sum) .v{color:var(--ac)}
+/* The design's rows are font:400 15px/1 with 15px padding, and the Total row is taller:
+   18px above it, 14px below (lines 338-342). The base .row keeps its own metrics for the
+   ticket detail rows on SCR-17, which are 16px/1.3 in the design (lines 476-481). Only the
+   Total row lines its two ends up on the baseline; the others stretch, as the design's do. */
+
+/* SCR-12 method cards */
+.methods{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.method{display:flex;align-items:center;gap:14px;padding:18px;border-radius:var(--r);background:var(--s1);border:2px solid var(--l1);text-align:left;width:100%;transition:background .2s,border-color .2s,transform .3s cubic-bezier(.2,.8,.2,1)}
+.method.sel{background:var(--acw);border-color:var(--ac)}
+.method:disabled{opacity:.45;cursor:default}
+.method .tile{width:48px;height:36px;flex:none;border-radius:8px;background:var(--s3);display:grid;place-items:center;font:600 10px/1 var(--fm)}
+.method .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.method .name{font:600 15px/1.2 var(--f)}
+.method .left{font:400 13px/1.2 var(--f);color:var(--mu)}
+.method .left.out{color:var(--st)}
+.method .check{width:22px;height:22px;flex:none;border-radius:50%;background:var(--ac);color:var(--aci);display:grid;place-items:center;font-size:13px}
+@media (hover:hover){
+  .method:not(:disabled):hover{transform:translateY(-3px)}
+}
+
+/* SCR-13: the QR panel (line 358) and the bank's own wording beside it */
+.payqr{display:flex;align-items:center;gap:32px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:28px}
+.payqr .frame{position:relative;overflow:hidden;width:240px;flex:none;padding:16px;border-radius:var(--rb);background:var(--qr);box-sizing:border-box}
+.payqr .frame svg{display:block}
+.payqr .scan{position:absolute;left:10px;right:10px;height:2px;background:var(--ac);box-shadow:0 0 10px var(--ac);animation:tq-scan 2.6s ease-in-out infinite;z-index:1}
+.payqr .say{display:flex;flex-direction:column;gap:10px}
+.payqr .say b{font:600 18px/1.3 var(--f)}
+.payqr .say p{margin:0;font:400 15px/1.5 var(--f);color:var(--mu)}
+.payqr .say span{font:400 13px/1 var(--f);color:var(--mu);margin-top:6px}
+
+/* SCR-14: the simulated provider's own page (lines 364-384). It must not look like ours. */
+.paycard{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden}
+.paycard .chead{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 24px;background:var(--s2);border-bottom:1px solid var(--l1)}
+.paycard .logo{display:flex;align-items:center;gap:8px;font:700 15px/1 var(--f)}
+.paycard .logo i{width:16px;height:16px;border-radius:4px;background:var(--ac)}
+.paycard .chead>span:last-child{font:400 12px/1 var(--fm);opacity:.7}
+.paycard .cbody{padding:22px 24px 24px;display:flex;flex-direction:column;gap:16px}
+.paycard .fld{display:flex;flex-direction:column;gap:7px}
+.paycard .fld>span{font:600 12px/1 var(--f);color:var(--mu)}
+.paycard input{height:48px;width:100%;box-sizing:border-box;padding:0 14px;border-radius:var(--rb);background:var(--bg);color:var(--tx);font:400 16px/1 var(--f);outline:0;border:1px solid var(--l2)}
+.paycard input::placeholder{color:#5C5C62}
+.paycard input:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acw)}
+.paycard input.bad{border-color:var(--st)}
+.paycard .err{font:400 12px/1.3 var(--f);color:var(--st)}
+.paycard .three{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,2fr);gap:12px}
+.paycard .act{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:4px}
+.paycard .act .textlink{padding:0;color:var(--ac);font:500 14px/1.3 var(--f);text-decoration:underline;text-underline-offset:3px}
+.paycard .act .btn{width:auto;min-width:200px;height:50px;padding:0 24px;font-size:16px}
+.paycard .note{margin:0;font:400 12px/1.45 var(--f);color:var(--mu)}
+
+/* SCR-15: the bank is being asked (lines 324-330) */
+.confirm{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:90px 20px}
+.confirm .status-title{font-size:30px}
+.confirm .status-text{max-width:420px}
+.dual{position:relative;width:72px;height:72px;margin-bottom:10px;flex:none}
+.dual i{position:absolute;border-radius:50%;border:3px solid var(--s3)}
+.dual i:first-child{inset:0;border-top-color:var(--ac);animation:tq-spin 1.6s linear infinite}
+.dual i:last-child{inset:13px;border-bottom-color:var(--a2);animation:tq-spin 2.4s linear infinite reverse}
+
+/* SCR-16: one stub per seat, side by side (lines 415-443) */
+.screen.confirmed{max-width:1000px;padding:48px 40px 70px;gap:30px}
+.gohead{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.gohead .status-title{font-size:40px}
+.gohead .status-text{max-width:none}
+.checkring{position:relative;width:80px;height:80px;margin-bottom:6px;flex:none;border-radius:50%;background:var(--ac);color:var(--aci);display:grid;place-items:center;box-shadow:0 12px 40px -10px var(--ac);animation:tq-pop .6s cubic-bezier(.2,.8,.2,1) both}
+.checkring::before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--ac);animation:tq-ring 1.4s .3s ease-out both}
+.checkring polyline{stroke-dasharray:30;animation:tq-draw .45s .35s ease-out both}
+.stubs{display:flex;flex-wrap:wrap;justify-content:center;gap:20px}
+.confirmed .acts{display:flex;justify-content:center;gap:12px}
+.confirmed .acts .btn{width:auto;height:54px;padding:0 28px;font:600 15px/1 var(--f)}
+.confirmed .acts .btn.quiet{padding:0 26px;font-weight:500}
+
+/* C-05 ticket stub, at the size the confirmed screen draws it (line 426) */
+.stubwrap{position:relative;flex:0 0 440px;border-radius:var(--r);overflow:hidden;background:var(--s1);border:1px solid var(--l1);transition:transform .4s cubic-bezier(.2,.8,.2,1),border-color .3s}
+.stubwrap>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:60% 45%}
+.stub{position:relative;background:linear-gradient(90deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.6) 55%,rgba(0,0,0,.25) 100%)}
+.stub .top{display:flex;justify-content:space-between;gap:12px;padding:16px 22px;font:500 12px/1 var(--fm)}
+.stub .top b{color:var(--tx)}
+.stub .top b.mono{color:var(--mu);font-weight:500}
+.stub .tear{border-top:1.5px dashed var(--l2);margin:0 18px;position:relative}
+.stub .tear::before,.stub .tear::after{content:"";position:absolute;top:-10px;width:20px;height:20px;border-radius:50%;background:var(--bg)}
+.stub .tear::before{left:-28px}
+.stub .tear::after{right:-28px}
+.stub .body{display:flex;gap:20px;padding:20px 22px 22px;align-items:center}
+.stub .body .qr{width:110px;height:110px;padding:9px;border-radius:10px;flex:none}
+.stub .info{display:flex;flex-direction:column;gap:5px;min-width:0}
+.stub .info .tier{color:var(--ac);font:700 22px/1.1 var(--f)}
+.stub .info b{font:600 15px/1.2 var(--f)}
+.stub .info span{color:var(--mu);font:400 14px/1.2 var(--f)}
+.stub .info span:nth-of-type(3){font:400 13px/1.2 var(--fm)}
+.stub .info span.mono{font:600 10px/1 var(--fm);letter-spacing:.12em;margin-top:4px}
+@media (hover:hover){
+  .stubwrap:hover{transform:translateY(-5px) rotate(-.4deg);border-color:var(--ac)}
+}
+
+/* SCR-17: the thing Kenji shows at the gate (lines 444-489) */
+.screen.ticket{max-width:1080px;gap:22px}
+.screen.ticket .backlink{align-self:flex-start;font:500 14px/1 var(--f);color:var(--mu);transition:color .2s,transform .3s cubic-bezier(.2,.8,.2,1)}
+@media (hover:hover){
+  .screen.ticket .backlink:hover{color:var(--tx);transform:translateX(-4px)}
+}
+.tkhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.tkhead>div{display:flex;flex-direction:column;gap:8px}
+.tkname{font:700 36px/1 var(--f);letter-spacing:-.01em}
+.tksub{font:500 12px/1 var(--fm);letter-spacing:.08em;color:var(--mu)}
+.pastchip{font:600 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu);padding:7px 9px;border:1px solid var(--l2);border-radius:6px}
+.tkbody{display:grid;grid-template-columns:420px minmax(0,1fr);gap:28px;align-items:start}
+.tkcard{position:relative;overflow:hidden;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:28px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.tkcard>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;z-index:0}
+.tkcard::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.35) 55%,rgba(0,0,0,.85) 100%)}
+.tkcard>.sheen{position:absolute;top:-20%;bottom:-20%;left:0;width:30%;z-index:2;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:tq-sheen 4.5s ease-in-out infinite}
+.tkcard>.qrwrap,.tkcard>.tkid,.tkcard>.tknav{position:relative;z-index:3}
+.tkcard .qr{width:300px;padding:18px;border-radius:calc(var(--r) - 6px);box-sizing:border-box}
+.tkcard .qr svg{display:block}
+.tkid{font:600 16px/1 var(--fm);letter-spacing:.06em;color:var(--ac)}
+.tknav{align-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+.tknav>button{width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--l2);background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
+.tknav>button:disabled{opacity:.3;cursor:default}
+.tkwhere{display:flex;flex-direction:column;align-items:center;gap:10px}
+.tklabel{font:500 12px/1 var(--fm);color:var(--mu)}
+.detail{display:flex;flex-direction:column;gap:14px}
+.detail .rows{padding:4px 24px}
+.detail .row{padding:16px 0}
+.detail .row .v.txt{font:500 15px/1.3 var(--f)}
+.detail .card.stop{background:var(--stw);border-color:transparent}
+.detail .card.stop b{color:var(--st)}
+
+/* QR, ticket stub and ticket (C-05, SCR-17) */
+.qr{background:var(--qr);border-radius:16px;padding:14px;display:grid;place-items:center;align-self:center}
+.qr svg{display:block}
+.qrwrap{position:relative;align-self:center}
+.qrwrap.void .qr{opacity:.35}
+.cut{position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--st)}
+.cut.a{transform:rotate(-45deg)}
+.cut.b{transform:rotate(45deg)}
+.stamp{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);font:700 22px/1 var(--fm);letter-spacing:.12em;color:var(--st);border:2.5px solid var(--st);padding:9px 13px;border-radius:6px;background:var(--qr)}
+.dots{display:flex;align-items:center;gap:8px}
+.dots button{width:7px;height:8px;border-radius:8px;background:var(--l2);transition:width .25s cubic-bezier(.2,.8,.2,1),background .25s}
+.dots button.on{width:22px;background:var(--ac)}
+@media (hover:hover){
+  .dots button:not(.on):hover{background:var(--mu)}
+}
+.screen.past{opacity:.55}
+
+@keyframes tq-scan{0%,100%{top:12px}50%{top:calc(100% - 14px)}}
+@keyframes tq-sheen{0%{transform:translateX(-150%) skewX(-20deg)}55%,100%{transform:translateX(350%) skewX(-20deg)}}
+@keyframes tq-ring{from{transform:scale(.8);opacity:.6}to{transform:scale(2.6);opacity:0}}
+@keyframes tq-draw{from{stroke-dashoffset:30}to{stroke-dashoffset:0}}

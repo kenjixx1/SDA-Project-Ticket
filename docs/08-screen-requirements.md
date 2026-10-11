@@ -31,7 +31,7 @@ Each one is also in `07-glossary.md`.
 | **Screen** | One full page the user sees. It has an ID, `SCR-nn`. |
 | **Variant** | The same screen in a different situation. `SCR-08e` is SCR-08 when Kenji asked for more seats than are left. A variant changes some parts; everything not mentioned stays as in the default. |
 | **Static content** `[S]` | Fixed words or parts. They are the same for every customer, every event and every moment. Example: the button label **Join the queue**. |
-| **Dynamic content** `[D]` | Filled in from stored data. It changes per event, per customer or over time. Example: the event name **BLACKPINK BANGKOK**, which is a different act for a different concert. |
+| **Dynamic content** `[D]` | Filled in from stored data. It changes per event, per customer or over time. Example: the event name **THE 1975 BANGKOK**, which is a different act for a different concert. |
 | **Dynamic list** `[D-list]` | A dynamic part that repeats once per item, and can hold 0, 1 or many items. Example: the Tickets list, one card per concert Kenji has tickets for. |
 | **Live content** `[D-live]` | Dynamic content that updates **by itself while the screen is open**, without the user doing anything. Example: the queue position counting down. |
 | **Takeover** | A full-screen flow with no tab bar, so the user cannot wander off. The purchase flow is a takeover. |
@@ -47,9 +47,9 @@ Every dynamic tag names where the value comes from, using the field names in
 `05-domain-model.md`. The value written after it is the **example from the
 story**, not fixed text.
 
-> `[D] Event.name` — *BLACKPINK BANGKOK*
+> `[D] Event.name` — *THE 1975 BANGKOK*
 >
-> means: show the event's name here. For our story it reads BLACKPINK BANGKOK.
+> means: show the event's name here. For our story it reads THE 1975 BANGKOK.
 > For another concert it reads that concert's name.
 
 A design must work for **every** value a dynamic field can hold, not only the
@@ -59,11 +59,11 @@ story value. Section 8.4 gives the ranges to design for.
 
 ## 8.2 The full list of screens
 
-**29 screens, plus their variants. 18 customer screens on a phone, 11
-organizer screens on a desktop.** Every use case extension in
+**29 screens, plus their variants. 18 customer screens and 11 organizer
+screens, all on a desktop browser.** Every use case extension in
 `04-use-cases.md` lands on at least one of them (see 8.10).
 
-### Customer app — phone
+### Customer app — desktop web
 
 | ID | Screen | Variants | Tab bar | Traces to | Prototype file no. |
 |---|---|---|---|---|---|
@@ -129,27 +129,29 @@ A design AI will often add these by itself. **Do not.**
 
 | Side | Device | Frame size | Why |
 |---|---|---|---|
-| Customer | Phone, portrait | **390 × 844** | Kenji has the page open on their phone at 09:59 (`03-prd.md` §3.3). |
+| Customer | Desktop browser | **1440 × 900** | Kenji has the page open on a laptop at 09:59 (`03-prd.md` §3.3). Changed 11 Oct 2026 from a phone frame, ASM-11. |
 | Organizer | Desktop browser | **1440 × 900** | Chai is watching a live table of numbers, not tapping. See OQ-01. |
 
-Customer screens must also work at **360 px** wide with no sideways scrolling.
+Every screen must also work from **1024 px** wide with no sideways scrolling. There is no phone layout (ASM-11).
 
 ### Design system
 
-The look is already decided. It is **Neon Arena**, written in full in
-`design/mockups/BRIEF.md`. That file is the source of truth for colours, type,
-radius and glow. This document does not repeat it.
+The look is **Redesign V1, look 1a**, in two clickable desktop designs:
+`design/Ticket App Web.dc.html` (customer, SCR-01 to SCR-18) and
+`design/Organizer Console.dc.html` (organizer, SCR-30 to SCR-34a/b). The earlier
+phone prototype `design/TicketApp.dc.html` is kept for history only. That prototype is the source of truth for
+colours, type, radius and glow. This document does not repeat it.
 
 The three rules from it that every screen here depends on:
 
-- **Cyan `#35E3F5` means "move forward".** Primary buttons, the queue bar, the
+- **Lime `#C5F25A` means "move forward".** Primary buttons, the queue bar, the
   countdown, the live dot, the selected tier.
-- **Magenta `#FF5CA8` means "stop".** Low stock, sold out, errors, and the
+- **Coral `#FF8B7B` means "stop".** Low stock, sold out, errors, and the
   expired screens. Nothing else is coloured.
 - **Only the queue bar and the live dot glow.**
 
-> `diagrams/ui-mockup-prompt.md` asks for an amber countdown and red errors.
-> That was written before the design system was chosen. **BRIEF.md wins.**
+Where this document still says cyan, read lime. Where it says magenta, read
+coral.
 
 ### Writing rules for screen text
 
@@ -251,7 +253,7 @@ Design with the long or large value, not only the story value.
 
 | Field | Story value | Must also fit |
 |---|---|---|
-| `Event.name` | BLACKPINK BANGKOK | 40 characters, e.g. *THE ROLLING STONES — HACKNEY DIAMONDS TOUR*. Wraps to 2 lines, then cuts with `…`. |
+| `Event.name` | THE 1975 BANGKOK | 40 characters, e.g. *THE ROLLING STONES — HACKNEY DIAMONDS TOUR*. Wraps to 2 lines, then cuts with `…`. |
 | `Event.venue` | Impact Arena | 30 characters, e.g. *Rajamangala National Stadium*. |
 | `TicketTier.name` | VIP | 20 characters, e.g. *Standing Front Zone A*. |
 | `TicketTier.price` | ฿6,500 | ฿0 (shown as `Free`) to ฿99,999. |
@@ -317,17 +319,20 @@ ORGANIZER
 **Top to bottom**
 
 1. Title `[S] Events`, large. Under it `[D] city` — *Bangkok*.
-2. **Feature card** `[D]` — the soonest event that is on sale or opens today.
-   Stage-lit, two rigs. Contains:
+2. **Search** `[S]` *Search events or venues*, top right. It filters the hero and
+   the grid by event name or venue as you type, shows a result count, and a
+   no-results line when nothing matches.
+3. **Feature hero** — the first event (soonest sale), one wide stage-lit card.
+   (Changed 11 Oct 2026 to match the desktop design: hero + grid, no carousel.) It contains:
    - Status pill `[D] from Event.state and saleOpensAt` — *ON SALE TODAY*. Values: `OPENS 1 OCT`, `ON SALE TODAY`, `ON SALE NOW`, `SOLD OUT`, `SALE CLOSED`.
-   - `[D] Event.name` — *BLACKPINK BANGKOK*, heavy uppercase, up to 2 lines.
+   - `[D] Event.name` — *THE 1975 BANGKOK*, heavy uppercase, up to 2 lines.
    - `[D] Event.venue · Event.eventDateTime` — *Impact Arena · 14 Nov 2026*.
    - Cyan line `[D]` — *Sale opens 10:00, from ฿1,900*. "From" is the cheapest tier price.
-3. Label `[S] ALSO ON SALE`.
-4. **Event rows** `[D-list]` — every other event visible to customers, ordered
+4. Label `[S] ALSO ON SALE`.
+5. **Event cards** `[D-list]`, a 3-column grid — every other event visible to customers, ordered
    by `saleOpensAt`, soonest first. Each row: act name left, cheapest price
-   right, `venue · date` beneath in mono. Story rows: *Bodyslam ฿1,200 Thunder
-   Dome · 22 Nov*, *Tame Impala ฿2,400 UOB Live · 5 Dec*, *Phum Viphurit ฿1,500
+   right, `venue · date` beneath in mono. Story rows: *Bruno Mars ฿1,200 Thunder
+   Dome · 22 Nov*, *Alan Walker ฿2,400 UOB Live · 5 Dec*, *Marshmello ฿1,500
    Moonstar Studio · 18 Dec*. Sold-out rows show `Sold out` in magenta instead
    of a price.
    - **0 rows:** hide the label too.
@@ -360,11 +365,11 @@ Otherwise SCR-03.
 3. **Order cards** `[D-list]` — **one card per confirmed order**, not per
    ticket. Upcoming events first, ordered by event date, soonest first. Each card:
    - Date block on the left: day `[D]` *14* over month `[D]` *NOV*.
-   - `[D] Event.name` — *Blackpink*. Under it `[D] venue · time` in mono — *Impact Arena · 19:00*.
+   - `[D] Event.name` — *The 1975 Bangkok*. Under it `[D] venue · time` in mono — *Impact Arena · 19:00*.
    - Cyan outlined pill on the right `[D] quantity · tier` — *2 · VIP*.
 4. Label `[S] PAST` — hidden if there are none.
 5. **Past order cards** `[D-list]` — same card, half opacity, most recent
-   first. Pill reads `[S] PAST` in grey. *02 AUG · Bodyslam · Thunder Dome · 20:00*.
+   first. Pill reads `[S] PAST` in grey. *02 AUG · Bruno Mars · Thunder Dome · 20:00*.
 6. Tab bar, **Tickets** active.
 
 **Card for a cancelled event.** Full opacity, but the pill reads `[S] CANCELLED`
@@ -459,7 +464,7 @@ button `[S] Back to events` instead.
 
 **Top to bottom**
 
-1. Slim stage-lit header: `[D] Event.name` short form — *BLACKPINK* — and `[D] venue · date`.
+1. Slim stage-lit header: `[D] Event.name` short form — *THE 1975* — and `[D] venue · date`.
 2. Centre, the hero:
    - `[S] YOUR POSITION` small cyan label.
    - `[D-live] QueueToken.position` — **4,182**, about 104 px, tabular digits. **The largest thing on the screen.**
@@ -600,7 +605,7 @@ Different from SCR-18: here no payment was ever started.
 
 **Purpose.** Show the final price, and choose how to pay (UC-03 steps 1–3, FR-14, FR-15).
 
-1. Title `[D]` *Pay ฿13,000*. Under it `[D]` *2 × VIP for Blackpink, 14 Nov 2026*.
+1. Title `[D]` *Pay ฿13,000*. Under it `[D]` *2 × VIP for The 1975 Bangkok, 14 Nov 2026*.
 2. C-02 countdown block, still running.
 3. C-03 order summary, including promotion lines.
 4. Label `[S] HOW DO YOU WANT TO PAY`.
@@ -712,13 +717,13 @@ No buttons. No back.
 
 **Purpose.** The thing Kenji shows at the gate (UC-04 steps 2–4, FR-21).
 
-1. Slim stage-lit header: `[D]` *BLACKPINK* and `[D]` *TICKET 1 OF 2 · VIP*.
+1. Slim stage-lit header: `[D]` *THE 1975* and `[D]` *TICKET 1 OF 2 · VIP*.
 2. Large QR code on a light panel, centred, the dominant element. It carries
    the signed, single-use payload `[D] DigitalTicket.payload + signature`.
 3. Under it `[D] DigitalTicket.ticketId` in cyan mono — *TKT-9F42-01*.
 4. Rows:
    - `[S] Holder` `[D]` *Kenji*
-   - `[S] Event` `[D]` *Blackpink Bangkok*
+   - `[S] Event` `[D]` *The 1975 Bangkok*
    - `[S] Venue` `[D]` *Impact Arena*
    - `[S] Date` `[D]` *Saturday 14 November, 19:00*
    - `[S] Tier` `[D]` *VIP*
@@ -778,7 +783,7 @@ understand **in under 2 seconds** that they were not charged (UC-03 ext 7a, FR-1
 
    | Column | Example |
    |---|---|
-   | Event | *BLACKPINK — Bangkok* |
+   | Event | *The 1975 Bangkok* |
    | Venue | *Impact Arena* |
    | Event date | *14 Nov 2026, 19:00* |
    | Sale opens | *1 Oct 2026, 10:00* |
@@ -801,12 +806,13 @@ understand **in under 2 seconds** that they were not charged (UC-03 ext 7a, FR-1
 3. Form fields, every one required:
    | Label | Input | Story value |
    |---|---|---|
-   | `[S] Event name` | text, up to 40 characters | *BLACKPINK — Bangkok* |
+   | `[S] Event name` | text, up to 40 characters | *The 1975 Bangkok* |
    | `[S] Venue` | text, up to 30 characters | *Impact Arena* |
    | `[S] Event date and time` | date + time | *14 Nov 2026, 19:00* |
    | `[S] Sale opens` | date + time, to the second | *1 Oct 2026, 10:00:00* |
    | `[S] Admission rate` | number per second, default **12** | *12* — helper text as in SCR-38 |
-4. Footer: `[S] Cancel` (quiet) → SCR-30. Cyan `[S] Save and add tiers` → SCR-32. The event is saved as `DRAFT` at this point.
+4. **Card picture** (right column, above the admission-rate help; added 11 Oct 2026, no design yet). `[S] CARD PICTURE`, a 16:9 drop box `[S] Choose a picture` · *or drop it here · PNG, JPG or WebP · up to 2 MB*. Once chosen it shows the picture with the event name on it, the way the customer card shows it, with `[S] Change` and `[S] Remove`. Optional: without it the customer card shows the event name on a plain panel. A wrong file: `[S] Use a PNG, JPG or WebP picture of 2 MB or less.`
+5. Footer: `[S] Cancel` (quiet) → SCR-30. Cyan `[S] Save and add tiers` → SCR-32. The event is saved as `DRAFT` at this point.
 
 **Variant b · sale time in the past** (ext 1a). Under the field in magenta:
 `[S] The sale must open in the future.` Button disabled.
@@ -821,7 +827,7 @@ sale time after the event time (`[S] The sale must open before the event.`).
 **Purpose.** Add the price bands (UC-05 steps 3–4, FR-24).
 
 1. Step indicator, step 2 active.
-2. Title `[D]` *Tiers for BLACKPINK — Bangkok*.
+2. Title `[D]` *Tiers for The 1975 Bangkok*.
 3. **Tier table** `[D-list]`, editable rows, 0 to 8:
    | Name | Price (฿) | Seats | |
    |---|---|---|---|
@@ -856,6 +862,9 @@ than 0.* or *VIP · Price cannot be below ฿0.* Review is disabled.
 ---
 
 ### SCR-34 · Event overview
+
+> SCR-34a and b follow `design/Organizer Console.dc.html`. Variants c to f and SCR-35 to SCR-40 have
+> no visual design yet; they are built from this text with the same parts (11 Oct 2026).
 
 **Purpose.** See the event and make changes that its state allows (UC-06).
 
@@ -958,7 +967,7 @@ just disabled. In e and f the whole page is read only.
 
 **Purpose.** See whether the sale is working, right now (UC-07, FR-31 – FR-34).
 
-1. Title `[D]` *BLACKPINK — Bangkok · Live*. On the right, C-01 live indicator.
+1. Title `[D]` *The 1975 Bangkok · Live*. On the right, C-01 live indicator.
 2. **Queue row**, two big figures:
    - `[S] Waiting` `[D-live]` **31,208**
    - `[S] Admitting` `[D-live]` **12 / second**

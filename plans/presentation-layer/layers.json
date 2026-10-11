@@ -1,0 +1,197 @@
+{
+ "schema_version": 1,
+ "diagram_type": "architecture",
+ "meta": {
+  "title": "EventFlow presentation layer",
+  "quality_profile": "showcase",
+  "viewBox": [
+   1100,
+   580
+  ]
+ },
+ "components": [
+  {
+   "id": "phone",
+   "type": "external",
+   "label": "Kenji's phone",
+   "sublabel": "browser",
+   "pos": [
+    20,
+    240
+   ],
+   "size": [
+    140,
+    68
+   ]
+  },
+  {
+   "id": "page",
+   "type": "frontend",
+   "label": "Page",
+   "sublabel": "public/ HTML CSS JS",
+   "pos": [
+    220,
+    240
+   ],
+   "size": [
+    150,
+    68
+   ]
+  },
+  {
+   "id": "routes",
+   "type": "backend",
+   "label": "web/ routes",
+   "sublabel": "Javalin, JSON",
+   "pos": [
+    450,
+    240
+   ],
+   "size": [
+    150,
+    68
+   ]
+  },
+  {
+   "id": "gateway",
+   "type": "backend",
+   "label": "BookingGateway",
+   "sublabel": "1 Java interface",
+   "pos": [
+    670,
+    240
+   ],
+   "size": [
+    150,
+    68
+   ]
+  },
+  {
+   "id": "fake",
+   "type": "backend",
+   "label": "Fake gateway",
+   "sublabel": "today, in memory",
+   "pos": [
+    900,
+    110
+   ],
+   "size": [
+    150,
+    68
+   ]
+  },
+  {
+   "id": "real",
+   "type": "backend",
+   "tag": "later",
+   "label": "Core gateway",
+   "sublabel": "later, teammate",
+   "pos": [
+    900,
+    350
+   ],
+   "size": [
+    150,
+    68
+   ]
+  },
+  {
+   "id": "core",
+   "type": "backend",
+   "tag": "teammate",
+   "label": "core/ services",
+   "sublabel": "queue, seats, orders",
+   "pos": [
+    900,
+    480
+   ],
+   "size": [
+    150,
+    60
+   ]
+  }
+ ],
+ "boundaries": [
+  {
+   "kind": "region",
+   "label": "Java app, 1 run command",
+   "wraps": [
+    "routes",
+    "gateway",
+    "fake",
+    "real",
+    "core"
+   ]
+  }
+ ],
+ "connections": [
+  {
+   "id": "tap",
+   "from": "phone",
+   "to": "page",
+   "label": "tap",
+   "variant": "emphasis"
+  },
+  {
+   "id": "fetch",
+   "from": "page",
+   "to": "routes",
+   "label": "fetch JSON",
+   "variant": "emphasis"
+  },
+  {
+   "id": "call",
+   "from": "routes",
+   "to": "gateway",
+   "label": "call"
+  },
+  {
+   "id": "today",
+   "from": "gateway",
+   "to": "fake",
+   "label": "today",
+   "fromSide": "top",
+   "toSide": "left"
+  },
+  {
+   "id": "later",
+   "from": "gateway",
+   "to": "real",
+   "label": "later",
+   "variant": "dashed",
+   "fromSide": "bottom",
+   "toSide": "left"
+  },
+  {
+   "id": "uses",
+   "from": "real",
+   "to": "core",
+   "label": "calls",
+   "variant": "dashed",
+   "fromSide": "bottom",
+   "toSide": "top",
+   "labelAt": [
+    1005,
+    449
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "dot": "cyan",
+   "title": "The 1-line switch",
+   "items": [
+    "WebServer picks fake or core",
+    "Page and routes never change"
+   ]
+  },
+  {
+   "dot": "amber",
+   "title": "The rule",
+   "items": [
+    "core/ never imports web/",
+    "The page never decides anything"
+   ]
+  }
+ ]
+}

@@ -36,3 +36,5 @@ skills-lock.json
 
 # raw, unnormalised image-gen output (kept locally, regenerate from design/mockups/BRIEF.md)
 design/mockups/raw/
+
+.superpowers/

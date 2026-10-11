@@ -16,6 +16,15 @@ of the solution, not people with goals.
 
 ---
 
+### Adapter
+A small piece of code that lets one part talk to another part whose shape does not fit it directly.
+
+*A travel plug adapter: the hair dryer stays the same, only the plug shape changes.*
+
+**Example:** `BookingGateway` is the presentation layer's adapter. The pages talk to it; behind it sits the fake today and `core/` later.
+
+---
+
 ### Admission window
 How long an admitted customer has to place a hold before their queue token
 expires. **5 minutes** (ASM-07).
@@ -34,6 +43,16 @@ outside.*
 
 Customers are let in as **batches** (FR-05): each second, the next 200
 tokens in line.
+
+---
+
+### API
+Short for application programming interface. The list of messages one program
+accepts from another, and the answer to each.
+
+*A cafe menu. You can only order what is on it.*
+
+**Example:** the customer page uses 13 messages, M-01 to M-13, listed in `09-web-api.md`.
 
 ---
 
@@ -169,6 +188,26 @@ What a list screen shows when the list has nothing in it. It says why it is empt
 
 ---
 
+### Endpoint
+One address on the server that answers one kind of message.
+
+*A counter window at the post office: each window does one job.*
+
+**Example:** `POST /api/holds` is the endpoint Kenji's page calls to hold 2 VIP seats.
+
+---
+
+### Envelope
+The fixed outer shape every answer from the server has, so the page always
+knows where to look.
+
+*A printed form: the boxes are always in the same place, only what is written in them changes.*
+
+**Example:** every answer starts with `serverNow`, the server's clock, then
+either `data` or `error` (`09-web-api.md` §9.3).
+
+---
+
 ### Event
 A short message saying that something has **already happened**. It is news,
 not a request.
@@ -229,6 +268,17 @@ reconnect (FR-04) and admission by issue time (FR-05).
 
 ---
 
+### Fake
+A stand-in that behaves like the real part, but with simple made-up rules.
+It lets one part be built and tested before the real part exists.
+
+*A cardboard cut-out of a person at a photo stand.*
+
+**Example:** `FakeBookingGateway` holds seats and takes payments in memory
+while the real `core/` is still being written.
+
+---
+
 ### FIFO — first in, first out
 The rule of a normal queue: whoever arrived first is served first. Here it
 decides admission order. **NFR-09.**
@@ -260,6 +310,17 @@ not — regardless of what any document claims.
 Something the system **does**. Written as **FR-nn**.
 
 *"Issue a queue token to a customer who asks to enter a sale that is open."*
+
+---
+
+### Gateway
+The single doorway one layer uses to reach another. Swapping what is behind
+the doorway does not change the layer in front of it.
+
+*A wall socket. The lamp works the same whichever power station is behind it.*
+
+**Example:** `BookingGateway` is filled by the fake today and by `core/` later.
+Only 2 lines in `WebServer` change.
 
 ---
 
@@ -306,6 +367,15 @@ matter what happens in between. Written as **INV-nn**.
 
 If an invariant is ever false, the system is not merely wrong, it is broken.
 INV-01 is this project's most important line.
+
+---
+
+### JSON
+A plain text format for sending data: names and values inside curly brackets.
+
+*A labelled form: every value sits next to its name.*
+
+**Example:** `{"tierId": "vip", "quantity": 2}` is the body of Kenji's hold message.
 
 ---
 
@@ -358,6 +428,15 @@ This system has exactly two kinds: `PaymentProvider` and `PricingRule`.
 
 ---
 
+### Polling
+Asking the server the same question again on a timer, to keep a screen up to date.
+
+*Checking the queue number board at a bank every few seconds.*
+
+**Example:** the queue screen asks for Kenji's position every 2 seconds (SCR-06).
+
+---
+
 ### Postcondition
 What is true after a use case finishes. Written for both outcomes — success
 *and* failure.
@@ -366,6 +445,15 @@ What is true after a use case finishes. Written for both outcomes — success
 
 ### Precondition
 What must already be true before a use case can start.
+
+---
+
+### Presentation layer
+The part of the system the customer sees and touches, plus the code that carries their taps to the server. Here: the pages in `resources/public/` and the `web/` routes.
+
+*The shop counter and the person serving at it. The kitchen behind is a different layer.*
+
+**Example:** when Kenji taps **Hold these seats**, the presentation layer sends M-06 and shows SCR-09 with the answer.
 
 ---
 

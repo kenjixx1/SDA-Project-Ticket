@@ -25,7 +25,7 @@ This project designs a system that survives both.
 
 Every document in this set uses the same story.
 
-> **BLACKPINK — Bangkok.** Impact Arena, 14 November 2026.
+> **The 1975 Bangkok.** Impact Arena, 14 November 2026.
 > 7,500 seats. Sale opens at exactly 10:00:00 on 1 October 2026.
 > About **40,000 people** are waiting with the page already open.
 >
@@ -51,7 +51,7 @@ selling seat A-14 twice — two people will be standing in front of it.
 
 ### The real numbers
 
-| | Supermarket | BLACKPINK sale |
+| | Supermarket | The 1975 sale |
 |---|---|---|
 | People arriving | Spread over 12 hours | 40,000 in 1 second |
 | Items | Restocked tomorrow | 7,500, then gone forever |

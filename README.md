@@ -32,6 +32,7 @@ same seat twice.
 | 5 | [`docs/05-domain-model.md`](docs/05-domain-model.md) | The six things the system stores, and the rules that must never break. |
 | 6 | [`docs/06-architecture.md`](docs/06-architecture.md) | Event-driven + microkernel, and which requirement forced each decision. |
 | 8 | [`docs/08-screen-requirements.md`](docs/08-screen-requirements.md) | Every screen, what it must show, and which parts are static or dynamic. Hand this to a designer. |
+| 9 | [`docs/09-web-api.md`](docs/09-web-api.md) | The 13 messages the customer page sends to the Java server. |
 | — | [`docs/07-glossary.md`](docs/07-glossary.md) | Every technical word, in plain English. Read whenever a word is unfamiliar. |
 
 **In a hurry?** Read `01`, then `04`, then `06`.
@@ -146,7 +147,7 @@ exists to point, not to hold.
 | `E-nn` | Domain entity | `docs/05` |
 | `INV-nn` | Invariant — a rule that must always hold | `docs/05` |
 
-**One story runs through every document**: BLACKPINK at Impact Arena, Kenji
+**One story runs through every document**: The 1975 at Impact Arena, Kenji
 buying 2 × VIP, Chai running the sale. The numbers are fixed in `AGENTS.md` §2
 so no document contradicts another.
 

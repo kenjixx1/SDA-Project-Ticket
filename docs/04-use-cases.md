@@ -35,7 +35,7 @@ Each specification below has these parts:
 
 | Actor | Who | In this document |
 |---|---|---|
-| **Customer** | A member of the public buying tickets | **Kenji**, buying 2 × VIP for BLACKPINK — Bangkok |
+| **Customer** | A member of the public buying tickets | **Kenji**, buying 2 × VIP for The 1975 Bangkok |
 | **Organizer** | The person running the event and its sale | **Chai** |
 
 **There are only two actors, and both are people.**
@@ -87,13 +87,13 @@ activity diagram, not in the use case diagram.
 | | |
 |---|---|
 | **Actor** | Customer (Kenji) |
-| **Goal** | *"Get a place in line for the BLACKPINK sale, and know where I stand."* |
+| **Goal** | *"Get a place in line for the The 1975 sale, and know where I stand."* |
 | **Preconditions** | Kenji has an account (ASM-01). The event exists and the sale-open time has passed. |
 | **Trigger** | Kenji opens the event's sale page. |
 
 ### Main success scenario
 
-1. Kenji asks to join the sale for **BLACKPINK — Bangkok**.
+1. Kenji asks to join the sale for **The 1975 Bangkok**.
 2. The system checks they have no active queue token for this event.
 3. The system issues a **queue token** and puts it at the back of the queue.
 4. The system shows their **position 4,182** and an estimated wait of ~6 minutes.
@@ -325,7 +325,7 @@ ends at *issuing* a ticket that can be verified. See `03-prd.md` §3.5.
 ### Main success scenario
 
 1. Chai enters name, venue, date and sale-open time:
-   *BLACKPINK — Bangkok · Impact Arena · 14 Nov 2026 · on sale 1 Oct 2026, 10:00.*
+   *The 1975 Bangkok · Impact Arena · 14 Nov 2026 · on sale 1 Oct 2026, 10:00.*
 2. The system creates the `Event` in state `DRAFT`.
 3. Chai adds the tiers:
 

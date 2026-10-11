@@ -40,7 +40,8 @@ documents harder to follow, and nothing builds up.
 
 | Thing | Value |
 |---|---|
-| Event | BLACKPINK — Bangkok |
+| Event | The 1975 Bangkok |
+| Other events (lists only) | Bruno Mars · Thunder Dome · from ฿1,200, Alan Walker · UOB Live · from ฿2,400, Marshmello · Moonstar Studio · from ฿1,500 |
 | Venue / date | Impact Arena, 14 November 2026 |
 | Sale opens | 10:00:00, 1 October 2026 |
 | People at the door | ~40,000 |
@@ -180,6 +181,11 @@ commit that touches `src/`; all tests must pass.
   architecture is still demonstrated.
 - **No build tool, no libraries.** Plain `javac` through `./run.sh`, Java 17
   language level. Tests use the small runner in `src/test/java`, not JUnit.
+- **One exception: `web/`**, the presentation layer, uses Javalin and JUnit and
+  builds with Maven (`mvn test`, `mvn -q compile exec:java`). `./run.sh` skips
+  `web/`. Before a commit that touches `web/` or `resources/public/`, run
+  `mvn test`; before one that touches anything else in `src/`, run
+  `./run.sh test`. `core/` stays library-free either way.
 - Only the composition root `EventFlow.java` (outside `core/`) may name a
   plug-in class. `ArchitectureTest` fails the build otherwise (NFR-08).
 
