@@ -318,8 +318,11 @@ ORGANIZER
 **Top to bottom**
 
 1. Title `[S] Events`, large. Under it `[D] city` — *Bangkok*.
-2. **Feature card** `[D]` — the soonest event that is on sale or opens today.
-   Stage-lit, two rigs. Contains:
+2. **Feature carousel** `[D-list]` — one feature card per event, soonest sale
+   first. Swiped sideways on a phone, one card at a time. A counter `1 / 4`
+   sits on each card, dots under the carousel show where you are, and with a
+   mouse two arrows appear on hover. (Changed 11 Oct 2026 to match the design,
+   which shows a carousel.) Each card is stage-lit, two rigs, and contains:
    - Status pill `[D] from Event.state and saleOpensAt` — *ON SALE TODAY*. Values: `OPENS 1 OCT`, `ON SALE TODAY`, `ON SALE NOW`, `SOLD OUT`, `SALE CLOSED`.
    - `[D] Event.name` — *THE 1975 BANGKOK*, heavy uppercase, up to 2 lines.
    - `[D] Event.venue · Event.eventDateTime` — *Impact Arena · 14 Nov 2026*.

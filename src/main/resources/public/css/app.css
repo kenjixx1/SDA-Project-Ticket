@@ -141,6 +141,24 @@ img{max-width:100%;display:block}
 .feature .meta{font:400 13px var(--fm);color:var(--mu)}
 .feature .from{color:var(--ac);font-weight:500}
 .feature .pill:not(.stop):not(.grey){background:var(--ac);color:var(--aci);border-color:var(--ac)}
+.feature .pill.grey{background:rgba(0,0,0,.6);color:var(--tx);border-color:rgba(255,255,255,.3)}
+.feature .count{position:absolute;top:14px;right:14px;z-index:1;font:600 11px var(--fm);color:var(--tx);background:rgba(0,0,0,.55);padding:4px 8px;border-radius:999px}
+/* SCR-01 carousel: swipe on a phone, arrows on hover with a mouse, dots everywhere */
+.carousel-wrap{position:relative;margin:0 -20px}
+.carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px;scroll-padding:0 20px;scrollbar-width:none}
+.carousel::-webkit-scrollbar{display:none}
+.carousel .feature{flex:0 0 100%;scroll-snap-align:start}
+.cdots{display:flex;justify-content:center;gap:6px;margin-top:12px}
+.cdots button{width:6px;height:6px;border-radius:3px;background:var(--l2);transition:width .2s,background .2s}
+.cdots button.on{width:18px;background:var(--ac)}
+.cnav{position:absolute;top:132px;z-index:2;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);color:var(--tx);font-size:22px;line-height:1;display:grid;place-items:center;opacity:0;transition:opacity .2s,background .2s}
+.cnav.prev{left:28px}
+.cnav.next{right:28px}
+/* SCR-17: the QR sits on the event's artwork, like the design */
+.ticket-hero{position:relative;border-radius:var(--r);overflow:hidden;padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--s2)}
+.ticket-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6}
+.ticket-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.75))}
+.ticket-hero>.qrwrap,.ticket-hero>p{position:relative;z-index:1}
 .pill{align-self:flex-start;font:600 11px/1 var(--fm);letter-spacing:.06em;padding:6px 9px;border-radius:999px;border:1px solid var(--ac);color:var(--ac);white-space:nowrap}
 .pill.stop{border-color:var(--st);color:var(--st)}
 .pill.grey{border-color:var(--l2);color:var(--mu)}
@@ -239,6 +257,27 @@ img{max-width:100%;display:block}
 #dev button,#dev select{font:inherit;color:inherit;background:#2A3249;border:1px solid #3A4562;border-radius:6px;padding:4px 6px}
 #dev .row2{display:flex;gap:4px;flex-wrap:wrap}
 
+/* Hover: only on devices with a mouse, so phones keep their tap look */
+.btn,.pick,.erow,.ocard,.menu button,.textlink,.tabbar a,.stepper button,.back,.feature img{transition:transform .15s,filter .15s,background .15s,border-color .15s,color .15s}
+.feature img{transition:transform .5s ease}
+@media (hover:hover){
+  .btn:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn.quiet:not(:disabled):hover,.btn.danger:not(:disabled):hover{filter:none;background:var(--s1)}
+  .pick:not(:disabled):hover{border-color:var(--l2);background:var(--s2)}
+  .pick.sel:not(:disabled):hover{border-color:var(--ac)}
+  .feature:hover img{transform:scale(1.04)}
+  .erow:hover b{color:var(--ac)}
+  .erow:hover .thumb{transform:scale(1.06)}
+  .ocard:not(.past):hover{border-color:var(--l2);background:var(--s2)}
+  .menu button:hover{background:var(--s2)}
+  .textlink:hover,.tabbar a:hover{color:var(--tx)}
+  .tabbar a.on:hover{color:var(--ac)}
+  .stepper button:not(:disabled):hover{border-color:var(--ac);color:var(--ac)}
+  .back:hover,.cnav:hover{background:rgba(0,0,0,.85)}
+  .carousel-wrap:hover .cnav{opacity:1}
+  .dots button:hover,.cdots button:not(.on):hover{background:var(--mu)}
+}
+.erow .thumb{transition:transform .2s}
 @keyframes tq-spin{to{transform:rotate(360deg)}}
 @keyframes tq-pulse{0%,100%{opacity:1}50%{opacity:.45}}
 @keyframes tq-up{from{transform:translate(-50%,100%)}to{transform:translate(-50%,0)}}

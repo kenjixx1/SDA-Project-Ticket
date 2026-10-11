@@ -23,6 +23,24 @@ function orderCard(o) {
   </button>`;
 }
 
+// The event carousel (SCR-01) moves without redrawing the screen, so its buttons use
+// data-carousel-go instead of data-action. These listeners scroll it and light the right dot.
+const step = (c) => (c.firstElementChild ? c.firstElementChild.offsetWidth + 12 : c.clientWidth);
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-carousel-go]');
+  const c = document.querySelector('[data-carousel]');
+  if (!b || !c) return;
+  const go = b.dataset.carouselGo;
+  if (go === 'prev' || go === 'next') c.scrollBy({ left: (go === 'next' ? 1 : -1) * step(c), behavior: 'smooth' });
+  else c.scrollTo({ left: Number(go) * step(c), behavior: 'smooth' });
+});
+document.addEventListener('scroll', (e) => {
+  const c = e.target;
+  if (!(c instanceof Element) || !c.matches('[data-carousel]')) return;
+  const i = Math.round(c.scrollLeft / step(c));
+  document.querySelectorAll('.cdots button').forEach((d, k) => d.classList.toggle('on', k === i));
+}, true);
+
 export const screens = [
   {
     id: 'events',
@@ -38,12 +56,20 @@ export const screens = [
       }
       return html`<section class="screen tabbed">
         <div><h1 class="title">Events</h1><p class="sub">Bangkok</p></div>
-        <button class="feature" data-action="go" data-to="#/event/${f.eventId}">
-          <img src="${f.artwork}" alt=""><div class="shade"></div>
-          <div class="txt">${pill(f)}<h2>${f.name}</h2>
-            <span class="meta">${f.venue} · ${dateShort(f.eventDateTime)}</span>
-            <span class="from">Sale opens ${time24(f.saleOpensAt)}, from ${baht(f.fromPrice)}</span></div>
-        </button>
+        <div class="carousel-wrap">
+          <div class="carousel" data-carousel>
+            ${st.events.map((e, i) => html`<button class="feature" data-action="go" data-to="#/event/${e.eventId}">
+              <img src="${e.artwork}" alt=""><div class="shade"></div>
+              <span class="count">${i + 1} / ${st.events.length}</span>
+              <div class="txt">${pill(e)}<h2>${e.name}</h2>
+                <span class="meta">${e.venue} · ${dateShort(e.eventDateTime)}</span>
+                <span class="from">Sale opens ${time24(e.saleOpensAt)}, from ${baht(e.fromPrice)}</span></div>
+            </button>`)}
+          </div>
+          ${st.events.length > 1 ? html`<button class="cnav prev" data-carousel-go="prev" aria-label="Previous event">‹</button>
+            <button class="cnav next" data-carousel-go="next" aria-label="Next event">›</button>
+            <div class="cdots">${st.events.map((e, i) => html`<button class="${i === 0 ? 'on' : ''}" data-carousel-go="${i}" aria-label="Event ${i + 1}"></button>`)}</div>` : ''}
+        </div>
         ${rest.length ? html`<span class="label" style="margin-top:12px">Also on sale</span>
           <div>${rest.map((e) => html`<button class="erow" data-action="go" data-to="#/event/${e.eventId}">
             <div class="who"><img class="thumb" src="${e.artwork}" alt=""><div><b>${e.name}</b><span>${e.venue} · ${dayMonth(e.eventDateTime)}</span></div></div>

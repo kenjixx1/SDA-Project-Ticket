@@ -41,11 +41,14 @@ export const screens = [
       const t = o.tickets[n - 1];
       const cancelled = t.state === 'CANCELLED';
       return html`<section class="screen ${o.past ? 'past' : ''}">
-        ${slimHeader(o.event.shortName, `TICKET ${n} OF ${o.tickets.length} · ${o.tierName.toUpperCase()}`)}
+        ${slimHeader(o.event.shortName, `TICKET ${n} OF ${o.tickets.length} · ${o.tierName.toUpperCase()}`, o.event.artwork)}
         ${o.past ? html`<span class="label">Past event</span>` : ''}
-        <div class="qrwrap ${cancelled ? 'void' : ''}"><div class="qr">${qr(t.payload, 240)}</div>
-          ${cancelled ? html`<span class="stamp">CANCELLED</span>` : ''}</div>
-        <p class="mono" style="color:var(--ac);text-align:center;margin:0">${t.ticketId}</p>
+        <div class="ticket-hero">
+          ${o.event.artwork ? html`<img src="${o.event.artwork}" alt="">` : ''}
+          <div class="qrwrap ${cancelled ? 'void' : ''}"><div class="qr">${qr(t.payload, 220)}</div>
+            ${cancelled ? html`<span class="stamp">CANCELLED</span>` : ''}</div>
+          <p class="mono" style="color:var(--ac);text-align:center;margin:0">${t.ticketId}</p>
+        </div>
         <div class="rows">
           <div class="row"><span class="k">Holder</span><span class="v txt">${st.me.name}</span></div>
           <div class="row"><span class="k">Event</span><span class="v txt">${o.event.name}</span></div>

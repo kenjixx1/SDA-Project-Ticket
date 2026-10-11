@@ -59,6 +59,7 @@ class FakeBookingTest {
         assertEquals(1300, h.promotions().get(0).amount());
         assertEquals(11700, h.totalAmount());
         assertEquals("The 1975 Bangkok", h.event().name());
+        assertEquals("assets/the-1975-card.png", h.event().artwork());
         assertEquals(14, vipLeft());
         assertEquals("SPENT", gw.queueStatus("kenji", token).state());
     }

@@ -107,7 +107,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         }
 
         EventRef ref() {
-            return new EventRef(id, name, shortName, venue, dateTime);
+            return new EventRef(id, name, shortName, venue, dateTime, artwork);
         }
     }
 
@@ -235,7 +235,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         paymentSeq = 5000;
         orderSeq = 9000;
         EventRef past = new EventRef("bruno-mars-aug", "Bruno Mars", "BRUNO MARS", "Thunder Dome",
-                at(2026, 8, 2, 20, 0));
+                at(2026, 8, 2, 20, 0), "assets/bruno-mars.png");
         Order o = new Order("O-0001", "kenji", past, "zone-a", "Zone A", 1, 3800, "PromptPay");
         o.ticketIds.add("TKT-3B17-01");
         orders.put(o.id, o);

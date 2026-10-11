@@ -36,7 +36,9 @@ public final class Views {
     public record TierAvailability(String tierId, String name, long price, int remaining, int total) {
     }
 
-    public record EventRef(String eventId, String name, String shortName, String venue, long eventDateTime) {
+    /** artwork: the event picture path, for headers and ticket backdrops. */
+    public record EventRef(String eventId, String name, String shortName, String venue, long eventDateTime,
+                           String artwork) {
     }
 
     /** amount is the discount in baht, a positive number. */

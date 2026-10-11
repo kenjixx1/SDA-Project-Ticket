@@ -77,11 +77,11 @@ A refusal or error:
 | M-09 | `POST /api/holds/{reservationId}/payments` | `{providerKey}` | **201** `{paymentId, reservationId, providerKey, providerLabel, amount, display}` | SCR-12, 13b, 14b |
 | M-10 | `POST /api/payments/{paymentId}/answer` | `{approve}` | `PaymentStatus`. Sending it twice changes nothing (FR-18) | SCR-13, SCR-14 |
 | M-11 | `GET /api/payments/{paymentId}` | | `PaymentStatus` = `{paymentId, reservationId, providerKey, state, answered, orderId}`. `state` is `PENDING`, `CAPTURED`, `DECLINED` or `VOIDED` | SCR-15 every 1 s |
-| M-12 | `GET /api/me/orders` | | list of `{orderId, event, eventState, tierId, tierName, quantity, paidAmount, providerLabel, past, tickets[{ticketId, n, of, payload, state}]}` | SCR-02, 03, 16, 17 |
+| M-12 | `GET /api/me/orders` | | list of `{orderId, event (same fields as in HoldView), eventState, tierId, tierName, quantity, paidAmount, providerLabel, past, tickets[{ticketId, n, of, payload, state}]}` | SCR-02, 03, 16, 17 |
 | M-13 | `GET /api/me` | | `{customerId, name, maskedEmail}` | SCR-04, SCR-17 |
 
 `HoldView` = `{reservationId, token, state, event{eventId, name, shortName,
-venue, eventDateTime}, tierId, tierName, quantity, unitPrice,
+venue, eventDateTime, artwork}, tierId, tierName, quantity, unitPrice,
 promotions[{name, amount}], totalAmount, expiresAt, remainingBefore,
 remainingAfter, paymentMethods[{key, tile, label, line, available}],
 paymentId}`. `state` is `HELD`, `CONFIRMED`, `EXPIRED` or `RELEASED`.
