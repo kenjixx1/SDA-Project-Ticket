@@ -7,6 +7,7 @@
 /* ---- SCR-30 My events ---- */
 .ev-top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
 .ev-titles{display:flex;flex-direction:column;gap:8px}
+.ev-titles .sub{line-height:1}
 .ev-top .btn{width:auto;height:48px;padding:0 22px;font:600 15px/1 var(--f);box-shadow:none}
 
 .ev-tbl{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden}
@@ -41,16 +42,56 @@
 /* ---- SCR-31 Details: the form card and the ADMISSION RATE helper ---- */
 .wiz-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}
 .wiz-card{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:32px;display:flex;flex-direction:column;gap:26px}
+/* The label row is 14 tall, like the design's 14px/1 label (design lines 98, 103, 108). */
+.wiz-card .field .fl{align-items:flex-start;height:14px}
 .wiz-card .field .fl b{font:500 14px/1 var(--f)}
+/* The design's inputs are 50 tall plus a 1px border on each side (design line 99). */
 .wiz-card .field input{height:50px;font:500 16px/1 var(--f)}
+.wiz-card .field input[name=name],.wiz-card .field input[name=venue]{height:52px}
+.wiz-card .field input:focus{outline:none;border-color:var(--ac)}
 .wiz-card .err{min-height:17px}
 /* field() draws its error line only when it has one; keep the 17px line reserved so nothing jumps. */
 .wiz-card .field:not(:has(.err)){padding-bottom:25px}
 .wiz-two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
-.wiz-card .wiz-two input{font:500 15px/1 var(--fm)}
 .wiz-rate{display:flex;align-items:center;gap:12px}
 .wiz-card .wiz-rate input{width:120px;font:500 16px/1 var(--fm)}
 .wiz-rate>span{font:400 15px/1 var(--f);color:var(--mu)}
+
+/* ---- SCR-31 Details: the four date and time pickers (design lines 107-186) ---- */
+.wiz-two>.pk-wrap{position:relative}
+.pk{position:relative;z-index:6;width:100%;height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid var(--l2);color:var(--mu);font:500 15px/1 var(--fm);display:flex;align-items:center;justify-content:space-between;text-align:left;cursor:pointer}
+.pk.set{color:var(--tx)}
+.field .pk.on{border-color:var(--ac)}
+.field.bad .pk:not(.on){border-color:var(--st)}
+.pk .chev{width:7px;height:7px;border-right:1.5px solid var(--mu);border-bottom:1.5px solid var(--mu);transform:rotate(45deg) translateY(-2px);flex:none}
+.pk-back{position:fixed;inset:0;z-index:5}
+
+.pk-pop{position:absolute;z-index:10;width:320px;padding:18px;border-radius:18px;background:var(--s2);border:1px solid var(--l2);box-shadow:0 24px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:12px;animation:oc-in .18s ease-out both}
+.pk-date{top:58px;left:0}
+.pk-time{top:58px;right:0;padding:14px}
+.pk-pop.up{top:auto;bottom:58px}
+@keyframes oc-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.pk-head{display:flex;align-items:center;justify-content:space-between}
+.pk-nav{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:500 16px/1 var(--f);cursor:pointer}
+.pk-nav.off{color:rgba(143,143,148,.35);cursor:default}
+.pk-title{font:600 15px/1 var(--f)}
+.pk-wd,.pk-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.pk-wd{font:500 11px/1 var(--fm);color:var(--mu);text-align:center}
+.pk-d{height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--fm);color:var(--tx);cursor:pointer}
+.pk-d.sel{background:var(--ac);color:var(--aci);cursor:default}
+.pk-d.today{box-shadow:inset 0 0 0 1px var(--l2)}
+.pk-d.past{color:rgba(143,143,148,.35);cursor:not-allowed}
+.pk-note{font:400 12px/1.4 var(--f);color:var(--mu)}
+
+.pk-cols{display:flex;gap:6px}
+.pk-col{display:flex;flex-direction:column;gap:8px;width:64px}
+.pk-h{font:500 10.5px/1 var(--fm);letter-spacing:.1em;color:var(--mu);text-align:center}
+.pk-list{height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none}
+.pk-list::-webkit-scrollbar{display:none}
+.pk-it{flex:none;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--fm);color:var(--tx);cursor:pointer}
+.pk-it.sel{background:var(--ac);color:var(--aci)}
+.pk-done{height:38px;border:0;border-radius:12px;background:var(--ac);color:var(--aci);font:600 13px/1 var(--f);cursor:pointer}
 
 .wiz-help{display:flex;flex-direction:column;gap:14px;padding-top:6px}
 .wiz-help p{margin:0;font:400 14px/1.55 var(--f);color:var(--mu);text-wrap:pretty}
@@ -66,4 +107,5 @@
 
 @media (hover:hover){
   .ev-row:hover{background:var(--s2)}
+  .pk-d:not(.sel):not(.past):hover,.pk-it:not(.sel):hover,.pk-nav:not(.off):hover{background:var(--s3)}
 }
