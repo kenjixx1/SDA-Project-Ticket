@@ -30,7 +30,7 @@ const isWhole = (n) => Number.isInteger(n);
 
 // ----- the live checks, in the server's own words (docs/09 §9.4) -----
 
-/** SCR-35: the same required fields as SCR-31. The sale time is only checked while its inputs are editable. */
+/** SCR-35: the same required fields as SCR-31. The sale time is only judged while its inputs are editable. */
 function detailsChecks(e, d) {
   const f = d.f;
   const err = {};
@@ -39,8 +39,10 @@ function detailsChecks(e, d) {
   if (saleFrozen(e)) return err;
   const sale = toEpoch(f.saleDate, f.saleTime);
   const event = toEpoch(f.evDate, f.evTime);
+  // Only a changed time can be too late: an untouched one is not sent, so a sale that opens at that
+  // moment still saves. The server judges it the same way.
   if (sale === null) err.sale = 'Required';
-  else if (sale <= serverNow()) err.sale = 'The sale must open in the future.';
+  else if (sale !== e.saleOpensAt && sale <= serverNow()) err.sale = 'The sale must open in the future.';
   else if (event !== null && sale >= event) err.sale = 'The sale must open before the event.';
   return err;
 }
