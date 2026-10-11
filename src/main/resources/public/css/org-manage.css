@@ -1,1 +1,57 @@
-/* Organizer manage screens (SCR-34 to SCR-40). Owned by Lane E. */
+/* Organizer manage screens (SCR-34 to SCR-40). Owned by Lane E. Look 1a tokens come from app.css. */
+
+/* The 1200px column these screens sit in (design line 48). */
+.ov-page{max-width:1200px;padding-bottom:60px;gap:28px}
+.ov-page .title{font-size:40px;line-height:1.05}
+
+/* ---- SCR-34 the event head, the banners and the action bar (design lines 267-279) ---- */
+.ov-note{display:flex;gap:8px;align-items:baseline;border-radius:16px;background:var(--acw);padding:16px 20px;animation:tq-in .4s cubic-bezier(.2,.8,.2,1) both}
+.ov-note b{font:600 15px/1.3 var(--f);color:var(--ac)}
+.ov-note span{font:400 15px/1.3 var(--f)}
+.ov-note.stop{background:var(--stw)}
+.ov-note.stop b{color:var(--st)}
+
+.ov-head{display:flex;flex-direction:column;gap:12px}
+.ov-name{display:flex;align-items:center;gap:16px}
+.ov-meta{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.ov-sub{font:400 14px/1.3 var(--fm);color:var(--mu)}
+.ov-link{font:500 14px/1 var(--f);color:var(--ac);white-space:nowrap}
+
+.ov-acts{display:flex;align-items:flex-start;gap:12px}
+.ov-acts .btn{width:auto;height:46px;padding:0 20px;border-radius:14px;font:600 14px/1 var(--f);box-shadow:none}
+.ov-hold{display:flex;flex-direction:column;gap:8px}
+.ov-hold span{font:400 13px/1.3 var(--f);color:var(--mu)}
+
+/* ---- SCR-34 tier table and queue card (design lines 280-295) ---- */
+.ov-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.ov-tbl{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden}
+.ov-th,.ov-row{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(5,minmax(0,1fr)) 60px;gap:16px;padding:0 26px}
+.ov-th{padding-top:18px;padding-bottom:18px;border-bottom:1px solid var(--l1);font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)}
+.ov-row{align-items:center;padding-top:17px;padding-bottom:17px;border-top:1px solid var(--l1);font:500 14px/1.3 var(--fm);font-variant-numeric:tabular-nums}
+.ov-th .n,.ov-row .n{text-align:right}
+.ov-tname{font:600 15px/1.3 var(--f)}
+.ov-row .held{color:var(--ac)}
+.ov-act{text-align:right}
+.ov-none{padding:24px 26px;border-top:1px solid var(--l1);font:400 14px/1.5 var(--f);color:var(--mu)}
+.ov-add{padding:16px 26px;border-top:1px solid var(--l1)}
+.ov-add .btn{width:auto;height:40px;padding:0 16px;border-radius:12px;font:500 14px/1 var(--f);box-shadow:none}
+
+.ov-card{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:14px}
+.ov-rate-k{font:400 14px/1 var(--f);color:var(--mu)}
+.ov-rate{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.ov-rate-n{font:600 30px/1 var(--fm);font-variant-numeric:tabular-nums}
+.ov-rate-n span{font:400 14px/1 var(--f);color:var(--mu)}
+
+/* ---- SCR-35 to SCR-39 the dialogs (sheet() from parts.js, design "Ticket App Web" lines 494-519) ---- */
+.sheet .dlg{display:flex;flex-direction:column;gap:12px}
+.sheet .field .fl b{font:500 14px/1.2 var(--f)}
+.sheet .field input{height:46px;border-radius:12px;font:500 15px/1 var(--f)}
+.sheet .dlg-two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px}
+/* A field keeps room for its error line, so a refused save does not move the buttons. */
+.sheet .field:not(:has(.err)){padding-bottom:19px}
+.sheet .note{font:400 13px/1.45 var(--f);color:var(--mu);text-wrap:pretty}
+.sheet .lock{display:inline-flex;align-items:center;color:var(--mu)}
+
+@media (hover:hover){
+  .ov-link:hover{color:var(--tx)}
+}

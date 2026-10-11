@@ -1,1 +1,345 @@
-export {};
+// SCR-35 to SCR-39: the dialogs the event overview opens. Each one draws with sheet() from parts.js.
+// Which dialog is open and what was typed lives in ctx.state.dialog, so typing never redraws the page.
+import { org } from './api.js';
+import { ApiError } from '../api.js';
+import { html, raw, num, sheet } from '../parts.js';
+import { field, toEpoch, dateInput, timeInput } from './parts.js';
+
+/** The screen that owns the open dialog. Only it may repaint the dialog's live checks. */
+let live = null;
+export const bindDialogs = (ctx) => { live = ctx; };
+
+/** A redraw would take the caret out of the box being typed in, so hold the screen's 5-second poll. */
+const holdPoll = (ctx) => { ctx.run.busy = !!ctx.state.dialog; };
+
+const LOCK = raw('<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.5"/><path d="M8.5 10.5v-3a3.5 3.5 0 0 1 7 0v3"/></svg>');
+
+const tierOf = (e, tierId) => e.tiers.find((t) => t.tierId === tierId);
+
+const number = (v) => {
+  const s = String(v).trim();
+  if (s === '') return null;
+  const n = Number(s);
+  return Number.isFinite(n) ? n : null;
+};
+
+/** The server counts baht as whole numbers, so a typed 6,500.4 goes in as 6,500. */
+const whole = (v) => { const n = number(v); return n === null ? null : Math.round(n); };
+
+// ----- the live checks, in the server's own words (docs/09 §9.4) -----
+
+/** SCR-36: the same row rules as SCR-32, plus FR-28 — a tier cannot shrink below what is sold and held. */
+function tierChecks(e, d) {
+  const t = tierOf(e, d.tierId);
+  const err = rowChecks(d.f);
+  const total = number(d.f.total);
+  if (!err.total && total !== null && total < t.sold + t.held) {
+    err.total = `${d.f.name.trim() || t.name}: ${num(t.sold)} sold and ${num(t.held)} held. Cannot reduce below ${num(t.sold + t.held)}.`;
+  }
+  return err;
+}
+
+/** SCR-37: the same checks as a SCR-32 row. A row without a name is named by its number. */
+const addChecks = (e, d) => rowChecks(d.f);
+
+function rowChecks(f) {
+  const err = {};
+  const name = f.name.trim();
+  const label = name || 'Tier 1';
+  if (!name) err.name = `${label} · Name is required.`;
+  const price = number(f.price);
+  if (price === null || price < 0) err.price = `${label} · Price cannot be below ฿0.`;
+  const total = number(f.total);
+  if (total === null || total <= 0) err.total = `${label} · Seats must be more than 0.`;
+  return err;
+}
+
+/** SCR-38: a rate below 1 would stop the queue moving at all. */
+function rateChecks(e, d) {
+  const rate = number(d.f.rate);
+  return rate === null || rate < 1 ? { rate: 'Must be at least 1.' } : {};
+}
+
+const CHECKS = { details: () => ({}), tier: tierChecks, add: addChecks, rate: rateChecks, close: () => ({}) };
+const checks = (e, d) => CHECKS[d.name](e, d);
+
+/** A refusal from the server names a field; this is the error line that field belongs under. */
+const KEY = {
+  details: { name: 'name', venue: 'venue', eventDateTime: 'ev', saleOpensAt: 'sale' },
+  tier: { name: 'name', price: 'price', total: 'total' },
+  add: { name: 'name', price: 'price', total: 'total' },
+  rate: { admitPerSecond: 'rate' },
+  close: {},
+};
+
+/** What the error line under one field says right now: the server's refusal, or a live check of a field already typed in. */
+const lineOf = (e, d, key) => (d.err && d.err.key === key ? d.err.message : d.touched[key] || d.asked ? checks(e, d)[key] || '' : '');
+/** A refusal that is not about one field. */
+const apart = (d) => (d.err && !d.err.key ? d.err.message : '');
+/** True while any error line is showing, which is when Save has nothing to send. */
+const blocked = (e, d) => GROUPS.some((key) => lineOf(e, d, key));
+const GROUPS = ['name', 'venue', 'ev', 'sale', 'price', 'total', 'rate'];
+
+// ----- the sheets -----
+
+export function dialogSheet(st) {
+  const d = st.dialog;
+  if (!d) return '';
+  if (d.name === 'details') return detailsSheet(st.e, d);
+  if (d.name === 'tier') return tierSheet(st.e, d);
+  if (d.name === 'add') return addSheet(st.e, d);
+  if (d.name === 'rate') return rateSheet(st.e, d);
+  return closeSheet(st.e, d);
+}
+
+/** SCR-35 Edit details. The sale time belongs to the sale, so it stops being editable once the sale is on. */
+function detailsSheet(e, d) {
+  const f = d.f;
+  const frozen = !(e.state === 'DRAFT' || e.state === 'SCHEDULED');
+  const bad = (k) => (lineOf(e, d, k) ? 'bad' : '');
+  return sheet({
+    title: 'Edit details',
+    extra: html`<div class="dlg">
+      ${field({ label: 'Event name', name: 'f_name', value: f.name, error: lineOf(e, d, 'name'), extra: 'maxlength="40" placeholder="The 1975 Bangkok"' })}
+      ${field({ label: 'Venue', name: 'f_venue', value: f.venue, error: lineOf(e, d, 'venue'), extra: 'maxlength="30" placeholder="Impact Arena"' })}
+      <div class="field ${bad('ev')}">
+        <span class="fl"><b>Event date and time</b></span>
+        <span class="dlg-two"><input type="date" name="f_evDate" value="${f.evDate}"><input type="time" name="f_evTime" value="${f.evTime}"></span>
+        <span class="err" role="alert">${lineOf(e, d, 'ev')}</span>
+      </div>
+      <div class="field ${bad('sale')}">
+        <span class="fl"><b>Sale opens</b><i>to the second</i></span>
+        <span class="dlg-two"><input type="date" name="f_saleDate" value="${f.saleDate}" ${frozen ? raw('disabled') : ''}><input type="time" step="1" name="f_saleTime" value="${f.saleTime}" ${frozen ? raw('disabled') : ''}></span>
+        <span class="err" role="alert">${lineOf(e, d, 'sale')}</span>
+      </div>
+      ${apart(d) ? html`<span class="err" role="alert">${apart(d)}</span>` : ''}
+    </div>`,
+    buttons: [
+      { label: 'Cancel', action: 'dlgClose', quiet: true },
+      { label: 'Save', action: 'dlgSaveDetails', disabled: blocked(e, d), working: d.working ? 'Saving' : '' },
+    ],
+    close: 'dlgClose',
+  });
+}
+
+/** SCR-36 Edit tier (b: the price is frozen while the sale is on). */
+function tierSheet(e, d) {
+  const t = tierOf(e, d.tierId);
+  const frozen = e.state === 'ON_SALE';
+  const counts = `${num(t.sold)} sold · ${num(t.held)} held · ${num(t.remaining)} remaining`;
+  const price = frozen
+    ? html`<label class="field">
+        <span class="fl"><b>Price (฿)</b><i class="lock">${LOCK}</i></span>
+        <span class="fi"><input name="f_price" value="${d.f.price}" disabled></span>
+        <span class="note">Prices are frozen while the sale is on, so no customer sees a price change mid-purchase.</span>
+      </label>`
+    : field({ label: 'Price (฿)', name: 'f_price', value: d.f.price, error: lineOf(e, d, 'price'), extra: 'inputmode="numeric" placeholder="0"' });
+  return sheet({
+    title: `Edit ${t.name}`,
+    extra: html`<div class="dlg">
+      ${field({ label: 'Name', name: 'f_name', value: d.f.name, error: lineOf(e, d, 'name'), extra: 'maxlength="20" placeholder="Tier name"' })}
+      ${price}
+      <label class="field ${lineOf(e, d, 'total') ? 'bad' : ''}">
+        <span class="fl"><b>Total seats</b></span>
+        <span class="fi"><input name="f_total" inputmode="numeric" value="${d.f.total}" placeholder="0"></span>
+        <span class="note">${counts}</span>
+        <span class="err" role="alert">${lineOf(e, d, 'total')}</span>
+      </label>
+      ${apart(d) ? html`<span class="err" role="alert">${apart(d)}</span>` : ''}
+    </div>`,
+    buttons: [
+      { label: 'Cancel', action: 'dlgClose', quiet: true },
+      { label: 'Save', action: 'dlgSaveTier', disabled: blocked(e, d), working: d.working ? 'Saving' : '' },
+    ],
+    close: 'dlgClose',
+  });
+}
+
+/** SCR-37 Add tier. */
+function addSheet(e, d) {
+  return sheet({
+    title: 'Add tier',
+    extra: html`<div class="dlg">
+      ${field({ label: 'Name', name: 'f_name', value: d.f.name, error: lineOf(e, d, 'name'), extra: 'maxlength="20" placeholder="Tier name"' })}
+      ${field({ label: 'Price (฿)', name: 'f_price', value: d.f.price, error: lineOf(e, d, 'price'), extra: 'inputmode="numeric" placeholder="0"' })}
+      ${field({ label: 'Seats', name: 'f_total', value: d.f.total, error: lineOf(e, d, 'total'), extra: 'inputmode="numeric" placeholder="0"' })}
+      ${e.state === 'ON_SALE' ? html`<span class="note">The new tier goes on sale straight away.</span>` : ''}
+      ${apart(d) ? html`<span class="err" role="alert">${apart(d)}</span>` : ''}
+    </div>`,
+    buttons: [
+      { label: 'Cancel', action: 'dlgClose', quiet: true },
+      { label: 'Add tier', action: 'dlgSaveAdd', disabled: blocked(e, d), working: d.working ? 'Adding' : '' },
+    ],
+    close: 'dlgClose',
+  });
+}
+
+/** SCR-38 Admission rate, worked out from this event's own seats and hold. */
+function rateSheet(e, d) {
+  const total = e.tiers.reduce((n, t) => n + t.total, 0);
+  return sheet({
+    title: 'Admission rate',
+    extra: html`<div class="dlg">
+      ${field({ label: 'Admission rate', name: 'f_rate', value: d.f.rate, type: 'number', error: lineOf(e, d, 'rate'), suffix: 'per second', extra: 'min="1"' })}
+      <span class="note">${num(total)} seats ÷ 600 seconds of hold ≈ ${Math.floor(total / 600)} per second. Faster than this and people get in only to find every seat already held.</span>
+      ${e.state === 'ON_SALE' ? html`<span class="note" data-rate-preview>${preview(e, number(d.f.rate))}</span>` : ''}
+      ${apart(d) ? html`<span class="err" role="alert">${apart(d)}</span>` : ''}
+    </div>`,
+    buttons: [
+      { label: 'Cancel', action: 'dlgClose', quiet: true },
+      { label: 'Save', action: 'dlgSaveRate', disabled: blocked(e, d), working: d.working ? 'Saving' : '' },
+    ],
+    close: 'dlgClose',
+  });
+}
+
+/** "At 12 per second, the 31,208 people now waiting are through in about 43 minutes." */
+const preview = (e, rate) =>
+  rate === null || rate < 1 ? '' : `At ${num(rate)} per second, the ${num(e.waiting)} people now waiting are through in about ${Math.ceil(e.waiting / rate / 60)} minutes.`;
+
+/** SCR-39 Close the sale? The seats inside a hold keep their time. */
+function closeSheet(e, d) {
+  return sheet({
+    title: 'Close the sale?',
+    text: [
+      'No one new will be let in from the queue.',
+      `${num(e.heldNow)} ${e.heldNow === 1 ? 'seat is' : 'seats are'} inside someone's 10 minutes. Those customers keep their time and can still pay.`,
+      'This cannot be undone.',
+    ],
+    buttons: [
+      { label: 'Keep selling', action: 'dlgClose' },
+      { label: 'Close the sale', action: 'dlgCloseSale', danger: true, working: d.working ? 'Closing' : '' },
+    ],
+    close: 'dlgClose',
+  });
+}
+
+// ----- opening, closing, saving -----
+
+function open(ctx, dialog) {
+  ctx.state.dialog = { touched: {}, asked: false, err: null, working: false, ...dialog };
+  holdPoll(ctx);
+}
+
+export function closeDialog(ctx) {
+  ctx.state.dialog = null;
+  holdPoll(ctx);
+}
+
+const detailsOf = (f) => ({
+  name: f.name.trim(),
+  venue: f.venue.trim(),
+  eventDateTime: toEpoch(f.evDate, f.evTime),
+  saleOpensAt: toEpoch(f.saleDate, f.saleTime),
+});
+
+const tierOfForm = (f) => ({ name: f.name.trim(), price: whole(f.price), total: whole(f.total) });
+
+async function save(ctx, run) {
+  const st = ctx.state;
+  const d = st.dialog;
+  d.asked = true;
+  if (Object.keys(checks(st.e, d)).length) return;
+  d.err = null;
+  d.working = true;
+  ctx.render();
+  try {
+    st.e = await run();
+    closeDialog(ctx);
+  } catch (e) {
+    d.working = false;
+    if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
+    d.err = { key: KEY[d.name][e.field] || null, message: e.message };
+  }
+}
+
+async function closeSale(ctx, id) {
+  const st = ctx.state;
+  const d = st.dialog;
+  d.working = true;
+  ctx.render();
+  try {
+    st.e = await org.close(id);
+    closeDialog(ctx);
+  } catch (e) {
+    d.working = false;
+    if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
+    d.err = { key: null, message: e.message };
+  }
+}
+
+export const dialogActions = {
+  editDetails(ctx) {
+    const e = ctx.state.e;
+    const f = { name: e.name, venue: e.venue, evDate: dateInput(e.eventDateTime), evTime: timeInput(e.eventDateTime), saleDate: dateInput(e.saleOpensAt), saleTime: timeInput(e.saleOpensAt, true) };
+    open(ctx, { name: 'details', f });
+  },
+  editTier(ctx, data) {
+    const t = tierOf(ctx.state.e, data.tier);
+    open(ctx, { name: 'tier', tierId: t.tierId, f: { name: t.name, price: String(t.price), total: String(t.total) } });
+  },
+  addTier(ctx) {
+    open(ctx, { name: 'add', f: { name: '', price: '', total: '' } });
+  },
+  changeRate(ctx) {
+    open(ctx, { name: 'rate', f: { rate: String(ctx.state.e.admitPerSecond) } });
+  },
+  closeSale(ctx) {
+    open(ctx, { name: 'close' });
+  },
+  dlgClose: (ctx) => closeDialog(ctx),
+  dlgSaveDetails: (ctx, data, id) => save(ctx, () => org.update(id, detailsOf(ctx.state.dialog.f))),
+  dlgSaveTier: (ctx, data, id) => save(ctx, () => org.updateTier(id, ctx.state.dialog.tierId, tierOfForm(ctx.state.dialog.f))),
+  dlgSaveAdd: (ctx, data, id) => save(ctx, () => org.addTier(id, tierOfForm(ctx.state.dialog.f))),
+  dlgSaveRate: (ctx, data, id) => save(ctx, () => org.setRate(id, whole(ctx.state.dialog.f.rate))),
+  dlgCloseSale: (ctx, data, id) => closeSale(ctx, id),
+};
+
+// ----- live checks: the error lines, the preview and Save change in place, so the caret stays -----
+
+// Every input of every dialog carries f_, so no other screen's listener picks it up.
+const GROUP = { name: 'name', venue: 'venue', evDate: 'ev', evTime: 'ev', saleDate: 'sale', saleTime: 'sale', price: 'price', total: 'total', rate: 'rate' };
+const SAVE = { details: 'dlgSaveDetails', tier: 'dlgSaveTier', add: 'dlgSaveAdd', rate: 'dlgSaveRate', close: 'dlgCloseSale' };
+
+document.addEventListener('input', (ev) => {
+  const ctx = live && live.alive() ? live : null;
+  const d = ctx && ctx.state.dialog;
+  const el = ev.target;
+  const name = el.name && el.name.startsWith('f_') ? el.name.slice(2) : null;
+  if (!d || !name || !GROUP[name] || !el.closest('#app')) return;
+  d.f[name] = el.value;
+  d.touched[GROUP[name]] = 1;
+  if (d.err && d.err.key === GROUP[name]) d.err = null;
+  paint(ctx);
+});
+
+function paint(ctx) {
+  const st = ctx.state;
+  const d = st.dialog;
+  const root = document.getElementById('app');
+  if (!d) return;
+  for (const [name, key] of Object.entries(GROUP)) {
+    const input = root.querySelector(`[name="f_${name}"]`);
+    const box = input && input.closest('.field');
+    if (!box) continue;
+    const msg = lineOf(st.e, d, key);
+    const line = box.querySelector('.err');
+    if (line) line.textContent = msg;
+    else if (msg) {
+      const span = document.createElement('span');
+      span.className = 'err';
+      span.setAttribute('role', 'alert');
+      span.textContent = msg;
+      box.append(span);
+    }
+    box.classList.toggle('bad', !!msg);
+  }
+  const save = root.querySelector(`[data-action="${SAVE[d.name]}"]`);
+  if (save) save.disabled = d.working || blocked(st.e, d);
+  const line = root.querySelector('[data-rate-preview]');
+  if (line) {
+    const text = preview(st.e, number(d.f.rate));
+    line.textContent = text;
+    line.hidden = !text;
+  }
+}
