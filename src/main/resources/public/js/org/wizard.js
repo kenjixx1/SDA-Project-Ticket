@@ -81,10 +81,10 @@ function artBox(st, err) {
     ${f.artwork
       ? html`<div class="art-card"><img src="${f.artwork}" alt=""><span class="art-shade"></span>
           <b>${(f.name.trim() || 'Event name').toUpperCase()}</b>
-          <span class="art-acts"><label class="art-btn">Change<input type="file" accept="image/png,image/jpeg,image/webp" data-art hidden></label>
+          <span class="art-acts"><button type="button" class="art-btn" data-art-pick>Change</button>
           <button type="button" class="art-btn" data-action="artRemove">Remove</button></span></div>`
-      : html`<label class="art-drop" data-art-drop><input type="file" accept="image/png,image/jpeg,image/webp" data-art hidden>
-          <span class="art-plus">+</span><b>Choose a picture</b><span>or drop it here · PNG, JPG or WebP · up to 2 MB</span></label>`}
+      : html`<button type="button" class="art-drop" data-art-drop data-art-pick>
+          <span class="art-plus">+</span><b>Choose a picture</b><span>or drop it here · PNG, JPG or WebP · up to 2 MB</span></button>`}
     <p>Customers see it on the event's card and page. 16:9 works best.</p>
     ${msg ? html`<span class="err" role="alert">${msg}</span>` : ''}
   </div>`;
@@ -110,8 +110,30 @@ function takeArt(file) {
   reader.readAsDataURL(file);
 }
 
-document.addEventListener('change', (e) => {
-  if (e.target instanceof HTMLInputElement && e.target.matches('[data-art]')) takeArt(e.target.files && e.target.files[0]);
+// One file input for the whole page, outside #app, so a redraw can never replace it while the chooser is open.
+// It is moved off screen, not display:none: Safari will not open a chooser for a hidden input.
+let fileInput = null;
+function artInput() {
+  if (fileInput) return fileInput;
+  fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = ART_TYPES.join(',');
+  fileInput.setAttribute('aria-hidden', 'true');
+  fileInput.tabIndex = -1;
+  fileInput.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0';
+  fileInput.addEventListener('change', () => {
+    takeArt(fileInput.files && fileInput.files[0]);
+    fileInput.value = ''; // choosing the same file again still counts as a change
+  });
+  document.body.append(fileInput);
+  return fileInput;
+}
+
+// Not a data-action: those redraw the page after the click. This only opens the chooser.
+document.addEventListener('click', (e) => {
+  const btn = e.target instanceof Element && e.target.closest('[data-art-pick]');
+  if (!btn || !btn.closest('#app')) return;
+  artInput().click();
 });
 document.addEventListener('dragover', (e) => {
   const drop = e.target instanceof Element && e.target.closest('[data-art-drop]');
