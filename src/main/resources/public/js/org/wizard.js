@@ -5,12 +5,12 @@ import { html, button, num } from '../parts.js';
 import { field, toEpoch, dateInput, timeInput, dateTime } from './parts.js';
 import { BKK, pad, pickerKit } from './pickers.js';
 
-const BLANK = { name: '', venue: '', evDate: '', evTime: '', saleDate: '', saleTime: '', rate: '12' };
+const BLANK = { name: '', venue: '', evDate: '', evTime: '', saleDate: '', saleTime: '', rate: '12', artwork: '' };
 const MAX = { name: 40, venue: 30 };
 // One error line per group: the event and the sale each have a date picker and a time picker.
 const GROUP = { name: 'name', venue: 'venue', evDate: 'ev', evTime: 'ev', saleDate: 'sale', saleTime: 'sale', rate: 'rate' };
 // A server refusal names an EventDetails field; this is the error line that field belongs under.
-const FIELD = { name: 'name', venue: 'venue', eventDateTime: 'ev', saleOpensAt: 'sale', admitPerSecond: 'rate' };
+const FIELD = { name: 'name', venue: 'venue', eventDateTime: 'ev', saleOpensAt: 'sale', admitPerSecond: 'rate', artwork: 'art' };
 // The four pickers: which group each one's error line belongs to, and whether its popup opens upward.
 const PICKS = { evDate: { group: 'ev', up: false }, evTime: { group: 'ev', up: false }, saleDate: { group: 'sale', up: true }, saleTime: { group: 'sale', up: true } };
 
@@ -50,12 +50,14 @@ const fromEvent = (e) => ({
   evDate: dateInput(e.eventDateTime), evTime: timeInput(e.eventDateTime),
   saleDate: dateInput(e.saleOpensAt), saleTime: timeInput(e.saleOpensAt, true),
   rate: String(e.admitPerSecond),
+  artwork: e.artwork || '',
 });
 
 const toDetails = (f) => ({
   name: f.name.trim(), venue: f.venue.trim(),
   eventDateTime: at(f.evDate, f.evTime), saleOpensAt: at(f.saleDate, f.saleTime),
   admitPerSecond: Number(f.rate),
+  artwork: f.artwork, // '' removes the picture
 });
 
 // ----- the date and time pickers (design lines 107–186: a trigger, a calendar, a column popup) -----
@@ -63,6 +65,70 @@ const toDetails = (f) => ({
 // The design's pickers (pickers.js). The form, the open picker and the calendar month live on the screen state.
 const kit = pickerKit({ picks: PICKS, box: (ctx) => ctx.state, touch: (ctx, group) => touch(ctx.state, group) });
 const picker = kit.picker;
+
+// ----- the event picture: the card customers see on the Events page. No design for it; it uses the card look of SCR-01. -----
+
+const ART_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const ART_MAX = 2 * 1024 * 1024;
+const ART_SAY = 'Use a PNG, JPG or WebP picture of 2 MB or less.';
+
+/** Empty: a dashed drop box. Chosen: the picture with the event name on it, the way the customer card shows it. */
+function artBox(st, err) {
+  const f = st.form;
+  const msg = st.artErr || err;
+  return html`<div class="art ${msg ? 'bad' : ''}">
+    <span class="label">CARD PICTURE</span>
+    ${f.artwork
+      ? html`<div class="art-card"><img src="${f.artwork}" alt=""><span class="art-shade"></span>
+          <b>${(f.name.trim() || 'Event name').toUpperCase()}</b>
+          <span class="art-acts"><label class="art-btn">Change<input type="file" accept="image/png,image/jpeg,image/webp" data-art hidden></label>
+          <button type="button" class="art-btn" data-action="artRemove">Remove</button></span></div>`
+      : html`<label class="art-drop" data-art-drop><input type="file" accept="image/png,image/jpeg,image/webp" data-art hidden>
+          <span class="art-plus">+</span><b>Choose a picture</b><span>or drop it here · PNG, JPG or WebP · up to 2 MB</span></label>`}
+    <p>Customers see it on the event's card and page. 16:9 works best.</p>
+    ${msg ? html`<span class="err" role="alert">${msg}</span>` : ''}
+  </div>`;
+}
+
+/** Reads a chosen or dropped file into the form as a data URL, then redraws once. */
+function takeArt(file) {
+  const ctx = live && live.alive() ? live : null;
+  if (!ctx || !file) return;
+  const st = ctx.state;
+  if (!ART_TYPES.includes(file.type) || file.size > ART_MAX) {
+    st.artErr = ART_SAY;
+    return ctx.render();
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (!ctx.alive()) return;
+    st.form.artwork = String(reader.result);
+    st.artErr = '';
+    if (st.failed && st.failed.key === 'art') st.failed = null;
+    ctx.render();
+  };
+  reader.readAsDataURL(file);
+}
+
+document.addEventListener('change', (e) => {
+  if (e.target instanceof HTMLInputElement && e.target.matches('[data-art]')) takeArt(e.target.files && e.target.files[0]);
+});
+document.addEventListener('dragover', (e) => {
+  const drop = e.target instanceof Element && e.target.closest('[data-art-drop]');
+  if (!drop) return;
+  e.preventDefault();
+  drop.classList.add('over');
+});
+document.addEventListener('dragleave', (e) => {
+  const drop = e.target instanceof Element && e.target.closest('[data-art-drop]');
+  if (drop) drop.classList.remove('over');
+});
+document.addEventListener('drop', (e) => {
+  const drop = e.target instanceof Element && e.target.closest('[data-art-drop]');
+  if (!drop) return;
+  e.preventDefault();
+  takeArt(e.dataTransfer && e.dataTransfer.files[0]);
+});
 
 function detailsView(st) {
   const f = st.form;
@@ -95,6 +161,7 @@ function detailsView(st) {
         </div>
       </div>
       <aside class="wiz-help">
+        ${artBox(st, shown('art'))}
         <span class="label">ADMISSION RATE</span>
         <p>How many people the queue lets in each second. Work it out from your seats and the 10-minute hold: 7,500 seats ÷ 600 seconds of hold ≈ 12 per second. Faster than this and people get in only to find every seat already held.</p>
         <p>You can change it later, even while the sale is on.</p>
@@ -138,6 +205,7 @@ function touch(st, group) {
 
 const actions = {
   save,
+  artRemove: (ctx) => { ctx.state.form.artwork = ''; ctx.state.artErr = ''; },
   ...kit.actions,
 };
 

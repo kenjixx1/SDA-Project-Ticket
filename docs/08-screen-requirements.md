@@ -811,7 +811,8 @@ understand **in under 2 seconds** that they were not charged (UC-03 ext 7a, FR-1
    | `[S] Event date and time` | date + time | *14 Nov 2026, 19:00* |
    | `[S] Sale opens` | date + time, to the second | *1 Oct 2026, 10:00:00* |
    | `[S] Admission rate` | number per second, default **12** | *12* — helper text as in SCR-38 |
-4. Footer: `[S] Cancel` (quiet) → SCR-30. Cyan `[S] Save and add tiers` → SCR-32. The event is saved as `DRAFT` at this point.
+4. **Card picture** (right column, above the admission-rate help; added 11 Oct 2026, no design yet). `[S] CARD PICTURE`, a 16:9 drop box `[S] Choose a picture` · *or drop it here · PNG, JPG or WebP · up to 2 MB*. Once chosen it shows the picture with the event name on it, the way the customer card shows it, with `[S] Change` and `[S] Remove`. Optional: without it the customer card shows the event name on a plain panel. A wrong file: `[S] Use a PNG, JPG or WebP picture of 2 MB or less.`
+5. Footer: `[S] Cancel` (quiet) → SCR-30. Cyan `[S] Save and add tiers` → SCR-32. The event is saved as `DRAFT` at this point.
 
 **Variant b · sale time in the past** (ext 1a). Under the field in magenta:
 `[S] The sale must open in the future.` Button disabled.

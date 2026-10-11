@@ -17,10 +17,10 @@ public final class OrgViews {
     public record OrgTier(String tierId, String name, long price, int total, int held, int sold, int remaining) {
     }
 
-    /** O-02 to O-10. waiting: people in the queue now (0 unless ON_SALE). closedAt: null until CLOSED. */
+    /** O-02 to O-10. waiting: people in the queue now (0 unless ON_SALE). closedAt: null until CLOSED. artwork: the card picture or null. */
     public record OrgEvent(String eventId, String name, String venue, long eventDateTime, long saleOpensAt,
                            String state, int admitPerSecond, List<OrgTier> tiers, int heldNow, int waiting,
-                           Long closedAt) {
+                           Long closedAt, String artwork) {
     }
 
     /** O-11. all: the sum row, tierId "all", name "All", price 0. revenue: confirmed orders only, in baht. */

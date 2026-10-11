@@ -8,7 +8,13 @@ public final class OrgRequests {
     private OrgRequests() {
     }
 
-    public record EventDetails(String name, String venue, Long eventDateTime, Long saleOpensAt, Integer admitPerSecond) {
+    /** artwork: the event picture as a data URL (PNG, JPG or WebP, up to 2 MB). Null keeps it; "" removes it. */
+    public record EventDetails(String name, String venue, Long eventDateTime, Long saleOpensAt, Integer admitPerSecond,
+                               String artwork) {
+
+        public EventDetails(String name, String venue, Long eventDateTime, Long saleOpensAt, Integer admitPerSecond) {
+            this(name, venue, eventDateTime, saleOpensAt, admitPerSecond, null);
+        }
     }
 
     public record TierInput(String name, Long price, Integer total) {

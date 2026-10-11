@@ -83,7 +83,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
 
     static final class Event {
         final String id;
-        final String artwork;
+        String artwork;
         String name, shortName, venue;
         long dateTime, saleOpensAt;
         final List<Tier> tiers = new ArrayList<>();

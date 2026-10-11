@@ -129,7 +129,7 @@ left.
 
 **The four request shapes.**
 
-- `EventDetails` = `{name, venue, eventDateTime, saleOpensAt, admitPerSecond}`.
+- `EventDetails` = `{name, venue, eventDateTime, saleOpensAt, admitPerSecond, artwork}`. `artwork` is the card picture as a data URL (PNG, JPG or WebP, up to 2 MB). Left out, it stays as it is; `""` removes it.
 - `TierInput` = `{name, price, total}`. `price` is whole baht: `6500` is ฿6,500.
 - `TierList` = `{tiers: [TierInput, ...]}`. O-05 replaces every tier at once.
 - `RateInput` = `{admitPerSecond}`.
@@ -140,7 +140,7 @@ current value. Times are epoch milliseconds in Bangkok time, as everywhere else.
 **The three reply shapes.**
 
 - `OrgEventRow` = `{eventId, name, venue, eventDateTime, saleOpensAt, state, sold, total}`.
-- `OrgEvent` = `{eventId, name, venue, eventDateTime, saleOpensAt, state, admitPerSecond, tiers, heldNow, waiting, closedAt}`.
+- `OrgEvent` = `{eventId, name, venue, eventDateTime, saleOpensAt, state, admitPerSecond, tiers, heldNow, waiting, closedAt, artwork}`.
 - `Dashboard` = `{eventId, name, state, waiting, admitPerSecond, tiers, all, revenue, closedAt}`.
 
 `tiers` is a list of `OrgTier` = `{tierId, name, price, total, held, sold,
@@ -176,6 +176,7 @@ row, counted from 0; the second tier row is `tiers[1]`.
 | 400 | `TOO_LONG` | `venue` | `Up to 30 characters` | Longer than 30 (O-02, O-04) |
 | 400 | `SALE_IN_PAST` | `saleOpensAt` | `The sale must open in the future.` | The sale time is not in the future (O-02, O-04) |
 | 400 | `SALE_AFTER_EVENT` | `saleOpensAt` | `The sale must open before the event.` | The sale time is after the event (O-02, O-04) |
+| 400 | `BAD_IMAGE` | `artwork` | `Use a PNG, JPG or WebP picture of 2 MB or less.` | The card picture is another kind of file, or too big (O-02, O-04) |
 | 400 | `RATE_TOO_LOW` | `admitPerSecond` | `Must be at least 1.` | The rate is missing or below 1 (O-02, O-09) |
 | 400 | `TOO_MANY_TIERS` | `tiers` | `Up to 8 tiers.` | A ninth tier (O-05, O-06) |
 | 400 | `TIER_NAME_REQUIRED` | `tiers[i].name`, or `name` on O-06 and O-07 | `Tier 2 · Name is required.` | The row has no name. A nameless row is named by its number |

@@ -510,4 +510,32 @@ class FakeOrganizerTest {
         OrgEvent e = org.updateTier("chai", "the-1975", "vip", new TierInput(" VIP ", null, null));
         assertEquals("VIP", row(e, "vip").name());
     }
+
+    private static final String PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
+    @Test
+    void pictureIsTheCustomersCard() {
+        OrgEvent made = org.createEvent("chai", new EventDetails("Test Night Bangkok", "Impact Arena", EVENT, SALE, 12, PNG));
+        assertEquals(PNG, made.artwork());
+        org.replaceTiers("chai", made.eventId(), List.of(tier("VIP", 6500, 500)));
+        org.publish("chai", made.eventId());
+        EventSummary seen = gw.listEvents("kenji").stream().filter(x -> x.eventId().equals(made.eventId())).findFirst().orElseThrow();
+        assertEquals(PNG, seen.artwork());
+    }
+
+    @Test
+    void pictureMustBeAnImage() {
+        GatewayException e = assertThrows(GatewayException.class, () ->
+                org.createEvent("chai", new EventDetails("Test Night Bangkok", "Impact Arena", EVENT, SALE, 12, "data:text/html;base64,PGI+")));
+        assertEquals("BAD_IMAGE", e.code);
+        assertEquals("artwork", e.field);
+        assertEquals("Use a PNG, JPG or WebP picture of 2 MB or less.", e.getMessage());
+    }
+
+    @Test
+    void emptyPictureRemovesItAndNullKeepsIt() {
+        OrgEvent made = org.createEvent("chai", new EventDetails("Test Night Bangkok", "Impact Arena", EVENT, SALE, 12, PNG));
+        assertEquals(PNG, org.updateDetails("chai", made.eventId(), new EventDetails(null, "UOB Live", null, null, null)).artwork());
+        assertNull(org.updateDetails("chai", made.eventId(), new EventDetails(null, null, null, null, null, "")).artwork());
+    }
 }

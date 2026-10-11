@@ -66,8 +66,9 @@ public class FakeOrganizerGateway implements OrganizerGateway {
             if (rate < 1) {
                 throw GatewayException.invalid("RATE_TOO_LOW", "admitPerSecond", "Must be at least 1.");
             }
+            String artwork = checkedArtwork(details.artwork());
             FakeBookingGateway.Event e = new FakeBookingGateway.Event(uniqueId(slug(name)), name, shortName(name),
-                    venue, null, date, sale);
+                    venue, artwork, date, sale);
             e.draft = true;
             e.owner = organizerId;
             e.admitPerSecond = rate;
@@ -110,10 +111,12 @@ public class FakeOrganizerGateway implements OrganizerGateway {
             if (sale >= date) {
                 throw GatewayException.invalid("SALE_AFTER_EVENT", "saleOpensAt", "The sale must open before the event.");
             }
+            String artwork = details.artwork() == null ? e.artwork : checkedArtwork(details.artwork());
             e.name = name;
             e.venue = venue;
             e.dateTime = date;
             e.saleOpensAt = sale;
+            e.artwork = artwork;
             return view(e);
         }
     }
@@ -276,9 +279,22 @@ public class FakeOrganizerGateway implements OrganizerGateway {
         return e;
     }
 
+    static final int MAX_ARTWORK_CHARS = 2_800_000; // a 2 MB picture as base64
+
+    /** Null or "" means no picture. Otherwise a PNG, JPG or WebP data URL of at most 2 MB. */
+    static String checkedArtwork(String artwork) {
+        if (artwork == null || artwork.isEmpty()) {
+            return null;
+        }
+        if (!artwork.matches("data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+") || artwork.length() > MAX_ARTWORK_CHARS) {
+            throw GatewayException.invalid("BAD_IMAGE", "artwork", "Use a PNG, JPG or WebP picture of 2 MB or less.");
+        }
+        return artwork;
+    }
+
     private OrgEvent view(FakeBookingGateway.Event e) {
         return new OrgEvent(e.id, e.name, e.venue, e.dateTime, e.saleOpensAt, fake.orgState(e), e.admitPerSecond,
-                tiers(e), held(e), fake.waiting(e), e.closedAt);
+                tiers(e), held(e), fake.waiting(e), e.closedAt, e.artwork);
     }
 
     private static List<OrgTier> tiers(FakeBookingGateway.Event e) {

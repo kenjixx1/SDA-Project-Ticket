@@ -43,7 +43,10 @@ public final class WebServer {
     }
 
     public static Javalin create(BookingGateway gateway, OrganizerGateway organizer, DevControls dev) {
-        Javalin app = Javalin.create(config -> config.staticFiles.add("/public", Location.CLASSPATH));
+        Javalin app = Javalin.create(config -> {
+            config.staticFiles.add("/public", Location.CLASSPATH);
+            config.http.maxRequestSize = 4_000_000L; // room for a 2 MB event picture sent as base64
+        });
         app.get("/api/health", ctx -> ctx.json(Map.of("ok", true)));
         app.exception(GatewayException.class, (e, ctx) -> Reply.error(ctx, gateway, e));
         // A body that is not valid JSON, or a field of the wrong type, gets the same envelope as any refusal.
