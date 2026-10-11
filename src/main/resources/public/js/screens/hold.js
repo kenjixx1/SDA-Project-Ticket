@@ -1,6 +1,6 @@
 // SCR-09 Seats held (a running, b release sheet), SCR-10 Seats released, SCR-11 Hold ran out.
 import { api, serverNow } from '../api.js';
-import { html, button, countdown, orderSummary, statusScreen, sheet, seats, mmss } from '../parts.js';
+import { html, button, countdown, orderSummary, statusScreen, sheet, seats, mmss, num } from '../parts.js';
 import { joinAgain } from './queue.js';
 
 /** Goes to the screen that matches the hold on the server. Returns true when it moved. */
@@ -53,24 +53,26 @@ export const screens = [
     onZero: atZero,
     view(st) {
       const h = st.h;
-      return html`<section class="screen">
-        <div><h1 class="title sm">Seats held</h1><p class="sub">Yours until the timer runs out.</p></div>
-        ${countdown(h.expiresAt)}
-        ${orderSummary(h)}
-        <div class="card good"><b>${h.tierName} just dropped from ${h.remainingBefore} to ${h.remainingAfter}.</b>
-          <p>Your seats left the sale the moment you held them.</p></div>
+      return html`<section class="screen timed">
+        <div class="col">
+          <div class="head"><h1 class="title">Seats held</h1><p class="sub">Yours until the timer runs out.</p></div>
+          ${orderSummary(h)}
+          <div class="card good"><b>${h.tierName} just dropped from ${num(h.remainingBefore)} to ${num(h.remainingAfter)}.</b>
+            <p>Your seats left the sale the moment you held them.</p></div>
+        </div>
+        <aside class="side">
+          ${countdown(h.expiresAt)}
+          ${button({ label: 'Continue to payment', action: 'go', data: { to: `#/checkout/${h.reservationId}` } })}
+          ${button({ label: 'Release these seats', action: 'askRelease', quiet: true })}
+        </aside>
       </section>
-      <div class="foot">
-        ${button({ label: 'Continue to payment', action: 'go', data: { to: `#/checkout/${h.reservationId}` } })}
-        ${button({ label: 'Release these seats', action: 'askRelease', quiet: true })}
-      </div>
       ${st.sheet ? sheet({
         title: 'Release these seats?',
-        text: [`The ${seats(h.quantity, h.tierName)} go back on sale straight away.`, 'To buy again you join the back of the line.'],
+        text: [`The ${seats(h.quantity, h.tierName)} go back on sale straight away. To buy again you join the back of the line.`],
         extra: html`<div class="sheet-time" data-countdown="${h.expiresAt}"><span>Time to pay</span><span class="mono" data-cd-text>${mmss(h.expiresAt - serverNow())}</span></div>`,
         buttons: [
-          { label: 'Keep my seats', action: 'keep' },
           { label: 'Release seats', action: 'release', danger: true, working: st.releasing ? 'Releasing…' : '' },
+          { label: 'Keep my seats', action: 'keep' },
         ],
         close: 'keep',
       }) : ''}`;

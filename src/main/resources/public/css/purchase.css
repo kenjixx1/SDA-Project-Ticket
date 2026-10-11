@@ -1,22 +1,70 @@
-/* Purchase screens SCR-09 to SCR-18 (moved from app.css, phone rules unchanged). Owned by Lane C. */
+/* Purchase screens SCR-09 to SCR-18. Owned by Lane C.
+   Shapes and sizes come from design/Ticket App Web.dc.html: the "Timed" block (319-414)
+   and the release dialog (494-505). */
+
+/* SCR-09 / SCR-12: the "Timed" block, one column for content and one for the clock */
+.screen.timed{max-width:1100px;padding:40px 40px 70px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start}
+.screen.timed .col{display:flex;flex-direction:column;gap:16px}
+.screen.timed .head{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
+.screen.timed .title{font:600 40px/1.05 var(--f);letter-spacing:-.02em}
+.screen.timed .sub{font:400 16px/1.45 var(--f)}
+.screen.timed .label{font-size:12px;margin-top:10px}
+.screen.timed .side{position:sticky;top:0;display:flex;flex-direction:column;gap:14px}
+.screen.timed .side .btn{height:56px;font-size:16px}
+.screen.timed .side .btn.quiet{height:52px;font:500 15px/1 var(--f)}
+/* the coral banner (line 334): no border, the second line in white */
+.screen.timed .banner{padding:14px 18px;border:0;border-radius:var(--rb);gap:3px}
+.screen.timed .banner b{font:600 15px/1.3 var(--f);color:var(--st)}
+.screen.timed .banner p{font:400 14px/1.35 var(--f);color:var(--tx)}
+/* the lime card that says the seats just dropped (line 345) */
+.screen.timed .card.good{background:var(--acw);border:0;padding:18px 22px;gap:5px}
+.screen.timed .card.good b{font:600 15px/1.3 var(--f)}
+.screen.timed .card.good p{font-size:14px;line-height:1.45}
+/* SCR-09b: the release dialog is the only user of .sheet-time (line 499) */
+.sheet-time{align-items:center;padding:10px 0;margin-top:0}
+.sheet-time .mono{font-size:17px}
+
 /* C-02 countdown */
-.countdown{border:1.5px solid var(--ac);border-radius:var(--r);padding:16px 18px 14px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(var(--acw),var(--acw)),var(--bg);width:100%}
-.countdown .top{display:flex;justify-content:space-between;align-items:center}
-.countdown .lbl{display:flex;align-items:center;gap:8px;color:var(--ac);font-weight:500}
-.countdown .lbl i{width:8px;height:8px;border-radius:50%;background:var(--ac)}
-.countdown .v{font:600 44px/1 var(--fm);color:var(--ac);font-variant-numeric:tabular-nums}
-.bar{height:6px;border-radius:3px;background:var(--s3);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--ac);border-radius:3px;transition:width .6s linear}
+.countdown{position:relative;overflow:hidden;border:1.5px solid var(--ac);border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(135deg,var(--acw),transparent 60%)}
+.countdown .top{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.countdown .lbl{display:flex;align-items:center;gap:8px;color:var(--ac);font:500 14px/1 var(--f)}
+.countdown .lbl i{position:relative;width:7px;height:7px;border-radius:50%;background:var(--ac)}
+.countdown .lbl i::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ac);animation:tq-ripple 1s ease-out infinite}
+.countdown .v{font:600 56px/1 var(--fm);letter-spacing:-.02em;color:var(--ac);font-variant-numeric:tabular-nums}
+.bar{height:3px;border-radius:3px;background:var(--s2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:3px;transition:width .3s linear}
+@keyframes tq-ripple{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.4);opacity:0}}
 
 /* C-03 order summary, and the ticket detail rows */
-.rows{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:4px 18px}
-.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--l1)}
+.rows{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:6px 24px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:15px 0;border-bottom:1px solid var(--l1)}
 .row:last-child{border-bottom:0}
 .row .k{color:var(--mu)}
-.row .v{font:600 15px var(--fm);text-align:right}
-.row .v.txt{font-family:var(--f)}
-.row.sum .k{color:var(--tx);font-weight:600}
-.row.sum .v{font:600 26px/1 var(--f)}
+.row .v{font:500 15px/1 var(--fm);text-align:right}
+.row .v.txt{font:600 15px/1 var(--f)}
+.row.sum{padding:18px 0 14px}
+.row.sum .k{color:var(--tx);font-weight:600;font-size:16px}
+.row.sum .v{font:600 30px/1 var(--f);letter-spacing:-.02em}
+/* The promotion lines are lime (line 341). parts.js orderSummary draws them after the first
+   three rows and before the Total row, which is the only row carrying .sum. */
+.screen.timed .rows .row:nth-child(n+4):not(.sum) .k,
+.screen.timed .rows .row:nth-child(n+4):not(.sum) .v{color:var(--ac)}
+
+/* SCR-12 method cards */
+.methods{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.method{display:flex;align-items:center;gap:14px;padding:18px;border-radius:var(--r);background:var(--s1);border:2px solid var(--l1);text-align:left;width:100%;transition:background .2s,border-color .2s,transform .3s cubic-bezier(.2,.8,.2,1)}
+.method.sel{background:var(--acw);border-color:var(--ac)}
+.method:disabled{opacity:.45;cursor:default}
+.method .tile{width:48px;height:36px;flex:none;border-radius:8px;background:var(--s3);display:grid;place-items:center;font:600 10px/1 var(--fm)}
+.method .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.method .name{font:600 15px/1.2 var(--f)}
+.method .left{font:400 13px/1.2 var(--f);color:var(--mu)}
+.method .left.out{color:var(--st)}
+.method .check{width:22px;height:22px;flex:none;border-radius:50%;background:var(--ac);color:var(--aci);display:grid;place-items:center;font-size:13px}
+@media (hover:hover){
+  .method:not(:disabled):hover{transform:translateY(-3px)}
+}
+
 /* SCR-17: the QR sits on the event's artwork, like the design */
 .ticket-hero{position:relative;border-radius:var(--r);overflow:hidden;padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--s2)}
 .ticket-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6}
@@ -53,6 +101,3 @@
 .provider .btn.ok{background:#1A1A1C;color:#FFFFFF}
 .provider .btn.no{background:transparent;color:#1A1A1C;border:1px solid #C9C9D0}
 .spinner{width:56px;height:56px;border-radius:50%;border:3px solid var(--acw);border-top-color:var(--ac);animation:tq-spin 1.4s linear infinite}
-/* payment method rows (SCR-12) */
-.pick.method{grid-template-columns:auto 1fr auto}
-.pick .tile{width:44px;height:44px;border-radius:12px;background:var(--s3);display:grid;place-items:center;font:600 11px/1 var(--fm);grid-row:span 2}

@@ -9,21 +9,20 @@ import { joinAgain } from './queue.js';
 const allDown = (h) => h.paymentMethods.every((m) => !m.available);
 
 function methodRows(h, st) {
-  return h.paymentMethods.map((m) => {
+  return html`<div class="methods">${h.paymentMethods.map((m) => {
     const sel = st.method === m.key;
-    return html`<button class="pick method ${sel ? 'sel' : ''}" data-action="choose" data-key="${m.key}" ${m.available && !st.working ? '' : raw('disabled')}>
-      <span class="tile">${m.tile}</span><span class="name">${m.label}</span><span></span>
-      <span class="left ${m.available ? '' : 'out'}">${m.available ? m.line : 'Not available right now'}</span>
+    return html`<button class="method ${sel ? 'sel' : ''}" data-action="choose" data-key="${m.key}" ${m.available && !st.working ? '' : raw('disabled')}>
+      <span class="tile">${m.tile}</span>
+      <span class="info"><span class="name">${m.label}</span><span class="left ${m.available ? '' : 'out'}">${m.available ? m.line : 'Not available right now'}</span></span>
       ${sel ? html`<span class="check" aria-label="Selected">✓</span>` : html`<span></span>`}
     </button>`;
-  });
+  })}</div>`;
 }
 
-function payFooter(h, st, down) {
-  return html`<div class="foot">
-    ${button({ label: `Pay ${baht(h.totalAmount)}`, action: 'pay', disabled: !st.method || down, working: st.working ? 'Paying…' : '' })}
-    ${down ? html`<p class="hint">Payment is not available right now</p>` : st.method ? '' : html`<p class="hint">Choose how to pay</p>`}
-  </div>`;
+function payFooter(h, st, down, wrap = true) {
+  const inner = html`${button({ label: `Pay ${baht(h.totalAmount)}`, action: 'pay', disabled: !st.method || down, working: st.working ? 'Paying…' : '' })}
+    ${down ? html`<p class="hint">Payment is not available right now</p>` : st.method ? '' : html`<p class="hint">Choose how to pay</p>`}`;
+  return wrap ? html`<div class="foot">${inner}</div>` : inner;
 }
 
 /** Keeps the chosen method only while it is still available. */
@@ -134,16 +133,20 @@ export const screens = [
     view(st) {
       const h = st.h;
       const down = allDown(h);
-      return html`<section class="screen">
-        <div><h1 class="title sm">Pay ${baht(h.totalAmount)}</h1>
-          <p class="sub">${h.quantity} × ${h.tierName} for ${h.event.name}, ${dateShort(h.event.eventDateTime)}</p></div>
-        ${down ? banner('Payment is not available right now.', 'Your seats are still held. Stay on this page, we will try again by ourselves.') : ''}
-        ${countdown(h.expiresAt)}
-        ${orderSummary(h)}
-        <span class="label">How do you want to pay</span>
-        ${methodRows(h, st)}
-      </section>
-      ${payFooter(h, st, down)}`;
+      return html`<section class="screen timed">
+        <div class="col">
+          <div class="head"><h1 class="title">Pay ${baht(h.totalAmount)}</h1>
+            <p class="sub">${h.quantity} × ${h.tierName} for ${h.event.name}, ${dateShort(h.event.eventDateTime)}</p></div>
+          ${down ? banner('Payment is not available right now.', 'Your seats are still held. Stay on this page, we will try again by ourselves.') : ''}
+          ${orderSummary(h)}
+          <span class="label">How do you want to pay</span>
+          ${methodRows(h, st)}
+        </div>
+        <aside class="side">
+          ${countdown(h.expiresAt)}
+          ${payFooter(h, st, down, false)}
+        </aside>
+      </section>`;
     },
     actions: {
       choose(ctx, data) { ctx.state.method = data.key; },
