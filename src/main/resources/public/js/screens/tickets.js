@@ -11,6 +11,8 @@ async function loadOrder(ctx, orderId) {
 // SCR-17: ← and → move between the tickets of one order, the same as the round buttons.
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return; // Alt+← is the browser's Back
+  if (e.target instanceof HTMLElement && e.target.closest('input,textarea,select,[contenteditable]')) return;
   const b = document.querySelector(`.tknav .${e.key === 'ArrowLeft' ? 'prev' : 'next'}`);
   if (b) b.click();
 });

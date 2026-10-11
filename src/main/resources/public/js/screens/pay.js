@@ -202,7 +202,7 @@ export const screens = [
       return html`<section class="screen timed">
         <div class="col">
           <div class="head"><h1 class="title">Pay ${baht(h.totalAmount)}</h1>
-            <p class="sub">${h.quantity} × ${h.tierName} for ${h.event.name}, ${dateShort(h.event.eventDateTime)}</p></div>
+            <p class="sub">${h.quantity} × ${h.tierName} for ${h.event.name.replace(/ Bangkok$/, '')}, ${dateShort(h.event.eventDateTime)}</p></div>
           ${down ? banner('Payment is not available right now.', 'Your seats are still held. Stay on this page, we will try again by ourselves.') : ''}
           ${orderSummary(h)}
           <span class="label">How do you want to pay</span>

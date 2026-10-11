@@ -62,8 +62,6 @@
    18px above it, 14px below (lines 338-342). The base .row keeps its own metrics for the
    ticket detail rows on SCR-17, which are 16px/1.3 in the design (lines 476-481). Only the
    Total row lines its two ends up on the baseline; the others stretch, as the design's do. */
-.screen.timed .rows .row{padding:15px 0;line-height:1;align-items:stretch}
-.screen.timed .rows .row.sum{padding:18px 0 14px;align-items:baseline}
 
 /* SCR-12 method cards */
 .methods{display:grid;grid-template-columns:1fr 1fr;gap:12px}
