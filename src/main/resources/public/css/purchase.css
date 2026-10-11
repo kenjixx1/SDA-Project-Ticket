@@ -156,7 +156,7 @@
 }
 
 /* SCR-17: the thing Kenji shows at the gate (lines 444-489) */
-.screen.ticket{max-width:1000px;gap:22px}
+.screen.ticket{max-width:1080px;gap:22px}
 .screen.ticket .backlink{align-self:flex-start;font:500 14px/1 var(--f);color:var(--mu);transition:color .2s,transform .3s cubic-bezier(.2,.8,.2,1)}
 @media (hover:hover){
   .screen.ticket .backlink:hover{color:var(--tx);transform:translateX(-4px)}
