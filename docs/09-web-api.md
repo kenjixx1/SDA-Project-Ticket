@@ -32,7 +32,7 @@ M-06 and gets back reservation **R-1042**, which expires at **10:16:20**.
 ## 9.2 Who is asking
 
 The page sends a header `X-Customer: kenji` with every message. There is no
-sign-in screen (ASM-01, ASM-08). Opening the page as `?as=mint` makes a second
+sign-in screen (ASM-01, ASM-09). Opening the page as `?as=mint` makes a second
 buyer for the demo.
 
 ## 9.3 The envelope
@@ -102,7 +102,7 @@ paymentId}`. `state` is `HELD`, `CONFIRMED`, `EXPIRED` or `RELEASED`.
 
 **The organizer console sends these to the same server, in the same envelope,
 with the header `X-Customer: chai`.** As for the customer, the header is the
-whole of "who is asking"; there is no organizer sign-in (ASM-08). What Chai
+whole of "who is asking"; there is no organizer sign-in (ASM-09). What Chai
 sends must match the event's `organizerId` (E-01). An event that belongs to
 someone else answers **404**, exactly like an event that does not exist (UC-06).
 

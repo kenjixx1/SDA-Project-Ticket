@@ -162,7 +162,7 @@ export const screens = [
     actions: {
       askSignOut(ctx) { ctx.state.sheet = true; },
       cancel(ctx) { ctx.state.sheet = false; },
-      signOut(ctx) { ctx.state.sheet = false; ctx.go('#/events'); }, // no sign-in exists (ASM-08)
+      signOut(ctx) { ctx.state.sheet = false; ctx.go('#/events'); }, // no sign-in exists (ASM-09)
     },
   },
 ];

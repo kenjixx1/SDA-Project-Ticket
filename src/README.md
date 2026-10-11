@@ -63,7 +63,7 @@ removed, 42 buyers got the last 10 seats and the test failed.
 - `PricingRule` plug-ins and `PricingService` (Slice 3)
 - `ticket/` — digital tickets and `TicketIssued` (Slice 3)
 - `SalesDashboardService` (Slice 3)
-- A real database. Everything is in memory (ASM-07).
+- A real database. Everything is in memory (ASM-08).
 
 `QueueLoadTest` measures the code in one Java process, not over a network.
 

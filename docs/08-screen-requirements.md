@@ -129,10 +129,10 @@ A design AI will often add these by itself. **Do not.**
 
 | Side | Device | Frame size | Why |
 |---|---|---|---|
-| Customer | Desktop browser | **1440 × 900** | Kenji has the page open on a laptop at 09:59 (`03-prd.md` §3.3). Changed 11 Oct 2026 from a phone frame, ASM-10. |
+| Customer | Desktop browser | **1440 × 900** | Kenji has the page open on a laptop at 09:59 (`03-prd.md` §3.3). Changed 11 Oct 2026 from a phone frame, ASM-11. |
 | Organizer | Desktop browser | **1440 × 900** | Chai is watching a live table of numbers, not tapping. See OQ-01. |
 
-Every screen must also work from **1024 px** wide with no sideways scrolling. There is no phone layout (ASM-10).
+Every screen must also work from **1024 px** wide with no sideways scrolling. There is no phone layout (ASM-11).
 
 ### Design system
 

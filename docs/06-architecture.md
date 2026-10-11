@@ -456,7 +456,7 @@ eventflow
     ├── BookingGateway.java           1 interface, every message the pages can send (docs/09)
     ├── routes/                       1 class per area: Event, Queue, Hold, Payment, Me, Dev
     ├── dto/                          the JSON shapes
-    └── fake/                         in-memory stand-in for core/, demo only (ASM-07)
+    └── fake/                         in-memory stand-in for core/, demo only (ASM-08)
 
 src/main/resources/public/    ◄── THE SCREENS. Plain HTML, CSS and JavaScript (SCR-01 to SCR-18).
 ```
