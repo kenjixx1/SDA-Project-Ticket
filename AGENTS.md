@@ -15,16 +15,16 @@ Management System**: a
 ticket-selling platform that survives a sudden traffic spike (40,000 people
 pressing "buy" in the same second) without ever selling the same seat twice.
 
-The course asks for six deliverables. This repository currently covers the
-first three.
+The course asks for six deliverables. This repository covers the first five;
+Deliverable 4 is partly built (Slice 3 is not).
 
 | # | Deliverable | Where it lives | Status |
 |---|---|---|---|
 | 1 | Problem Description | `docs/01-problem-description.md` | Written |
 | 2 | Requirements Model | `docs/02` – `docs/05` | Written |
 | 3 | Design | `docs/06-architecture.md`, `docs/08-screen-requirements.md` | Written |
-| 4 | Implementation | `src/` | Slices 1–2 built — booking engine + waiting room, with tests |
-| 5 | Operation | not yet | Not started |
+| 4 | Implementation | `src/` | Slices 1–2 built — booking engine + waiting room, with tests; all 29 screens on a fake engine |
+| 5 | Operation | `docs/10-operation.md` | Written |
 | 6 | Conclusion & Recommendation | not yet | Not started |
 
 **Code lives in `src/` only.** Slices 1 (booking engine) and 2 (waiting room)
