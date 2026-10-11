@@ -56,9 +56,9 @@ async function withTiers() {
   const e = await draft();
   await chai('PUT', `/api/org/events/${e.eventId}/tiers`, {
     tiers: [
-      { name: 'VIP', price: 6500, capacity: 500 },
-      { name: 'Zone A', price: 3800, capacity: 2000 },
-      { name: 'Zone B', price: 1900, capacity: 5000 },
+      { name: 'VIP', price: 6500, total: 500 },
+      { name: 'Zone A', price: 3800, total: 2000 },
+      { name: 'Zone B', price: 1900, total: 5000 },
     ],
   });
   return e;
