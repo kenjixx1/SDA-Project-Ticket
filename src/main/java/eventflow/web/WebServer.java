@@ -7,6 +7,9 @@ import eventflow.web.fake.DevControls;
 import eventflow.web.fake.FakeBookingGateway;
 import eventflow.web.fake.FakeClock;
 import eventflow.web.fake.FakeOrganizerGateway;
+import eventflow.web.real.CoreBookingGateway;
+import eventflow.web.real.CoreOrganizerGateway;
+import eventflow.web.real.RealEngine;
 import eventflow.web.routes.DevRoutes;
 import eventflow.web.routes.EventRoutes;
 import eventflow.web.routes.HoldRoutes;
@@ -26,16 +29,16 @@ public final class WebServer {
 
     public static void main(String[] args) {
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "7070"));
-        FakeBookingGateway fake = new FakeBookingGateway(
-                new FakeClock(FakeBookingGateway.START, System::currentTimeMillis));
+        FakeClock clock = new FakeClock(FakeBookingGateway.START, System::currentTimeMillis);
 
-        // THE SWITCH. When core/ is ready: gateway = new CoreBookingGateway(...); dev = null;
-        BookingGateway gateway = fake;
-        DevControls dev = fake;
-        // THE SWITCH, organizer side: organizer = new CoreOrganizerGateway(...)
-        OrganizerGateway organizer = new FakeOrganizerGateway(fake);
-
-        create(gateway, organizer, dev).start(port);
+        // THE SWITCH. ENGINE=core runs the pages on the real booking engine (core/). The fake stays the default.
+        if ("core".equals(System.getenv("ENGINE"))) {
+            RealEngine engine = new RealEngine(clock);
+            create(new CoreBookingGateway(engine), new CoreOrganizerGateway(engine), engine).start(port);
+            return;
+        }
+        FakeBookingGateway fake = new FakeBookingGateway(clock);
+        create(fake, new FakeOrganizerGateway(fake), fake).start(port);
     }
 
     public static Javalin create(BookingGateway gateway, DevControls dev) {

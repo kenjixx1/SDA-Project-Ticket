@@ -68,6 +68,9 @@ being sold twice. This document is how that morning is run.
 | Kenji, the customer | `http://localhost:7070/?dev` |
 | Chai, the organizer | `http://localhost:7070/organizer.html?dev` |
 
+To run the pages on the real booking engine instead: `ENGINE=core mvn -q compile exec:java`
+(see §10.7).
+
 `?dev` shows the **demo controls** in the corner. They exist only for the fake
 engine.
 
@@ -155,20 +158,28 @@ from other machines. That test is not built yet.
 
 ## 10.7 Switching the pages to the real engine
 
-**Today the pages talk to the fake engine. One place decides that.**
+**The pages talk to the fake engine unless `ENGINE=core` is set. One place decides that.**
 
-- In `WebServer.main`, the lines marked `THE SWITCH` choose the engine.
-- Two doors must switch: `BookingGateway` (Kenji's pages) and
-  `OrganizerGateway` (Chai's pages).
-- Before switching, run `ApiContractTest` and `OrgApiContractTest` against the
-  new gateway. They are written so the same checks pass on the fake and on
-  `core/`.
+- In `WebServer.main`, the lines marked `THE SWITCH` read `ENGINE`.
+- `ENGINE=core` starts `RealEngine`: the real `core/` plus the gateway's own
+  records for what core does not keep yet (drafts, pictures, event state,
+  payments, orders). Both doors sit on it: `CoreBookingGateway` (Kenji's pages)
+  and `CoreOrganizerGateway` (Chai's pages).
+- Core runs on the demo clock, so speed and +10 min still work. A scenario is
+  refused with `NOT_IN_CORE`, because core has nothing to fake.
+- `core/` itself is not changed by any of this.
 
-| Part of the sale | Ready in `core/` today? |
+| On `ENGINE=core` | Calls |
 |---|---|
-| Queue, hold, PromptPay happy path | Yes, Slices 1 and 2 |
-| Card payment, early bird, failed payments, tickets, dashboard | No, Slice 3 |
-| Organizer rules: frozen prices, close sale, edit tiers | No |
+| Answered by core | M-03 join · M-04 place in line · M-05 seats left · M-06 hold · O-06 add a tier · O-09 admission rate |
+| Core, finished by the gateway | M-02 one event · M-07 my hold · M-09, M-10, M-11 pay in 3 steps over core's one-step checkout · O-02 create · O-03 one event · O-05 set tiers · O-08 publish |
+| Stand-in made by the gateway | M-01 events list · M-12 orders, with tickets marked `UNSIGNED` (signing is Slice 3) · M-13 who am I · O-01 my events · O-11 dashboard |
+| Refused, `409 NOT_IN_CORE` | M-08 give seats back early · O-04 and O-07 after publishing · O-10 close the sale |
+
+- Card payment shows *Not available right now*: core has only the PromptPay plug-in.
+- No Early Bird discount: pricing rules are Slice 3.
+- When core adds a missing piece, one gateway method switches from refusing
+  to calling core.
 
 ---
 

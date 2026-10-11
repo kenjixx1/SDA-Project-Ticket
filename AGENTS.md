@@ -23,7 +23,7 @@ Deliverable 4 is partly built (Slice 3 is not).
 | 1 | Problem Description | `docs/01-problem-description.md` | Written |
 | 2 | Requirements Model | `docs/02` – `docs/05` | Written |
 | 3 | Design | `docs/06-architecture.md`, `docs/08-screen-requirements.md` | Written |
-| 4 | Implementation | `src/` | Slices 1–2 built — booking engine + waiting room, with tests; all 29 screens on a fake engine |
+| 4 | Implementation | `src/` | Slices 1–2 built — booking engine + waiting room, with tests; all 29 screens on a fake engine, or on core with ENGINE=core |
 | 5 | Operation | `docs/10-operation.md` | Written |
 | 6 | Conclusion & Recommendation | not yet | Not started |
 
