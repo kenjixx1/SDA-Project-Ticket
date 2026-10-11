@@ -10,14 +10,15 @@ OUT=out
 rm -rf "$OUT"
 mkdir -p "$OUT/main" "$OUT/test"
 
-javac --release 17 -encoding UTF-8 -d "$OUT/main" $(find src/main/java -name '*.java')
+# web/ (the presentation layer) needs Javalin, so it builds with Maven instead: mvn test
+javac --release 17 -encoding UTF-8 -d "$OUT/main" $(find src/main/java -name '*.java' -not -path '*/web/*')
 
 case "${1:-test}" in
   demo)
     java -cp "$OUT/main" eventflow.EventFlowDemo
     ;;
   test)
-    javac --release 17 -encoding UTF-8 -cp "$OUT/main" -d "$OUT/test" $(find src/test/java -name '*.java')
+    javac --release 17 -encoding UTF-8 -cp "$OUT/main" -d "$OUT/test" $(find src/test/java -name '*.java' -not -path '*/web/*')
     java -cp "$OUT/main:$OUT/test" eventflow.TestRunner
     ;;
   *)
