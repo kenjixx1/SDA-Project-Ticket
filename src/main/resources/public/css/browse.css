@@ -52,7 +52,7 @@
 
 /* SCR-01 events */
 [hidden]{display:none!important}
-.screen.wide{padding:44px 40px 70px;gap:28px}
+.screen.wide{max-width:1280px;padding:44px 40px 70px;gap:28px}
 .head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
 .titles{display:flex;flex-direction:column;gap:8px}
 .h1{font:600 44px/1 var(--f);letter-spacing:-.02em;margin:0}
@@ -111,7 +111,7 @@
 .blank .sub,.none .sub{line-height:1.5}
 
 /* SCR-02 tickets */
-.screen.mid{max-width:960px;padding:44px 40px 70px;gap:14px}
+.screen.mid{max-width:1040px;padding:44px 40px 70px;gap:14px}
 .orow{display:flex;align-items:center;gap:24px;width:100%;padding:20px 24px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);cursor:pointer;text-align:left;transition:background .15s,border-color .15s}
 .orow.past{opacity:.5}
 .orow .date{flex:none;width:56px;display:flex;flex-direction:column;align-items:center;gap:5px;padding-right:22px;border-right:1px solid var(--l1)}
@@ -124,14 +124,14 @@
 .orow .show .arr{display:inline-block;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 
 /* SCR-04 account */
-.screen.narrow{max-width:640px;padding:44px 40px 70px;gap:14px}
+.screen.narrow{max-width:720px;padding:44px 40px 70px;gap:14px}
 .screen.narrow .h1{margin-bottom:18px}
 .me{display:flex;align-items:center;gap:18px;margin-bottom:16px}
 .avatar{flex:none;width:64px;height:64px;border-radius:50%;background:var(--ac);color:var(--aci);display:grid;place-items:center;font:700 26px/1 var(--f);animation:tq-pop .5s cubic-bezier(.2,.8,.2,1) both}
 .meinfo{display:flex;flex-direction:column;gap:7px}
 .meinfo b{font:600 21px/1 var(--f)}
 .meinfo span{font:400 14px/1 var(--fm);color:var(--mu)}
-.arow{min-height:58px;padding:0 22px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;font:500 16px/1 var(--f);text-align:left;transition:background .2s,transform .3s cubic-bezier(.2,.8,.2,1)}
+.arow{min-height:60px;padding:0 22px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between;font:500 16px/1 var(--f);text-align:left;transition:background .2s,transform .3s cubic-bezier(.2,.8,.2,1)}
 .arow.stop{color:var(--st);justify-content:flex-start}
 .arow .chev{color:var(--mu)}
 
@@ -160,3 +160,11 @@
   .arow.stop:hover{background:var(--stw)}
 }
 .pick,.stepper button,.back{transition:transform .15s,filter .15s,background .15s,border-color .15s,color .15s}
+
+/* containers above: the design's max-widths are content width; ours are border-box, so 40px side padding is added */
+/* SCR-04 sign-out dialog is narrower than the shared dialog */
+.sheet:has([data-signout]){width:400px;gap:18px;border-color:var(--l2)}
+.sheet:has([data-signout]) .acts{margin-top:0}
+.sheet:has([data-signout]) .acts .btn{height:50px}
+.sheet:has([data-signout]) .acts .btn.danger{border-width:1.5px;font-weight:500}
+.orow .pill{letter-spacing:0}

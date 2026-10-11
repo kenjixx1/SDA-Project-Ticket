@@ -2,6 +2,9 @@
 import { api, serverNow } from '../api.js';
 import { html, baht, time24, dateShort, dayMonth, dayNum, monUpper, sameDay, sheet } from '../parts.js';
 
+// The design names events without the city: "The 1975", not "The 1975 Bangkok".
+const short = (n) => n.replace(/ Bangkok$/, '');
+
 function pill(e) {
   if (e.state === 'CLOSED') return html`<span class="pill stop">SALE CLOSED</span>`;
   if (e.soldOut) return html`<span class="pill stop">SOLD OUT</span>`;
@@ -62,7 +65,7 @@ function orderRow(o) {
       : html`<span class="pill">${o.quantity} · ${o.tierName}</span>`;
   return html`<button class="orow ${o.past ? 'past' : ''}" data-action="go" data-to="#/ticket/${o.orderId}/1">
     <span class="date"><b>${dayNum(o.event.eventDateTime)}</b><span>${monUpper(o.event.eventDateTime)}</span></span>
-    <span class="what"><b>${o.event.name}</b><span>${o.event.venue} · ${time24(o.event.eventDateTime)}</span></span>
+    <span class="what"><b>${short(o.event.name)}</b><span>${o.event.venue} · ${time24(o.event.eventDateTime)}</span></span>
     ${tag}${o.past ? '' : html`<span class="show">Show ticket<span class="arr">›</span></span>`}
   </button>`;
 }
@@ -105,8 +108,8 @@ export const screens = [
         <div class="egrid">${events.map((e, i) => {
           const text = `${e.name} ${e.venue}`.toLowerCase();
           return html`<button class="ecard" data-searchcard data-text="${text}" ${i === 0 ? html`data-first="1" hidden` : ''} data-action="go" data-to="#/event/${e.eventId}">
-            <span class="ecard-img">${e.artwork ? html`<img src="${e.artwork}" alt="">` : html`<span class="noimg">${e.name}</span>`}</span>
-            <span class="ecard-body"><span class="ecard-name">${e.name}</span>
+            <span class="ecard-img">${e.artwork ? html`<img src="${e.artwork}" alt="">` : html`<span class="noimg">${short(e.name)}</span>`}</span>
+            <span class="ecard-body"><span class="ecard-name">${short(e.name)}</span>
               <span class="ecard-meta">${e.venue} · ${dayMonth(e.eventDateTime)}</span>
               <span class="ecard-price">From ${baht(e.fromPrice)}</span></span>
           </button>`;
@@ -151,7 +154,7 @@ export const screens = [
         <button class="arow">Help<span class="chev">›</span></button>
         <button class="arow stop" data-action="askSignOut">Sign out</button>
       </section>
-      ${st.sheet ? sheet({ title: 'Sign out?', close: 'cancel', buttons: [
+      ${st.sheet ? sheet({ title: 'Sign out?', close: 'cancel', extra: html`<i data-signout hidden></i>`, buttons: [
         { label: 'Cancel', action: 'cancel', quiet: true },
         { label: 'Sign out', action: 'signOut', danger: true },
       ] }) : ''}`;
