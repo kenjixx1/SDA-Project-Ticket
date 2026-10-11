@@ -148,6 +148,7 @@ Grounding lives outside this repository, in the course folder:
   Lecture 8/8.1 SDA pipe filter.pdf                    pipeline style (not used)
   Lecture 8/8.2 SDA microkernel.pdf                    microkernel style
   Lecture 8/8.5 GroupProject2.pdf                      the six deliverables
+  Lecture 11/11.1 SDA eventdriven.pdf                  event-driven style
 ```
 
 The project brief itself is `SDA Project.pdf` at the repository root.

@@ -376,7 +376,7 @@ A **constraint** is something fixed that the design did not get to choose.
 
 | ID | Constraint | Where it comes from |
 |---|---|---|
-| CON-01 | *Retired.* Was: "the architecture must use the pipeline style". The brief does not require any style. The event-driven style is now a design decision, traced in §2.7. | — |
+| CON-01 | *Retired.* Was: "the architecture must use the pipeline style", from the group's original proposal (`SDA Project.pdf`). The course lets each group choose its design (slide 8.5). After Lecture 11.1, the group chose the event-driven style instead: expiry and late payment happen later, which a one-way pipeline cannot model. Traced in §2.7. | — |
 | CON-02 | The architecture must use the **microkernel** style for payment and promotion plug-ins. | The project brief: payment methods and pricing rules must plug in "without altering the core booking engine" |
 | CON-03 | Card details are handled by the payment provider, never stored here. | Standard practice; also keeps NFR-06 achievable |
 | CON-04 | Implementation language is **Java**. | Course convention |

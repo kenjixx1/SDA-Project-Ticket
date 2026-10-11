@@ -2,9 +2,9 @@
 
 **Deliverable 3 of 6 — Design**
 
-Two architectural styles: **event-driven** and **microkernel**. This document
-says which parts of the system are which, and — more importantly — **which
-requirement forced each decision**.
+Two architectural styles: **event-driven** (slide 11.1) and **microkernel**
+(slide 8.2). This document says which parts of the system are which, and —
+more importantly — **which requirement forced each decision**.
 
 ---
 
@@ -22,7 +22,7 @@ Before the styles, the shape.
   │   WAITING ROOM ── UserAdmitted ──► booking: hold · pay     │
   │   admits ~200/s                    · confirm · expire      │
   │                                                            │
-  │   the parts talk by EVENTS on one event channel            │
+  │   the parts talk by EVENTS through one event broker        │
   │   TicketHeld · HoldExpired · PaymentCompleted · ...        │
   └──────────────────────────────┬────────────────────────────┘
                                  │  looks up by key
@@ -43,31 +43,41 @@ directly to say "now do your job". It announces what just happened — an
 
 ---
 
-## 6.2 Style 1 — Event-driven
+## 6.2 Style 1 — Event-driven  *(slide 11.1)*
 
 ### What the style is
 
-**Event-driven architecture** is a style where the parts of a system work by
-announcing and reacting to **events**.
+Lecture 11.1 describes **event-driven architecture (EDA)** as a style that
+combines **asynchronous communication** with **parallel processing** — doing
+many things at once without waiting — to build very fast systems.
 
-- An **event** is a short message saying that something has **already
-  happened**. For example: "2 VIP seats were held for Kenji at 10:03:12."
-- An **event processor** is one part of the system. It **publishes** events,
-  **listens** for events, or both. Each one does one job.
-- The **event channel** carries events from the publisher to every listener.
-  The publisher does not know who is listening.
+The slides name **four components** in the broker topology:
+
+| Slide 11.1 component | What it is | In this system |
+|---|---|---|
+| **Initiating event** | The event that *"starts the entire event flow"*. | Kenji presses **Hold** or **Pay**; the clock passes a hold's deadline. |
+| **Event broker** | Holds all the **event channels** for one domain. | `EventBus`. Each event type is one channel. |
+| **Event processor** | Listens to a channel, does its business logic, publishes a new event. | `InventoryService`, `ReservationService`, `CheckoutService`, `AdmissionScheduler`, … |
+| **Processing event** (also *derived event*) | An event *"generated in response to the initiating event"*. | `TicketHeld`, `PaymentCompleted`, `OrderConfirmed`, `HoldExpired`, … |
+
+- An **event** says that something has **already happened**. Slide 11.1:
+  events are *broadcast* to many processors, while *messages* request
+  something from one service.
+- **Example:** `TicketHeld` — "2 VIP seats were held for Kenji at 10:04:40,
+  reservation R-1001".
+- The publisher does not know who is listening.
 
 **Analogy.** A restaurant kitchen. The waiter pins an order ticket on the rail
 and walks away. The grill cook takes what is theirs, the salad cook takes what
 is theirs. Nobody phones anybody. Adding a dessert station means one more
 cook reading the rail — the waiter does not change.
 
-There are two common **topologies** (ways of wiring it):
+Slide 11.1 gives two **topologies** (ways of wiring it):
 
-| Topology | How it works | Used here? |
+| Topology | Slide 11.1: use it when you need… | Used here? |
 |---|---|---|
-| **Broker** | No central controller. Each processor listens, does its job, and publishes a new event. | **Yes** |
-| **Mediator** | One central controller receives every event and tells each processor what to do next. | No — see below |
+| **Broker** | *"a high degree of responsiveness and dynamic control over the processing of an event"*. No central controller; each processor publishes what it did. | **Yes** |
+| **Mediator** | *"control over the workflow of an event process"*. One **event mediator** receives the initiating event and directs every step. | No — see below |
 
 ### Why this style fits here
 
@@ -81,21 +91,24 @@ schedule:
 A straight line of steps cannot wait 10 minutes for something that may never
 come. An event can simply arrive when it arrives. That is the whole fit.
 
-It also helps three characteristics directly:
+Slide 11.1 lists the broker topology's advantages. Each one maps to a
+characteristic this project needs:
 
-- **NFR-01 Elasticity.** Events queue up on the channel and are handled at a
-  steady pace, so a burst does not knock anything over.
-- **NFR-05 Fault tolerance.** If the payment provider is down, the waiting
-  room and the hold still work — they never call payment at all.
-- **FR-12 / FR-17.** Expiry and late payment are just two more events, not
-  special cases bolted onto a flow.
+| Advantage (slide 11.1) | Characteristic it serves |
+|---|---|
+| High responsiveness, high performance | NFR-03 Performance — the queue screen and the hold answer fast |
+| High scalability | NFR-01 Elasticity — events queue up and are handled at a steady pace |
+| High fault tolerance | NFR-05 — if payment is down, the waiting room and the hold still work |
+| Highly decoupled event processors | NFR-08 — a new listener needs no change to the publisher |
 
 ### Why broker, not mediator
 
-The workflow is short — five steps — and each reaction is independent. The
-one place where order truly matters (expire **or** confirm, never both) is
-already decided by a single atomic step inside `ReservationService` (rule
-R-E04-6). A mediator would be a controller that mostly passes messages along.
+- The workflow is short — five steps — and each reaction is independent.
+- The one place where order truly matters (expire **or** confirm, never both)
+  is already decided by a single atomic step inside `ReservationService`
+  (rule R-E04-6).
+- A mediator would be a controller that mostly passes events along, and a
+  single point of failure during the spike.
 
 The cost is that no single class shows the whole workflow. The event table
 below is that map instead.
@@ -106,7 +119,12 @@ Kenji buys 2 × VIP at ฿6,500. Every event carries his `tokenId` and, once it
 exists, his `reservationId` (locked decision 3), so the whole chain can be
 traced afterwards (NFR-07).
 
-| # | Event | Published by | Who listens | What they do |
+**Initiating events:** Kenji's **Hold** request, Kenji's **Pay** request, and
+the clock reaching a hold's `expiresAt`.
+
+**Processing events:**
+
+| # | Processing event | Published by | Who listens | What they do |
 |---|---|---|---|---|
 | 1 | **`UserAdmitted`** | `AdmissionScheduler` | Kenji's session · `SalesDashboardService` | Show "your turn" · count one more admitted |
 | 2 | **`TicketHeld`** | `InventoryService`, after the atomic hold succeeds | `SalesDashboardService` | VIP held goes 10 → 12 on the dashboard. The 10-minute deadline is already saved on the hold; `HoldExpiryScheduler` finds it by scanning, not by listening. |
@@ -115,6 +133,11 @@ traced afterwards (NFR-07).
 | 5 | **`TicketIssued`** | `TicketService` | Kenji's session | Show the two tickets |
 | — | **`HoldExpired`** | `ReservationService`, when expiry wins | `InventoryService` · `SalesDashboardService` · Kenji's session | Return the 2 seats (FR-12) · held goes back down · show "You have not been charged" |
 | — | **`PaymentVoided`** | `ReservationService`, when a payment arrived too late | `SalesDashboardService` · Kenji's session | Record it · tell Kenji the money is released |
+
+Slide 11.1 recommends that each processor **advertise what it has done**,
+*"regardless of whether or not any other event processor cares"*. That is why
+`TicketIssued` and `PaymentVoided` exist even though only Kenji's screen
+listens to them today.
 
 ```
  AdmissionScheduler ──UserAdmitted──►  Kenji picks 2 × VIP
@@ -128,13 +151,16 @@ traced afterwards (NFR-07).
                                              │                        │
                                      OrderConfirmed               HoldExpired
                                        │       │                      │
-                            InventoryService  TicketService     InventoryService
-                             held → sold     ──TicketIssued──►   seats returned
+                                InventoryService  TicketService     InventoryService
+                                 held → sold     ──TicketIssued──►   seats returned
 ```
 
-### What is NOT an event
+### Events versus requests
 
-Some steps need an answer **right now**, so they stay direct calls:
+Slide 11.1 separates the two: *"events always broadcast something that has
+already happened, whereas messages request something that needs to be done"*.
+
+Some steps need an answer **right now**, so they stay direct requests:
 
 - **Issuing a queue token.** Kenji must see his position immediately.
 - **The atomic hold.** Kenji must know at once whether he got the seats.
@@ -142,7 +168,9 @@ Some steps need an answer **right now**, so they stay direct calls:
   "declined".
 
 **The rule:** a request that needs an answer is a call. A fact that others may
-care about is an event.
+care about is an event. Slide 11.1's own example works the same way: the
+`OrderPlacement` processor saves the order and *returns an order ID to the
+customer*, then advertises `order-created`.
 
 ### Events are news, not decisions
 
@@ -158,22 +186,41 @@ This matters for INV-01. No event ever decides who gets the last VIP seat.
 A design that names a style's risks and does not answer them has not used the
 style — it has only drawn it.
 
+**The broker topology's disadvantages (slide 11.1):**
+
+| Disadvantage | Our answer |
+|---|---|
+| **Workflow control** — no one place runs the flow | The event table above is the map. The one ordering rule that matters — confirm **or** expire — is one conditional update in `ReservationService` (R-E04-6). |
+| **Error handling** — a failure inside one processor | Failures are events too: `HoldExpired`, `PaymentVoided`. A declined payment changes nothing, so the hold keeps its time (FR-19). |
+| **Recoverability** — an event is lost, e.g. a crash after saving but before publishing | The hold's expiry time is stored with the hold (locked decision 2). `HoldExpiryScheduler` scans the database, so a lost `TicketHeld` cannot leave seats stuck. |
+| **Restart capabilities** — the system stops mid-flow | Nothing lives only inside an event. On restart, every reservation's state is read back from the database, and the next sweep finishes any expiry that was due. |
+| **Data inconsistency** — counters and records drift apart | Only `InventoryService` changes `heldQuantity` and `soldQuantity`. Every processor is **idempotent** — handling the same event twice has the same effect as once. INV-02 and INV-03 are re-checked by the tests. |
+
+**The common risks of the style (slide 11.1):**
+
 | Risk | Our answer |
 |---|---|
-| **Two events race** — `PaymentCompleted` and `HoldExpired` for the same hold | `ReservationService` changes state with one conditional update: `HELD → CONFIRMED` or `HELD → EXPIRED`. Only one can win. The loser becomes `PaymentVoided` or does nothing. |
-| **An event is lost** — the server crashes after saving but before publishing | The hold's expiry time is stored with the hold (locked decision 2). `HoldExpiryScheduler` also scans the database for holds past their time, so a lost `TicketHeld` cannot leave seats stuck. |
-| **An event is delivered twice** | Every listener is **idempotent** — handling the same event twice has the same effect as once. `InventoryService` checks the reservation's state before moving seats. |
-| **Nobody can see the whole workflow** (broker topology) | The event table above is the map. Every event carries `tokenId` and `reservationId`, so the chain can be walked backwards (NFR-07). |
-| **Hard to test** | Each processor is tested alone: publish one fake event, check what it did. |
+| **Nondeterministic event processing** — the order events arrive in can differ run to run | `PaymentCompleted` and `HoldExpired` can race for the same hold. Who wins may differ; the result is always one of two valid endings. `PaymentExpiryRaceTest` runs this race 4,000 times. |
+| **Too much static coupling** — processors depending on each other's code | Processors share only the small event records in `core/event`. No processor calls another processor's class. |
+| **Too much synchronous communication between event processors** | Exactly three direct calls, listed in *Events versus requests*, each because Kenji is waiting for the answer. |
+| **Overall state management** — who knows the state of an order? | One place: the `Reservation`. Its state machine (`HELD → CONFIRMED / EXPIRED`) is the single answer. |
 
-### Data topology
+### Data topology — monolithic database
 
-**This design uses a single database.**
+Slide 11.1 gives three choices: a **monolithic database** shared by all
+processors, a **domain database** per group of processors, or a **dedicated
+database** per processor.
 
-The reason is INV-01. `heldQuantity` and `soldQuantity` must be correct at
-every instant; splitting inventory across separate stores would make the
-atomic hold a distributed problem, and a distributed atomic hold is a far
-harder thing to get right than the one this project needs.
+**This design uses the monolithic database topology.**
+
+- **Why:** INV-01. `heldQuantity` and `soldQuantity` must be correct at every
+  instant. Splitting inventory across separate stores would make the atomic
+  hold a distributed problem, which is far harder to get right.
+- **The cost, as slide 11.1 lists it:** weaker fault tolerance, scalability
+  and change control, and the whole system becomes one architectural quantum
+  (one unit that is deployed and fails together).
+- **Why the cost is acceptable:** the waiting room caps the rate that reaches
+  the database at about 200 requests per second, not 40,000.
 
 ---
 
@@ -228,7 +275,7 @@ It owns:
 - ticket inventory: the atomic hold and the inventory counters,
 - reservations: the lifecycle `HELD` → `CONFIRMED` / `EXPIRED` / `RELEASED`,
 - booking: checkout and pricing,
-- the event channel that connects all of the above.
+- the event broker that connects all of the above.
 
 **Its happy path is the event flow from §6.2.** That is exactly what slide 8.2
 says a core system *is*: a general processing flow with little or no custom
@@ -356,7 +403,7 @@ th.ac.kmitl.sda.ticketqueue
 ├── core/                     ◄── THE CORE SYSTEM. Knows no plug-in by name.
 │   ├── event/
 │   │   ├── DomainEvent.java          the shared event interface
-│   │   ├── EventBus.java             the event channel: publish · subscribe
+│   │   ├── EventBus.java             the event broker: publish · subscribe
 │   │   ├── UserAdmitted.java
 │   │   ├── TicketHeld.java
 │   │   ├── PaymentCompleted.java
@@ -410,8 +457,8 @@ th.ac.kmitl.sda.ticketqueue
 only), the simulated `PromptPayPlugin`, `admin/EventService` and `EventFlow`.
 `src/README.md` lists what is built and what the tests prove.
 
-**Event channel implementation.** `EventBus` is a small in-process class: a
-map from event type to its listeners. No message-broker product is needed to
+**Event broker implementation.** `EventBus` is a small in-process class: a
+map from event type (the channel) to its listeners. No message-broker product is needed to
 demonstrate the style. Whether a real one is used in production is an
 Operation question (§6.8).
 
@@ -462,8 +509,8 @@ An architecture document that lists only benefits has not made any choices.
 | Decision | What it buys | What it costs |
 |---|---|---|
 | Inventory drops at **hold**, not payment | Overselling becomes structurally impossible | Seats sit unavailable during abandoned checkouts. Mitigated by the 10-minute limit — which is why FR-12 is not optional. |
-| **Event-driven**, broker topology | Late and timed things (expiry, payment) fit naturally; parts fail independently (NFR-05) | No single class shows the whole workflow. Events can race, repeat or go missing — each answered in §6.2. |
-| Single database for inventory | A genuinely atomic hold, easy to prove | Inventory is a single point of contention, and eventually a scaling ceiling. Acceptable: the queue caps the rate that reaches it. |
+| **Event-driven**, broker topology (slide 11.1) | Late and timed things (expiry, payment) fit naturally; parts fail independently (NFR-05) | Slide 11.1's broker disadvantages: workflow control, error handling, recoverability, restart, data inconsistency — each answered in §6.2. |
+| Monolithic database topology (slide 11.1) | A genuinely atomic hold, easy to prove | Inventory is a single point of contention, and eventually a scaling ceiling. Acceptable: the queue caps the rate that reaches it. |
 | Waiting room in front of everything | NFR-01 without over-provisioning | Every customer waits, including the one who arrives at 10:47 to an empty queue. |
 | **Compile-based** plug-ins | Simple, readable, easy to govern with a build check | Adding a payment method needs a redeploy. Nothing requires otherwise. |
 | Only two plug-in seams | The design stays readable | Anything that is neither a payment method nor a pricing rule means changing the core. |
@@ -476,7 +523,9 @@ An architecture document that lists only benefits has not made any choices.
 Honest gaps, so they are not mistaken for oversights.
 
 - **Deployment topology.** The in-process `EventBus` could later become a
-  real message broker running on its own machines. How many instances of
+  real message broker — slide 11.1 names RabbitMQ and ActiveMQ — running on
+  its own machines. The slide also notes that cloud platforms suit EDA well,
+  because their elastic infrastructure matches the style. How many instances of
   what, and where, belongs to Deliverable 5 (Operation).
 - **The queue's own storage.** It must be fast and it must survive a restart
   without losing positions. The choice is an Operation concern.
