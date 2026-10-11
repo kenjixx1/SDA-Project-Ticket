@@ -82,10 +82,16 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     // ---------- data ----------
 
     static final class Event {
-        final String id, name, shortName, venue, artwork;
-        final long dateTime, saleOpensAt;
+        final String id;
+        final String artwork;
+        String name, shortName, venue;
+        long dateTime, saleOpensAt;
         final List<Tier> tiers = new ArrayList<>();
         boolean cancelled, closed;
+        String owner = "chai";
+        boolean draft, closing;
+        Long closedAt;
+        int admitPerSecond = ADMIT_PER_SECOND;
 
         Event(String id, String name, String shortName, String venue, String artwork, long dateTime, long saleOpensAt) {
             this.id = id;
@@ -112,10 +118,12 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     }
 
     static final class Tier {
-        final String id, name;
-        final long price;
-        final int total;
+        final String id;
+        String name;
+        long price;
+        int total;
         int held, sold;
+        int soldByOrders;
 
         Tier(String id, String name, long price, int total, int sold) {
             this.id = id;
@@ -260,14 +268,41 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         return e;
     }
 
-    String state(Event e) {
+    /** An event a customer may know about: a draft does not exist yet. */
+    Event customerEvent(String eventId) {
+        Event e = event(eventId);
+        if (e.draft) {
+            throw GatewayException.notFound("Event");
+        }
+        return e;
+    }
+
+    /** The organizer's state. CLOSING turns into CLOSED (and stamps closedAt) once no seat is held. */
+    String orgState(Event e) {
+        if (e.draft) {
+            return "DRAFT";
+        }
         if (e.cancelled) {
             return "CANCELLED";
         }
         if (e.closed) {
             return "CLOSED";
         }
+        if (e.closing) {
+            if (e.tiers.stream().anyMatch(t -> t.held > 0)) {
+                return "CLOSING";
+            }
+            e.closed = true;
+            e.closedAt = clock.now();
+            return "CLOSED";
+        }
         return clock.now() < e.saleOpensAt ? "SCHEDULED" : "ON_SALE";
+    }
+
+    /** What a customer sees: a closing sale already reads as closed (SCR-05e). */
+    String state(Event e) {
+        String s = orgState(e);
+        return s.equals("CLOSING") ? "CLOSED" : s;
     }
 
     Token ownedToken(String customerId, String tokenId) {
@@ -279,11 +314,18 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         return t;
     }
 
+    long admitAfterMs(Event e) {
+        return (long) Math.ceil(START_AHEAD * 1000.0 / e.admitPerSecond);
+    }
+
     void refresh(Token t) {
         long now = clock.now();
-        if (t.state.equals("WAITING") && now >= t.issuedAt + ADMIT_AFTER_MS) {
+        Event e = events.get(t.eventId);
+        long after = admitAfterMs(e);
+        // FR-29: once the sale is closing or closed, nobody new is let in.
+        if (t.state.equals("WAITING") && now >= t.issuedAt + after && orgState(e).equals("ON_SALE")) {
             t.state = "ADMITTED";
-            t.admittedAt = t.issuedAt + ADMIT_AFTER_MS;
+            t.admittedAt = t.issuedAt + after;
         }
         if (t.state.equals("ADMITTED") && now - t.admittedAt > TURN_LIMIT_MS) {
             t.state = "EXPIRED";
@@ -292,11 +334,35 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
 
     int admittedSoFar(Token t) {
         long elapsed = Math.max(0, clock.now() - t.issuedAt);
-        return (int) Math.min(START_AHEAD, elapsed * ADMIT_PER_SECOND / 1000);
+        return (int) Math.min(START_AHEAD, elapsed * events.get(t.eventId).admitPerSecond / 1000);
     }
 
     int position(Token t) {
         return t.state.equals("WAITING") ? Math.max(1, START_AHEAD - admittedSoFar(t)) : 0;
+    }
+
+    // ---------- organizer reads ----------
+
+    static final int CROWD_1975 = 35_768;
+
+    /** People waiting now. The 1975 also has the crowd from the story: 31,208 at 10:06:20 at 12 per second. */
+    int waiting(Event e) {
+        if (!orgState(e).equals("ON_SALE")) {
+            return 0;
+        }
+        long real = tokens.values().stream().filter(t -> t.eventId.equals(e.id))
+                .peek(this::refresh).filter(t -> t.state.equals("WAITING")).count();
+        long crowd = e.id.equals("the-1975")
+                ? Math.max(0, CROWD_1975 - (clock.now() - e.saleOpensAt) * e.admitPerSecond / 1000)
+                : 0;
+        return (int) (crowd + real);
+    }
+
+    /** Confirmed money for this event: seats sold before the demo at list price, plus what each order paid. */
+    long revenue(Event e) {
+        long seeded = e.tiers.stream().mapToLong(t -> (long) (t.sold - t.soldByOrders) * t.price).sum();
+        long paid = orders.values().stream().filter(o -> o.event.eventId().equals(e.id)).mapToLong(o -> o.paid).sum();
+        return seeded + paid;
     }
 
     /** Settles payments that are due and expires holds whose 10 minutes are up. */
@@ -338,6 +404,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         r.state = "CONFIRMED";
         t.held -= r.quantity;
         t.sold += r.quantity;
+        t.soldByOrders += r.quantity;
         Order o = new Order("O-" + (++orderSeq), r.customerId, event(r.eventId).ref(), t.id, t.name,
                 r.quantity, p.amount, providerLabel(p.providerKey));
         for (int n = 1; n <= r.quantity; n++) {
@@ -450,7 +517,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     public synchronized List<EventSummary> listEvents(String customerId) {
         sweep();
         return events.values().stream()
-                .filter(e -> !e.cancelled)
+                .filter(e -> !e.cancelled && !e.draft)
                 .sorted(Comparator.comparingLong(e -> e.saleOpensAt))
                 .map(e -> new EventSummary(e.id, e.name, e.shortName, e.venue, e.dateTime, e.saleOpensAt,
                         state(e), e.tiers.stream().mapToLong(t -> t.price).min().orElse(0), e.artwork, e.soldOut()))
@@ -460,7 +527,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     @Override
     public synchronized EventDetail getEvent(String customerId, String eventId) {
         sweep();
-        Event e = event(eventId);
+        Event e = customerEvent(eventId);
         Token mine = activeToken(customerId, eventId);
         return new EventDetail(e.id, e.name, e.shortName, e.venue, e.dateTime, e.saleOpensAt, state(e),
                 e.artwork, e.soldOut(),
@@ -484,7 +551,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
 
     @Override
     public synchronized JoinResult joinQueue(String customerId, String eventId) {
-        Event e = event(eventId);
+        Event e = customerEvent(eventId);
         if (!state(e).equals("ON_SALE")) {
             throw GatewayException.badRequest("NOT_ON_SALE", "This sale is not open");
         }
@@ -507,7 +574,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         String reservationId = reservations.values().stream()
                 .filter(r -> r.tokenId.equals(t.id)).map(r -> r.id).findFirst().orElse(null);
         return new QueueStatus(t.id, t.eventId, t.state, position(t), START_MOVED + admittedSoFar(t),
-                ADMIT_PER_SECOND, reservationId);
+                event(t.eventId).admitPerSecond, reservationId);
     }
 
     @Override
@@ -524,7 +591,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     @Override
     public synchronized List<TierAvailability> availability(String eventId) {
         sweep();
-        return event(eventId).tiers.stream()
+        return customerEvent(eventId).tiers.stream()
                 .map(t -> new TierAvailability(t.id, t.name, t.price, t.remaining(), t.total))
                 .toList();
     }
@@ -658,7 +725,10 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         Event e = events.get("the-1975");
         switch (scenario) {
             case EVENT_CANCELLED -> e.cancelled = true;
-            case SALE_CLOSED -> e.closed = true;
+            case SALE_CLOSED -> {
+                e.closed = true;
+                e.closedAt = clock.now();
+            }
             case SOLD_OUT_ALL -> e.tiers.forEach(t -> t.sold = t.total - t.held);
             default -> scenarios.add(scenario);
         }
