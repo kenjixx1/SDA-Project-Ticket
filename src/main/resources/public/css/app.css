@@ -119,7 +119,7 @@ img{max-width:100%;display:block}
 @keyframes tq-pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}
 @keyframes tq-dot{0%,100%{box-shadow:0 0 0 0 rgba(197,242,90,.5)}50%{box-shadow:0 0 0 6px rgba(197,242,90,0)}}
 @keyframes tq-modal{from{opacity:0;transform:translate(-50%,-46%) scale(.96)}to{opacity:1;transform:translate(-50%,-50%)}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 /* shared by browse and purchase screens: slim header (parts.js slimHeader) and the full-screen flash */
 .slim{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--l1)}
 .slim img,.slim .ph{width:40px;height:40px;border-radius:10px;object-fit:cover;background:var(--s3)}
