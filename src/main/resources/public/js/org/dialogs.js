@@ -4,6 +4,15 @@ import { org } from './api.js';
 import { ApiError, serverNow } from '../api.js';
 import { html, raw, num, sheet } from '../parts.js';
 import { field, toEpoch, dateInput, timeInput } from './parts.js';
+import { pickerKit } from './pickers.js';
+
+// SCR-35 uses the design's pickers, the same as SCR-31. The dialog holds them: d.form is d.f, plus d.pk and d.view.
+const PICKS = { evDate: { group: 'ev', up: false }, evTime: { group: 'ev', up: false }, saleDate: { group: 'sale', up: true }, saleTime: { group: 'sale', up: true } };
+const kit = pickerKit({
+  picks: PICKS,
+  box: (ctx) => ctx.state.dialog,
+  touch: (ctx, group) => { const d = ctx.state.dialog; d.touched[group] = 1; if (d.err && d.err.key === group) d.err = null; },
+});
 
 /** The screen that owns the open dialog. Only it may repaint the dialog's live checks. */
 let live = null;
@@ -100,7 +109,7 @@ const INPUTS = { name: ['name'], venue: ['venue'], ev: ['evDate', 'evTime'], sal
 /** True while every input of that error line is on screen and can still be typed in. */
 function clearable(key) {
   const root = document.getElementById('app');
-  return INPUTS[key].every((n) => { const el = root.querySelector(`[name="f_${n}"]`); return el && !el.disabled; });
+  return INPUTS[key].every((n) => { const el = root.querySelector(`[name="f_${n}"], [data-pk="${n}"]`); return el && !el.disabled; });
 }
 
 /**
@@ -144,12 +153,14 @@ function detailsSheet(e, d) {
       ${field({ label: 'Venue', name: 'f_venue', value: f.venue, error: lineOf(e, d, 'venue'), extra: 'maxlength="30" placeholder="Impact Arena"' })}
       <div class="field ${bad('ev')}">
         <span class="fl"><b>Event date and time</b></span>
-        <span class="dlg-two"><input type="date" name="f_evDate" value="${f.evDate}"><input type="time" name="f_evTime" value="${f.evTime}"></span>
+        <span class="dlg-two">${kit.picker(d, 'evDate', 'Pick a date')}${kit.picker(d, 'evTime', '--:--')}</span>
         <span class="err" role="alert">${lineOf(e, d, 'ev')}</span>
       </div>
       <div class="field ${bad('sale')}">
         <span class="fl"><b>Sale opens</b><i>to the second</i></span>
-        <span class="dlg-two"><input type="date" name="f_saleDate" value="${f.saleDate}" ${frozen ? raw('disabled') : ''}><input type="time" step="1" name="f_saleTime" value="${f.saleTime}" ${frozen ? raw('disabled') : ''}></span>
+        <span class="dlg-two">${frozen
+          ? html`${kit.locked(d, 'saleDate', 'Pick a date')}${kit.locked(d, 'saleTime', '--:--:--')}`
+          : html`${kit.picker(d, 'saleDate', 'Pick a date')}${kit.picker(d, 'saleTime', '--:--:--')}`}</span>
         <span class="err" role="alert">${lineOf(e, d, 'sale')}</span>
       </div>
       ${apart(d) ? html`<span class="err" role="alert">${apart(d)}</span>` : ''}
@@ -328,10 +339,11 @@ async function closeSale(ctx, id) {
 }
 
 export const dialogActions = {
+  ...kit.actions,
   editDetails(ctx) {
     const e = ctx.state.e;
     const f = { name: e.name, venue: e.venue, evDate: dateInput(e.eventDateTime), evTime: timeInput(e.eventDateTime), saleDate: dateInput(e.saleOpensAt), saleTime: timeInput(e.saleOpensAt, true) };
-    open(ctx, { name: 'details', f });
+    open(ctx, { name: 'details', f, form: f, pk: null, view: null });
   },
   editTier(ctx, data) {
     const t = tierOf(ctx.state.e, data.tier);

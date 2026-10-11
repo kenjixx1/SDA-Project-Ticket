@@ -80,3 +80,8 @@
 @media (hover:hover){
   .ov-link:hover{color:var(--tx)}
 }
+
+/* SCR-35 pickers: a popup may reach past the dialog, so the dialog stops clipping while one is open */
+.sheet:has(.pk-pop){overflow:visible}
+.sheet .dlg-two{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+.sheet .pk[disabled]{opacity:.55;cursor:default}
