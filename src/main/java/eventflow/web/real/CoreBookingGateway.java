@@ -3,7 +3,9 @@ package eventflow.web.real;
 import eventflow.core.inventory.HoldResult;
 import eventflow.core.inventory.InventoryService;
 import eventflow.core.inventory.TicketTier;
+import eventflow.core.order.CheckoutResult;
 import eventflow.core.order.Reservation;
+import eventflow.core.order.ReservationState;
 import eventflow.core.queue.JoinResult.Outcome;
 import eventflow.core.queue.QueueToken;
 import eventflow.core.queue.QueueTokenState;
@@ -19,9 +21,11 @@ import eventflow.web.dto.Views.PaymentMethod;
 import eventflow.web.dto.Views.PaymentStart;
 import eventflow.web.dto.Views.PaymentStatus;
 import eventflow.web.dto.Views.QueueStatus;
+import eventflow.web.dto.Views.TicketView;
 import eventflow.web.dto.Views.TierAvailability;
 import eventflow.web.dto.Views.TierPrice;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -202,12 +206,138 @@ public final class CoreBookingGateway implements BookingGateway {
         return PROVIDERS.stream().filter(p -> p.key().equals(key)).findFirst().orElseThrow().label();
     }
 
-    // Task 4 replaces these five.
-    @Override public HoldView release(String c, String r)                    { throw RealEngine.notInCore("This"); }
-    @Override public PaymentStart startPayment(String c, String r, String k) { throw RealEngine.notInCore("This"); }
-    @Override public PaymentStatus answerPayment(String c, String p, boolean a) { throw RealEngine.notInCore("This"); }
-    @Override public PaymentStatus paymentStatus(String c, String p)         { throw RealEngine.notInCore("This"); }
-    @Override public List<OrderView> orders(String c)                        { throw RealEngine.notInCore("This"); }
+    @Override
+    public HoldView release(String customerId, String reservationId) {                       // M-08
+        synchronized (engine) {
+            engine.tick();
+            ownedHold(customerId, reservationId);
+            throw RealEngine.notInCore("Giving seats back early");
+        }
+    }
+
+    @Override
+    public PaymentStart startPayment(String customerId, String reservationId, String providerKey) { // M-09
+        synchronized (engine) {
+            engine.tick();
+            RealEngine.HoldInfo h = ownedHold(customerId, reservationId);
+            Reservation r = engine.flow.store().find(reservationId).orElseThrow();
+            if (r.state() != ReservationState.HELD) {
+                throw GatewayException.badRequest("HOLD_NOT_ACTIVE", "These seats are no longer held");
+            }
+            PaymentMethodRow method = PROVIDERS.stream().filter(p -> p.key().equals(providerKey)).findFirst()
+                    .orElseThrow(() -> GatewayException.notFound("Payment method"));
+            if (!engine.flow.registry().paymentKeys().contains(method.key())) {
+                throw GatewayException.badRequest("PROVIDER_UNAVAILABLE", "This way to pay is not available right now");
+            }
+            if (h.paymentId != null) {
+                RealEngine.PaymentInfo last = engine.payments.get(h.paymentId);
+                if (last.state.equals("PENDING") && !last.answered && last.providerKey.equals(method.key())) {
+                    return start(last);
+                }
+            }
+            RealEngine.PaymentInfo p = new RealEngine.PaymentInfo("P-" + (++engine.paymentSeq), reservationId,
+                    customerId, method.key(), r.totalAmount().baht());
+            engine.payments.put(p.id, p);
+            h.paymentId = p.id;
+            return start(p);
+        }
+    }
+
+    @Override
+    public PaymentStatus answerPayment(String customerId, String paymentId, boolean approve) {  // M-10
+        synchronized (engine) {
+            engine.tick();
+            RealEngine.PaymentInfo p = ownedPayment(customerId, paymentId);
+            RealEngine.HoldInfo h = engine.holds.get(p.reservationId);
+            if (!p.id.equals(h.paymentId)) {
+                throw GatewayException.badRequest("PAYMENT_REPLACED", "This way to pay was replaced by a newer one");
+            }
+            if (p.state.equals("PENDING") && !p.answered) {
+                p.answered = true;
+                if (!approve) {
+                    p.state = "DECLINED";
+                } else {
+                    CheckoutResult result = engine.flow.checkout().checkout(p.reservationId, p.providerKey);
+                    switch (result) {
+                        case CONFIRMED -> {
+                            p.state = "CAPTURED";
+                            p.orderId = order(h, p).id;
+                        }
+                        case DECLINED -> p.state = "DECLINED";
+                        case HOLD_EXPIRED -> p.state = "VOIDED";
+                    }
+                }
+            }
+            return status(p);
+        }
+    }
+
+    @Override
+    public PaymentStatus paymentStatus(String customerId, String paymentId) {                 // M-11
+        synchronized (engine) {
+            engine.tick();
+            return status(ownedPayment(customerId, paymentId));
+        }
+    }
+
+    @Override
+    public List<OrderView> orders(String customerId) {                                       // M-12, stand-in
+        synchronized (engine) {
+            engine.tick();
+            long now = engine.clock.now();
+            return engine.orders.values().stream()
+                    .filter(o -> o.customerId.equals(customerId))
+                    .map(o -> orderView(o, now))
+                    .sorted(Comparator.comparing(OrderView::past)
+                            .thenComparingLong(v -> v.past() ? -v.event().eventDateTime() : v.event().eventDateTime()))
+                    .toList();
+        }
+    }
+
+    // ---------- payment and order helpers ----------
+
+    private RealEngine.PaymentInfo ownedPayment(String customerId, String paymentId) {
+        RealEngine.PaymentInfo p = engine.payments.get(paymentId);
+        if (p == null || !p.customerId.equals(customerId)) {
+            throw GatewayException.notFound("Payment");
+        }
+        return p;
+    }
+
+    private PaymentStart start(RealEngine.PaymentInfo p) {
+        return new PaymentStart(p.id, p.reservationId, p.providerKey, providerLabel(p.providerKey), p.amount,
+                "PROMPTPAY|" + p.id + "|" + p.amount);
+    }
+
+    private static PaymentStatus status(RealEngine.PaymentInfo p) {
+        return new PaymentStatus(p.id, p.reservationId, p.providerKey, p.state, p.answered, p.orderId);
+    }
+
+    /** Core confirmed the order (OrderConfirmed). Tickets are Slice 3, so the gateway numbers them for now. */
+    private RealEngine.OrderInfo order(RealEngine.HoldInfo h, RealEngine.PaymentInfo p) {
+        Reservation r = engine.flow.store().find(h.reservationId).orElseThrow();
+        TicketTier tier = engine.flow.inventory().tier(r.tierId());
+        RealEngine.OrderInfo o = new RealEngine.OrderInfo("O-" + (++engine.orderSeq), h.customerId, h.eventId,
+                tier.tierId(), tier.name(), r.quantity(), p.amount, providerLabel(p.providerKey));
+        for (int n = 1; n <= r.quantity(); n++) {
+            o.ticketIds.add(String.format("TKT-%s-%02d", o.id, n));
+        }
+        engine.orders.put(o.id, o);
+        return o;
+    }
+
+    private OrderView orderView(RealEngine.OrderInfo o, long now) {
+        RealEngine.EventInfo e = engine.event(o.eventId);
+        List<TicketView> tickets = new ArrayList<>();
+        for (int i = 0; i < o.ticketIds.size(); i++) {
+            String id = o.ticketIds.get(i);
+            // Not signed: signing tickets is Slice 3 (NFR-06).
+            String payload = "EVENTFLOW|" + id + "|" + o.eventId + "|" + o.tierId + "|" + o.customerId + "|UNSIGNED";
+            tickets.add(new TicketView(id, i + 1, o.ticketIds.size(), payload, "VALID"));
+        }
+        return new OrderView(o.id, engine.ref(e), engine.state(e), o.tierId, o.tierName, o.quantity, o.paid,
+                o.providerLabel, now > e.dateTime, tickets);
+    }
 
     // ---------- helpers ----------
 
