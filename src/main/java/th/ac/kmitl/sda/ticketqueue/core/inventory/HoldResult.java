@@ -6,13 +6,9 @@ public record HoldResult(Outcome outcome, Reservation reservation) {
 
     public enum Outcome {
         HELD,
-
         NOT_ENOUGH_SEATS,
-
         OVER_ORDER_LIMIT,
-
         NOT_ADMITTED,  // still waiting, expired or unknown
-
         TOKEN_ALREADY_USED
     }
 

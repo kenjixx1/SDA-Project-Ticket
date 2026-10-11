@@ -4,11 +4,8 @@ public record JoinResult(Outcome outcome, QueueToken token) {
 
     public enum Outcome {
         JOINED,
-
         ALREADY_IN_QUEUE,
-
         SALE_NOT_OPEN,
-
         SOLD_OUT
     }
 
