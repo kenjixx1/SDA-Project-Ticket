@@ -11,7 +11,9 @@ Slice 3 (more plug-ins, tickets, dashboard) is not built yet.
 
 **The presentation layer is built too** (`web/` and `resources/public/`). It
 runs on a fake booking engine for now; see `docs/09-web-api.md`. Run it with
-`mvn -q compile exec:java` and open http://localhost:7070/.
+`mvn -q compile exec:java` and open http://localhost:7070/ (Kenji, the customer)
+or http://localhost:7070/organizer.html (Chai, the organizer). Add `?dev` to
+either address for the demo controls.
 
 ## How to run
 

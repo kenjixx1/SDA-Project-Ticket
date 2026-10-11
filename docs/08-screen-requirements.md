@@ -59,11 +59,11 @@ story value. Section 8.4 gives the ranges to design for.
 
 ## 8.2 The full list of screens
 
-**29 screens, plus their variants. 18 customer screens on a phone, 11
-organizer screens on a desktop.** Every use case extension in
+**29 screens, plus their variants. 18 customer screens and 11 organizer
+screens, all on a desktop browser.** Every use case extension in
 `04-use-cases.md` lands on at least one of them (see 8.10).
 
-### Customer app — phone
+### Customer app — desktop web
 
 | ID | Screen | Variants | Tab bar | Traces to | Prototype file no. |
 |---|---|---|---|---|---|
@@ -129,16 +129,17 @@ A design AI will often add these by itself. **Do not.**
 
 | Side | Device | Frame size | Why |
 |---|---|---|---|
-| Customer | Phone, portrait | **390 × 844** | Kenji has the page open on their phone at 09:59 (`03-prd.md` §3.3). |
+| Customer | Desktop browser | **1440 × 900** | Kenji has the page open on a laptop at 09:59 (`03-prd.md` §3.3). Changed 11 Oct 2026 from a phone frame, ASM-10. |
 | Organizer | Desktop browser | **1440 × 900** | Chai is watching a live table of numbers, not tapping. See OQ-01. |
 
-Customer screens must also work at **360 px** wide with no sideways scrolling.
+Every screen must also work from **1024 px** wide with no sideways scrolling. There is no phone layout (ASM-10).
 
 ### Design system
 
-The look is **Redesign V1**, the clickable prototype in
-`design/TicketApp.dc.html`, look **a**. Its reference screenshots are in
-`diagrams/app-flow/screens/`. That prototype is the source of truth for
+The look is **Redesign V1, look 1a**, in two clickable desktop designs:
+`design/Ticket App Web.dc.html` (customer, SCR-01 to SCR-18) and
+`design/Organizer Console.dc.html` (organizer, SCR-30 to SCR-34a/b). The earlier
+phone prototype `design/TicketApp.dc.html` is kept for history only. That prototype is the source of truth for
 colours, type, radius and glow. This document does not repeat it.
 
 The three rules from it that every screen here depends on:
@@ -318,17 +319,17 @@ ORGANIZER
 **Top to bottom**
 
 1. Title `[S] Events`, large. Under it `[D] city` — *Bangkok*.
-2. **Feature carousel** `[D-list]` — one feature card per event, soonest sale
-   first. Swiped sideways on a phone, one card at a time. A counter `1 / 4`
-   sits on each card, dots under the carousel show where you are, and with a
-   mouse two arrows appear on hover. (Changed 11 Oct 2026 to match the design,
-   which shows a carousel.) Each card is stage-lit, two rigs, and contains:
+2. **Search** `[S]` *Search events or venues*, top right. It filters the hero and
+   the grid by event name or venue as you type, shows a result count, and a
+   no-results line when nothing matches.
+3. **Feature hero** — the first event (soonest sale), one wide stage-lit card.
+   (Changed 11 Oct 2026 to match the desktop design: hero + grid, no carousel.) It contains:
    - Status pill `[D] from Event.state and saleOpensAt` — *ON SALE TODAY*. Values: `OPENS 1 OCT`, `ON SALE TODAY`, `ON SALE NOW`, `SOLD OUT`, `SALE CLOSED`.
    - `[D] Event.name` — *THE 1975 BANGKOK*, heavy uppercase, up to 2 lines.
    - `[D] Event.venue · Event.eventDateTime` — *Impact Arena · 14 Nov 2026*.
    - Cyan line `[D]` — *Sale opens 10:00, from ฿1,900*. "From" is the cheapest tier price.
-3. Label `[S] ALSO ON SALE`.
-4. **Event rows** `[D-list]` — every other event visible to customers, ordered
+4. Label `[S] ALSO ON SALE`.
+5. **Event cards** `[D-list]`, a 3-column grid — every other event visible to customers, ordered
    by `saleOpensAt`, soonest first. Each row: act name left, cheapest price
    right, `venue · date` beneath in mono. Story rows: *Bruno Mars ฿1,200 Thunder
    Dome · 22 Nov*, *Alan Walker ฿2,400 UOB Live · 5 Dec*, *Marshmello ฿1,500
@@ -860,6 +861,9 @@ than 0.* or *VIP · Price cannot be below ฿0.* Review is disabled.
 ---
 
 ### SCR-34 · Event overview
+
+> SCR-34a and b follow `design/Organizer Console.dc.html`. Variants c to f and SCR-35 to SCR-40 have
+> no visual design yet; they are built from this text with the same parts (11 Oct 2026).
 
 **Purpose.** See the event and make changes that its state allows (UC-06).
 
