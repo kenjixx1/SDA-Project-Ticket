@@ -335,30 +335,29 @@ const PUB_HINT = 'An event needs at least one tier before it can be published.';
 
 const blankRow = () => ({ name: '', price: '', seats: '', t: {} });
 
-/** The same rules, in the same words, as the server: a row needs a name, a whole price and at least 1 seat. */
-function rowErrs(r) {
+/** The design's live rules and words (design script, tierErrors): a name no other tier has, a whole price, at least 1 seat. */
+function rowErrs(r, rows = []) {
   const e = {};
-  if (!r.name.trim()) e.name = 'Name is required.';
-  if (!/^\d+$/.test(r.price.trim())) e.price = 'Price cannot be below ฿0.';
-  if (!/^\d+$/.test(r.seats.trim()) || Number(r.seats) < 1) e.seats = 'Seats must be more than 0.';
+  const nm = r.name.trim().toLowerCase();
+  if (!nm) e.name = 'Give this tier a name.';
+  else if (rows.some((o) => o !== r && o.name.trim().toLowerCase() === nm)) e.name = 'Two tiers cannot share a name.';
+  if (!/^\d+$/.test(r.price.trim())) e.price = 'Price must be a whole number of baht.';
+  if (!/^\d+$/.test(r.seats.trim()) || Number(r.seats) < 1) e.seats = 'A tier needs at least 1 seat.';
   return e;
 }
-
-/** A tier's own name, or "Tier 2" when it has none — the way the server names a nameless row. */
-const tierLabel = (name, i) => name.trim() || `Tier ${i + 1}`;
 
 /** The message for one box: the server's refusal first, else what this row says now. Empty when it is fine. */
 function cellMsg(st, i, k) {
   const r = st.rows[i];
   if (!r) return '';
   if (st.failed && st.failed.i === i && st.failed.k === k) return st.failed.message;
-  const e = rowErrs(r)[k];
-  return e && r.t[k] ? `${tierLabel(r.name, i)} · ${e}` : '';
+  const e = rowErrs(r, st.rows)[k];
+  return e && r.t[k] ? e : '';
 }
 
 /** The one coral line under a row (design line 217). */
 const rowMsg = (st, i) => KEYS.map((k) => cellMsg(st, i, k)).filter(Boolean).join(' ');
-const rowsBad = (rows) => rows.some((r) => Object.keys(rowErrs(r)).length > 0);
+const rowsBad = (rows) => rows.some((r) => Object.keys(rowErrs(r, rows)).length > 0);
 const seatsOf = (rows) => rows.reduce((a, r) => a + (/^\d+$/.test(r.seats.trim()) ? Number(r.seats) : 0), 0);
 
 /** The line under Review (design line 229). */

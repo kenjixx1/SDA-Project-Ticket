@@ -117,10 +117,11 @@
 .wiz-th .r{text-align:right}
 .wiz-tr{display:flex;flex-direction:column;gap:8px;padding:14px 26px;border-top:1px solid var(--l1)}
 .wiz-tg{align-items:center}
-.wiz-ti{height:46px;padding:0 14px;border-radius:12px;background:var(--bg);border:1px solid var(--l2);color:var(--tx);font:500 15px/1 var(--f);outline:none;min-width:0}
+.wiz-ti{height:48px;padding:0 14px;border-radius:12px;background:var(--bg);border:1px solid var(--l2);color:var(--tx);font:500 15px/1 var(--f);outline:none;min-width:0}
 .wiz-ti.mono{font-family:var(--fm);text-align:right;font-variant-numeric:tabular-nums}
 .wiz-ti.bad{border-color:var(--st)}
 .wiz-ti:focus{border-color:var(--ac)}
+.wiz-ti.bad,.wiz-ti.bad:focus{border-color:var(--st)}
 .wiz-rm{font:500 13px/1 var(--f);color:var(--mu);cursor:pointer;text-align:right}
 .wiz-msg{font:500 13px/1.3 var(--f);color:var(--st)}
 .wiz-msg:empty{display:none}
