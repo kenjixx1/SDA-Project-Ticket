@@ -146,6 +146,10 @@ public final class CoreBookingGateway implements BookingGateway {
         synchronized (engine) {
             engine.tick();
             QueueToken t = ownedToken(customerId, tokenId);
+            // Core counts seats before it looks at the token; check the turn first, as the fake does.
+            if (t.state() != QueueTokenState.ADMITTED) {
+                throw GatewayException.badRequest("NOT_ADMITTED", "This place in line cannot hold seats now");
+            }
             RealEngine.EventInfo e = engine.byCore(t.eventId());
             if (!engine.state(e).equals("ON_SALE")) {
                 throw notOnSale();
@@ -233,6 +237,9 @@ public final class CoreBookingGateway implements BookingGateway {
                 RealEngine.PaymentInfo last = engine.payments.get(h.paymentId);
                 if (last.state.equals("PENDING") && !last.answered && last.providerKey.equals(method.key())) {
                     return start(last);
+                }
+                if (last.state.equals("PENDING") && !last.answered) {
+                    last.state = "VOIDED"; // a newer way to pay replaced it; it can no longer be answered
                 }
             }
             RealEngine.PaymentInfo p = new RealEngine.PaymentInfo("P-" + (++engine.paymentSeq), reservationId,
