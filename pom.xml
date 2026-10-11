@@ -56,7 +56,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.4.1</version>
         <configuration>
-          <mainClass>th.ac.kmitl.sda.ticketqueue.web.WebServer</mainClass>
+          <mainClass>eventflow.web.WebServer</mainClass>
         </configuration>
       </plugin>
     </plugins>
