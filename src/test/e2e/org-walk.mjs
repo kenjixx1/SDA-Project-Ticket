@@ -87,7 +87,7 @@ const shots = {
   },
   '34e': async () => { await open(); await dev.scenario('SALE_CLOSED'); await shoot('34e', `/event/${T}`); },
   '34f': async () => { await fresh(); await dev.scenario('EVENT_CANCELLED'); await shoot('34f', `/event/${T}`); },
-  '40a': async () => { await fresh(); await dev.advance(380); await shoot('40a', `/event/${T}/live`); },
+  '40a': async () => { await fresh(); await dev.advance(410); await shoot('40a', `/event/${T}/live`); },
   '40c': async () => { await open(); await dev.scenario('SALE_CLOSED'); await shoot('40c', `/event/${T}/live`); },
 };
 
