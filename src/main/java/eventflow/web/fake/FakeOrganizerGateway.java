@@ -1,6 +1,7 @@
 package eventflow.web.fake;
 
 import eventflow.web.GatewayException;
+import eventflow.web.OrgChecks;
 import eventflow.web.OrganizerGateway;
 import eventflow.web.dto.OrgRequests.EventDetails;
 import eventflow.web.dto.OrgRequests.TierInput;
@@ -14,13 +15,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import static eventflow.web.OrgChecks.*;
+
 /**
  * The organizer's rules (UC-05, UC-06, UC-07) over the fake's memory.
  * Throw-away: replaced by CoreOrganizerGateway when core/ is ready.
  */
 public class FakeOrganizerGateway implements OrganizerGateway {
-
-    private static final int MAX_TIERS = 8;
 
     private final FakeBookingGateway fake;
 
@@ -279,17 +280,10 @@ public class FakeOrganizerGateway implements OrganizerGateway {
         return e;
     }
 
-    static final int MAX_ARTWORK_CHARS = 2_800_000; // a 2 MB picture as base64
+    static final int MAX_ARTWORK_CHARS = OrgChecks.MAX_ARTWORK_CHARS;
 
-    /** Null or "" means no picture. Otherwise a PNG, JPG or WebP data URL of at most 2 MB. */
     static String checkedArtwork(String artwork) {
-        if (artwork == null || artwork.isEmpty()) {
-            return null;
-        }
-        if (!artwork.matches("data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+") || artwork.length() > MAX_ARTWORK_CHARS) {
-            throw GatewayException.invalid("BAD_IMAGE", "artwork", "Use a PNG, JPG or WebP picture of 2 MB or less.");
-        }
-        return artwork;
+        return OrgChecks.checkedArtwork(artwork);
     }
 
     private OrgEvent view(FakeBookingGateway.Event e) {
@@ -327,41 +321,6 @@ public class FakeOrganizerGateway implements OrganizerGateway {
         return GatewayException.conflict("NOT_DRAFT", null, "Only a draft can do this.", null);
     }
 
-    private static String checkedName(String raw) {
-        String value = raw == null ? "" : raw.trim();
-        if (value.isEmpty()) {
-            throw GatewayException.invalid("REQUIRED", "name", "Required");
-        }
-        if (value.length() > 40) {
-            throw GatewayException.invalid("TOO_LONG", "name", "Up to 40 characters");
-        }
-        return value;
-    }
-
-    private static String checkedVenue(String raw) {
-        String value = raw == null ? "" : raw.trim();
-        if (value.isEmpty()) {
-            throw GatewayException.invalid("REQUIRED", "venue", "Required");
-        }
-        if (value.length() > 30) {
-            throw GatewayException.invalid("TOO_LONG", "venue", "Up to 30 characters");
-        }
-        return value;
-    }
-
-    private static void checkRow(int index, String prefix, String rawName, Long price, Integer total) {
-        String label = rawName == null || rawName.trim().isEmpty() ? "Tier " + (index + 1) : rawName.trim();
-        if (rawName == null || rawName.trim().isEmpty()) {
-            throw GatewayException.invalid("TIER_NAME_REQUIRED", prefix + "name", label + " · Name is required.");
-        }
-        if (price == null || price < 0) {
-            throw GatewayException.invalid("PRICE_NEGATIVE", prefix + "price", label + " · Price cannot be below ฿0.");
-        }
-        if (total == null || total <= 0) {
-            throw GatewayException.invalid("SEATS_ZERO", prefix + "total", label + " · Seats must be more than 0.");
-        }
-    }
-
     private String uniqueId(String base) {
         String id = base;
         int n = 2;
@@ -387,15 +346,5 @@ public class FakeOrganizerGateway implements OrganizerGateway {
             }
         }
         return false;
-    }
-
-    private static String slug(String text) {
-        String s = text.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-").replaceAll("^-+|-+$", "");
-        return s.isEmpty() ? "event" : s;
-    }
-
-    private static String shortName(String name) {
-        String upper = name.toUpperCase(Locale.ROOT);
-        return upper.endsWith(" BANGKOK") ? upper.substring(0, upper.length() - " BANGKOK".length()) : upper;
     }
 }
