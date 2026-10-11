@@ -1,1 +1,69 @@
-/* Organizer wizard (SCR-31 to SCR-33). Owned by Lane D. */
+/* Organizer wizard (SCR-30 to SCR-33). Owned by Lane D. Look 1a tokens come from app.css. */
+
+/* The 1200px column these screens sit in (design line 48). */
+.ev-page{max-width:1200px;padding-bottom:60px;gap:28px}
+.ev-page .title{font-size:40px;line-height:1}
+
+/* ---- SCR-30 My events ---- */
+.ev-top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.ev-titles{display:flex;flex-direction:column;gap:8px}
+.ev-top .btn{width:auto;height:48px;padding:0 22px;font:600 15px/1 var(--f);box-shadow:none}
+
+.ev-tbl{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden}
+.ev-head,.ev-row{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.3fr) minmax(0,1.4fr) minmax(0,1.4fr) 130px 140px;gap:20px;padding:0 26px}
+.ev-head{padding-top:16px;padding-bottom:16px;border-bottom:1px solid var(--l1);font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)}
+.ev-head .r{text-align:right}
+.ev-row{align-items:center;padding-top:20px;padding-bottom:20px;border-top:1px solid var(--l1);cursor:pointer;transition:background .15s}
+.ev-name{font:600 16px/1.3 var(--f);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev-venue{font:400 14px/1.3 var(--f);color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev-when{font:400 13px/1.3 var(--fm);font-variant-numeric:tabular-nums}
+.ev-sale{font:400 13px/1.3 var(--fm);font-variant-numeric:tabular-nums;color:var(--mu)}
+.ev-state{display:flex}
+.ev-sold{font:500 13px/1.3 var(--fm);font-variant-numeric:tabular-nums;text-align:right}
+
+.ev-empty{border:1px dashed var(--l2);border-radius:var(--r);padding:90px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+.ev-empty .ring{width:64px;height:64px;border:1.5px dashed var(--l2);margin-bottom:10px}
+.ev-empty b{font:600 22px/1.2 var(--f)}
+.ev-empty p{margin:0;font:400 15px/1.5 var(--f);color:var(--mu)}
+.ev-empty .btn{width:auto;height:48px;padding:0 22px;margin-top:14px;font:600 15px/1 var(--f);box-shadow:none}
+
+/* ---- SCR-31 Details: the step indicator ---- */
+.wiz-steps{display:flex;align-items:center;gap:14px}
+.wiz-step{display:flex;align-items:center;gap:14px}
+.wiz-mark{display:flex;align-items:center;gap:10px}
+.wiz-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 12px/1 var(--fm);color:var(--mu);box-shadow:inset 0 0 0 1px var(--l2)}
+.wiz-dot.on{color:var(--ac);box-shadow:inset 0 0 0 1px var(--ac)}
+.wiz-dot.done{background:var(--ac);color:var(--aci);box-shadow:inset 0 0 0 1px var(--ac)}
+.wiz-lbl{font:500 14px/1 var(--f);color:var(--mu)}
+.wiz-lbl.on{color:var(--tx)}
+.wiz-bar{width:48px;height:1px;background:var(--l2)}
+
+/* ---- SCR-31 Details: the form card and the ADMISSION RATE helper ---- */
+.wiz-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start}
+.wiz-card{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:32px;display:flex;flex-direction:column;gap:26px}
+.wiz-card .field .fl b{font:500 14px/1 var(--f)}
+.wiz-card .field input{height:50px;font:500 16px/1 var(--f)}
+.wiz-card .err{min-height:17px}
+/* field() draws its error line only when it has one; keep the 17px line reserved so nothing jumps. */
+.wiz-card .field:not(:has(.err)){padding-bottom:25px}
+.wiz-two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+.wiz-card .wiz-two input{font:500 15px/1 var(--fm)}
+.wiz-rate{display:flex;align-items:center;gap:12px}
+.wiz-card .wiz-rate input{width:120px;font:500 16px/1 var(--fm)}
+.wiz-rate>span{font:400 15px/1 var(--f);color:var(--mu)}
+
+.wiz-help{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+.wiz-help p{margin:0;font:400 14px/1.55 var(--f);color:var(--mu);text-wrap:pretty}
+
+.wiz-foot{display:flex;justify-content:space-between;align-items:flex-start;padding-top:22px;border-top:1px solid var(--l1)}
+.wiz-foot .btn{width:auto;height:50px;box-shadow:none}
+.wiz-foot .btn.quiet{padding:0 22px;font:500 15px/1 var(--f)}
+.wiz-save{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.wiz-save .btn{padding:0 24px;font:600 15px/1 var(--f)}
+.wiz-save .btn:disabled{opacity:.4}
+.wiz-note{font:400 13px/1.3 var(--f);color:var(--mu)}
+.wiz-note.stop{color:var(--st)}
+
+@media (hover:hover){
+  .ev-row:hover{background:var(--s2)}
+}
