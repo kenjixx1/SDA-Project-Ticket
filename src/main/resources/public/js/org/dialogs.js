@@ -265,6 +265,7 @@ function closeSheet(e, d) {
       { label: 'Close the sale', action: 'dlgCloseSale', danger: true, working: d.working ? 'Closing' : '' },
     ],
     close: 'dlgClose',
+    extra: d.err ? html`<span class="err" role="alert">${d.err.message}</span>` : '',
   });
 }
 
@@ -335,6 +336,7 @@ async function closeSale(ctx, id) {
     d.working = false;
     if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
     d.err = { key: null, message: e.message };
+    ctx.render();
   }
 }
 
