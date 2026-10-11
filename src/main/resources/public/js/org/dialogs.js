@@ -244,7 +244,7 @@ function rateSheet(e, d) {
   });
 }
 
-/** "At 12 per second, the 31,208 people now waiting are through in about 43 minutes." */
+/** "At 200 per second, the 23,768 people now waiting are through in about 2 minutes." */
 const preview = (e, rate) => {
   if (rate === null || rate < 1) return '';
   const m = Math.ceil(e.waiting / rate / 60);

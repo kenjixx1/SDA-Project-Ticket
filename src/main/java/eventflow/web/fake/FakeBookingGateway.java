@@ -47,7 +47,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
     public static final int ORDER_LIMIT = 4;
     public static final int START_AHEAD = 4182;
     public static final int START_MOVED = 6823;
-    public static final int ADMIT_PER_SECOND = 12;
+    public static final int ADMIT_PER_SECOND = 200;
     public static final long TURN_LIMIT_MS = 5 * 60_000L;
     static final long ADMIT_AFTER_MS = (long) Math.ceil(START_AHEAD * 1000.0 / ADMIT_PER_SECOND);
 
@@ -345,7 +345,7 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
 
     static final int CROWD_1975 = 35_768;
 
-    /** People waiting now. The 1975 also has the crowd from the story: 31,208 at 10:06:20 at 12 per second. */
+    /** People waiting now. The 1975 also has the crowd from the story: 23,768 at 10:01:00 at 200 per second. */
     int waiting(Event e) {
         if (!orgState(e).equals("ON_SALE")) {
             return 0;

@@ -129,7 +129,7 @@ class OrgApiContractTest {
             assertEquals(200, client.post("/dev/advance", Map.of("seconds", 60)).code());
             String token = body(client.post("/api/events/the-1975/queue", null, as("kenji")))
                     .get("data").get("token").asText();
-            clock.advance(350_000);
+            clock.advance(30_000);
             assertEquals(201, client.post("/api/holds", Map.of("token", token, "tierId", "vip", "quantity", 2),
                     as("kenji")).code());
 

@@ -810,7 +810,7 @@ understand **in under 2 seconds** that they were not charged (UC-03 ext 7a, FR-1
    | `[S] Venue` | text, up to 30 characters | *Impact Arena* |
    | `[S] Event date and time` | date + time | *14 Nov 2026, 19:00* |
    | `[S] Sale opens` | date + time, to the second | *1 Oct 2026, 10:00:00* |
-   | `[S] Admission rate` | number per second, default **12** | *12* — helper text as in SCR-38 |
+   | `[S] Admission rate` | number per second, default **200** | *200* — helper text as in SCR-38 |
 4. **Card picture** (right column, above the admission-rate help; added 11 Oct 2026, no design yet). `[S] CARD PICTURE`, a 16:9 drop box `[S] Choose a picture` · *or drop it here · PNG, JPG or WebP · up to 2 MB*. Once chosen it shows the picture with the event name on it, the way the customer card shows it, with `[S] Change` and `[S] Remove`. Optional: without it the customer card shows the event name on a plain panel. A wrong file: `[S] Use a PNG, JPG or WebP picture of 2 MB or less.`
 5. Footer: `[S] Cancel` (quiet) → SCR-30. Cyan `[S] Save and add tiers` → SCR-32. The event is saved as `DRAFT` at this point.
 
@@ -881,7 +881,7 @@ than 0.* or *VIP · Price cannot be below ฿0.* Review is disabled.
 
    Held, Sold and Remaining always add up to Total. In `DRAFT` and
    `SCHEDULED` they read 0, 0 and the total. Below it, quiet `[S] + Add tier` → SCR-37.
-5. **Queue card**: `[S] Admission rate` `[D]` *12 per second*, link `[S] Change` → SCR-38.
+5. **Queue card**: `[S] Admission rate` `[D]` *200 per second*, link `[S] Change` → SCR-38.
 
 **What each state allows** (copied from UC-06; this table is the real content):
 
@@ -940,12 +940,12 @@ just disabled. In e and f the whole page is read only.
 **Purpose.** Set how many people the queue lets in each second (FR-30).
 
 1. Title `[S] Admission rate`.
-2. Number input `[D]` *12* with the unit `[S] per second`.
+2. Number input `[D]` *200* with the unit `[S] per second`.
 3. Helper, worked from the event's own numbers `[D]`:
    *7,500 seats ÷ 600 seconds of hold ≈ 12 per second. Faster than this and
    people get in only to find every seat already held.*
-4. Live preview `[D]`: *At 12 per second, the 31,208 people now waiting are
-   through in about 43 minutes.* (Shown only while `ON_SALE`.)
+4. Live preview `[D]`: *At 200 per second, the 23,768 people now waiting are
+   through in about 2 minutes.* (Shown only while `ON_SALE`.)
 5. `[S] Cancel` · cyan `[S] Save`.
 6. Values below 1 are refused: `[S] Must be at least 1.`
 
@@ -1080,7 +1080,7 @@ The prototype in `design/prototype/app.html` and the brief in
 | 5 | Account | Payment methods, Order history, Notifications | removed | No requirement behind them; notifications are out of scope. |
 | 6 | Pay screen | goes straight to PromptPay | a choice of method first (SCR-12) | FR-15: any registered provider. |
 | 7 | Event screen, before 10:00 | Join button active | disabled until 10:00 | UC-01 ext 1a: no token before the sale opens. |
-| 8 | `07-glossary.md`, `02-requirements.md` NFR-01 | admission rate 200 per second | **12 per second** | UC-07 works it out: 7,500 seats ÷ 600 s ≈ 12. The queue estimate on SCR-06 depends on it. |
+| 8 | `07-glossary.md`, `02-requirements.md` NFR-01 | admission rate 200 per second | **200 per second** (was 12 until 11 Oct 2026) | The booking engine's default. The team kept it. SCR-38's helper still shows the careful number, seats ÷ 600 s. |
 
 ---
 
