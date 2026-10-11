@@ -6,12 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
-/**
- * Checks the shape of the code, not its behaviour.
- *
- * <p>The core system must never import a plug-in. If this fails, someone has
- * written {@code if (method.equals("stripe"))} somewhere in the core.
- */
+// The core must never import a plug-in.
 public final class ArchitectureTest {
 
     private static final Path CORE = Path.of("src/main/java/th/ac/kmitl/sda/ticketqueue/core");

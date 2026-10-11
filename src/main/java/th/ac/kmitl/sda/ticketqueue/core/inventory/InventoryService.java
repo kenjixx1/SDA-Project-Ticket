@@ -17,16 +17,9 @@ import th.ac.kmitl.sda.ticketqueue.core.order.ReservationStore;
 import th.ac.kmitl.sda.ticketqueue.core.queue.ClaimResult;
 import th.ac.kmitl.sda.ticketqueue.core.queue.QueueService;
 
-/**
- * The ONLY writer of {@code heldQuantity} and {@code soldQuantity}, so seats
- * can never be oversold.
- *
- * <p>Takes the atomic hold and publishes {@link TicketHeld}. Listens to
- * {@link HoldExpired} (seats go back) and {@link OrderConfirmed} (held → sold).
- */
+// The only class allowed to change held and sold counts.
 public final class InventoryService {
 
-    /** The most tickets one order may hold. */
     public static final int ORDER_LIMIT = 4;
 
     private final Map<String, TicketTier> tiers = new ConcurrentHashMap<>();
@@ -69,28 +62,19 @@ public final class InventoryService {
                 .toList();
     }
 
-    /** True when every tier of the event has nothing left. */
     public boolean soldOut(String eventId) {
         List<TicketTier> eventTiers = tiersOf(eventId);
         return !eventTiers.isEmpty() && eventTiers.stream().allMatch(t -> t.remaining() == 0);
     }
 
-    /**
-     * The atomic hold.
-     *
-     * <p>Checking what is left, counting the seats as held and saving the
-     * reservation all happen inside one lock on the tier. No two requests can
-     * both read "10 left" before either writes. 2 or 0 — never 1.
-     *
-     * <p>Only an admitted queue token may hold, and holding spends it. A
-     * refused hold leaves the token unspent.
-     */
     public HoldResult hold(String tokenId, String tierId, int quantity) {
         if (quantity < 1 || quantity > ORDER_LIMIT) {
             return HoldResult.refused(HoldResult.Outcome.OVER_ORDER_LIMIT);
         }
         TicketTier tier = tier(tierId);
         Reservation reservation;
+        // Check seats, use the token and count the hold under one lock,
+        // so two buyers can never both get the last seat.
         synchronized (tier) {
             if (tier.remaining() < quantity) {
                 return HoldResult.refused(HoldResult.Outcome.NOT_ENOUGH_SEATS);
@@ -107,20 +91,19 @@ public final class InventoryService {
             tier.hold(quantity);
             store.add(reservation);
         }
-        // Saved first, announced second.
+
+        // Announce it only after it is saved.
         bus.publish(new TicketHeld(reservation.reservationId(), tokenId, tierId,
                                    quantity, reservation.expiresAt()));
         return new HoldResult(HoldResult.Outcome.HELD, reservation);
     }
 
-    /** The hold expired: the seats are back on sale. */
     private void onHoldExpired(HoldExpired event) {
-        if (settled.add(event.reservationId())) {  // idempotent: twice = once
+        if (settled.add(event.reservationId())) {  // the same event twice is ignored
             tier(event.tierId()).release(event.quantity());
         }
     }
 
-    /** The order is paid: held goes down and sold goes up by the same amount, in one step. */
     private void onOrderConfirmed(OrderConfirmed event) {
         if (settled.add(event.reservationId())) {
             tier(event.tierId()).sell(event.quantity());

@@ -5,10 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Every reservation, by id. Stands in for the single shared database. The
- * database is the truth; events are only announcements.
- */
+// Plays the role of the database. Everything is in memory.
 public final class ReservationStore {
 
     private final Map<String, Reservation> byId = new ConcurrentHashMap<>();

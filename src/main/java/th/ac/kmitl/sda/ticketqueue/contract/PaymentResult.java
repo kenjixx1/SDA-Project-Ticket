@@ -1,6 +1,5 @@
 package th.ac.kmitl.sda.ticketqueue.contract;
 
-/** A provider's answer: authorised with a reference, or declined with a reason. */
 public record PaymentResult(boolean authorised, String providerReference, String declineReason) {
 
     public static PaymentResult authorised(String providerReference) {

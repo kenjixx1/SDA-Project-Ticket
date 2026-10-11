@@ -4,13 +4,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Gives the seats back when a hold's ten minutes pass with no payment.
- *
- * <p>It scans the store for HELD reservations past their {@code expiresAt}
- * rather than trusting a timer per hold. The store is the truth, so a lost
- * event or a restart cannot leave seats stuck.
- */
 public final class HoldExpiryScheduler {
 
     private final ReservationStore store;
@@ -22,7 +15,7 @@ public final class HoldExpiryScheduler {
         this.reservations = reservations;
     }
 
-    /** One pass. Returns how many holds it expired. */
+    // Looks through saved holds instead of trusting timers, so none are missed.
     public int sweep() {
         int expired = 0;
         for (Reservation reservation : store.inState(ReservationState.HELD)) {
@@ -33,7 +26,6 @@ public final class HoldExpiryScheduler {
         return expired;
     }
 
-    /** Sweeps once a second in the background. */
     public synchronized void start() {
         if (timer == null) {
             timer = Executors.newSingleThreadScheduledExecutor();

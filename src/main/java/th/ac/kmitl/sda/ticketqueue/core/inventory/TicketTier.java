@@ -2,13 +2,6 @@ package th.ac.kmitl.sda.ticketqueue.core.inventory;
 
 import th.ac.kmitl.sda.ticketqueue.contract.Money;
 
-/**
- * One price band within an event: VIP ฿6,500, 500 seats.
- *
- * <p>The counters change only through {@link InventoryService}. The
- * changing methods are package-private, so nothing outside this package can
- * even call them.
- */
 public final class TicketTier {
 
     private final String tierId;
@@ -30,11 +23,11 @@ public final class TicketTier {
         this.totalQuantity = totalQuantity;
     }
 
+    // Only InventoryService can change these counts.
     synchronized void hold(int quantity)    { heldQuantity += quantity; }
     synchronized void release(int quantity) { heldQuantity -= quantity; }
     synchronized void sell(int quantity)    { heldQuantity -= quantity; soldQuantity += quantity; }
 
-    /** remaining is calculated, never stored. */
     public synchronized int remaining() {
         return totalQuantity - heldQuantity - soldQuantity;
     }

@@ -14,14 +14,7 @@ import th.ac.kmitl.sda.ticketqueue.core.queue.QueueService;
 import th.ac.kmitl.sda.ticketqueue.core.registry.PluginRegistry;
 import th.ac.kmitl.sda.ticketqueue.plugin.payment.PromptPayPlugin;
 
-/**
- * Wires the whole system together. This is the only class that names a
- * plug-in, and it sits outside {@code core/} on purpose: the core never
- * knows a plug-in by name.
- *
- * <p>Adding a payment method = write the plug-in, add one
- * {@code registry.register(...)} line here. Zero core files change.
- */
+// Builds the whole system. The only class that knows plug-in classes.
 public final class EventFlow {
 
     private final EventBus bus = new EventBus();
@@ -36,7 +29,7 @@ public final class EventFlow {
     private final EventService events;
 
     public EventFlow(Clock clock) {
-        registry.register(new PromptPayPlugin());
+        registry.register(new PromptPayPlugin());  // add a new payment method here
 
         queue = new QueueService(bus, clock, this::soldOut);
         admission = new AdmissionScheduler(queue, bus, clock);
@@ -47,7 +40,6 @@ public final class EventFlow {
         events = new EventService(inventory, queue);
     }
 
-    /** Lets the queue ask "is this event sold out?" without depending on inventory's class. */
     private boolean soldOut(String eventId) {
         return inventory.soldOut(eventId);
     }

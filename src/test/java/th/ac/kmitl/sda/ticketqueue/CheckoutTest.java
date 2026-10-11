@@ -19,7 +19,6 @@ import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 import th.ac.kmitl.sda.ticketqueue.core.registry.UnknownPaymentProviderException;
 import th.ac.kmitl.sda.ticketqueue.plugin.payment.PromptPayPlugin;
 
-/** Checkout and pay. */
 public final class CheckoutTest {
 
     @Test
@@ -58,17 +57,17 @@ public final class CheckoutTest {
         Check.equal(2, vip.soldQuantity(), "sold");
     }
 
-    /** The bank is slow: its answer arrives after the hold has expired. */
     @Test
+    // The bank answers 6 seconds after the hold expired.
     public void bankAnswersAfterExpiry_paymentVoided_seatsBackOnSale() {
         SettableClock clock = Fixtures.clock();
         EventFlow app = new EventFlow(clock);
         SlowBank bank = new SlowBank(clock, Duration.ofSeconds(8));
-        app.registry().register(bank);  // a new plug-in, zero core changes
+        app.registry().register(bank);
         TicketTier vip = Fixtures.vip(app, 500);
         String kenji = Fixtures.admit(app, vip, "kenji");
         Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
-        clock.advance(Duration.ofMinutes(9).plusSeconds(58));  // 10:14:38, 2 s left
+        clock.advance(Duration.ofMinutes(9).plusSeconds(58));  // 2 seconds left
 
         CheckoutResult result = app.checkout().checkout(r.reservationId(), "slowbank");
 
@@ -124,7 +123,6 @@ public final class CheckoutTest {
         }
     }
 
-    /** A test plug-in whose bank takes a while to answer. */
     private static final class SlowBank implements PaymentProvider {
         private final SettableClock clock;
         private final Duration delay;
@@ -147,7 +145,6 @@ public final class CheckoutTest {
         @Override public void voidAuthorisation(String ref) { voided = true; }
     }
 
-    /** A test plug-in that always says no. */
     private static final class DecliningBank implements PaymentProvider {
         @Override public String key() { return "declining"; }
         @Override public PaymentResult authorise(PaymentRequest request) {

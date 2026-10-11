@@ -6,16 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import th.ac.kmitl.sda.ticketqueue.contract.Money;
 
-/**
- * Seats taken out of the pool for one customer, with a deadline.
- *
- * <p>Everything is fixed at hold time except the state. The state changes by
- * compare-and-set, so when two things race for the same hold — payment and
- * expiry — exactly one of them wins.
- */
 public final class Reservation {
 
-    /** The hold time is judged by the server's clock, not the customer's. */
     public static final Duration HOLD_TIME = Duration.ofMinutes(10);
 
     private final String reservationId;
@@ -38,10 +30,10 @@ public final class Reservation {
         this.unitPrice = unitPrice;
         this.totalAmount = unitPrice.times(quantity);
         this.heldAt = heldAt;
-        this.expiresAt = heldAt.plus(HOLD_TIME);
+        this.expiresAt = heldAt.plus(HOLD_TIME);  // set by the server clock
     }
 
-    /** Moves the state only if it is still {@code from}. Returns whether this call won. */
+    // Only one change can win: paid or expired, never both.
     boolean moveState(ReservationState from, ReservationState to) {
         return state.compareAndSet(from, to);
     }
@@ -50,7 +42,6 @@ public final class Reservation {
         return !now.isBefore(expiresAt);
     }
 
-    /** Derived from the reservation, so a repeated checkout is the same payment. */
     public String idempotencyKey() {
         return "pay-" + reservationId;
     }

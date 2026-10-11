@@ -6,7 +6,6 @@ import th.ac.kmitl.sda.ticketqueue.core.inventory.TicketTier;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 
-/** Assertions, plus the domain invariants every test can re-check. */
 public final class Check {
 
     private Check() {
@@ -24,7 +23,7 @@ public final class Check {
         }
     }
 
-    /** The seat-count rules for one tier: never oversold, and counters match the reservations. */
+    // Never oversold, and the counts match the reservations.
     public static void invariants(EventFlow app, TicketTier tier) {
         int held = 0;
         int sold = 0;

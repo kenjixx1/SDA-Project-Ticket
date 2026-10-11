@@ -7,12 +7,7 @@ import th.ac.kmitl.sda.ticketqueue.contract.PaymentProvider;
 import th.ac.kmitl.sda.ticketqueue.contract.PaymentRequest;
 import th.ac.kmitl.sda.ticketqueue.contract.PaymentResult;
 
-/**
- * PromptPay, simulated. Always authorises. No network, no keys.
- *
- * <p>It honours the idempotency key like a real provider would: the same key
- * returns the same reference, so a double tap is one payment.
- */
+// Fake PromptPay: always says yes, no network. The same key gives the same payment.
 public final class PromptPayPlugin implements PaymentProvider {
 
     public enum Status { AUTHORISED, CAPTURED, VOIDED }

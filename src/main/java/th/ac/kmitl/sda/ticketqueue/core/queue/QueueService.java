@@ -13,16 +13,8 @@ import java.util.function.Predicate;
 import th.ac.kmitl.sda.ticketqueue.core.event.EventBus;
 import th.ac.kmitl.sda.ticketqueue.core.event.HoldExpired;
 
-/**
- * The virtual waiting room. Issues tokens and reports places.
- *
- * <p>It never lets anyone in by itself — {@link AdmissionScheduler} does that,
- * in batches, at the organizer's rate. Listens to {@link HoldExpired}: a token
- * whose hold ran out is expired, so the customer must rejoin.
- */
 public final class QueueService {
 
-    /** The default admission rate, per second. */
     public static final int DEFAULT_ADMISSION_RATE = 200;
 
     private final Map<String, Line> lines = new ConcurrentHashMap<>();
@@ -32,19 +24,14 @@ public final class QueueService {
     private final Predicate<String> soldOut;
     private final Clock clock;
 
-    /** One event's line. Sequence numbers are issued under its lock, so line order = issue order. */
     static final class Line {
         final Queue<QueueToken> waiting = new ConcurrentLinkedQueue<>();
         volatile boolean open;
         volatile int admissionRate = DEFAULT_ADMISSION_RATE;
-        volatile long admittedThrough;   // sequence of the last token let in
+        volatile long admittedThrough;
         long nextSequence = 1;
     }
 
-    /**
-     * @param soldOut answers "is every tier of this event sold out?"
-     *                Passed in so the queue does not depend on inventory's class.
-     */
     public QueueService(EventBus bus, Clock clock, Predicate<String> soldOut) {
         this.clock = clock;
         this.soldOut = soldOut;
@@ -55,7 +42,6 @@ public final class QueueService {
         line(eventId).open = true;
     }
 
-    /** The organizer sets how many customers are let in each second. */
     public void setAdmissionRate(String eventId, int perSecond) {
         if (perSecond < 1) {
             throw new IllegalArgumentException("Admission rate must be at least 1 per second");
@@ -67,16 +53,13 @@ public final class QueueService {
         return line(eventId).admissionRate;
     }
 
-    /**
-     * Joins the line. One active token per customer per event: ten tabs get
-     * the same token, and coming back gets the same place.
-     */
     public JoinResult join(String customerId, String eventId) {
         Line line = line(eventId);
         if (!line.open) {
             return JoinResult.refused(JoinResult.Outcome.SALE_NOT_OPEN);
         }
         String key = customerId + "@" + eventId;
+        // Ten tabs, one token: give back the token they already have.
         QueueToken existing = activeByCustomer.get(key);
         if (existing != null && existing.isActive()) {
             return new JoinResult(JoinResult.Outcome.ALREADY_IN_QUEUE, existing);
@@ -85,7 +68,7 @@ public final class QueueService {
             return JoinResult.refused(JoinResult.Outcome.SOLD_OUT);
         }
         synchronized (line) {
-            existing = activeByCustomer.get(key);  // another tab may have won meanwhile
+            existing = activeByCustomer.get(key);  // another tab may have joined meanwhile
             if (existing != null && existing.isActive()) {
                 return new JoinResult(JoinResult.Outcome.ALREADY_IN_QUEUE, existing);
             }
@@ -98,30 +81,23 @@ public final class QueueService {
         }
     }
 
-    /**
-     * Kenji's place and wait. Admission is strictly in order, so his
-     * place is simply how far his number is past the last one let in.
-     */
     public QueueStatus status(String tokenId) {
         QueueToken token = token(tokenId);
         if (token.state() != QueueTokenState.WAITING) {
             return new QueueStatus(token.state(), 0, Duration.ZERO);
         }
         Line line = line(token.eventId());
+        // Fans are let in strictly in order, so place = my number minus the last one let in.
         long position = Math.max(1, token.sequence() - line.admittedThrough);
-        long seconds = (position + line.admissionRate - 1) / line.admissionRate;  // one batch per second
+        long seconds = (position + line.admissionRate - 1) / line.admissionRate;
         return new QueueStatus(QueueTokenState.WAITING, position, Duration.ofSeconds(seconds));
     }
 
-    /** How many are still waiting. */
     public int queueLength(String eventId) {
         return line(eventId).waiting.size();
     }
 
-    /**
-     * Only an admitted token may hold, and only once.
-     * Called by inventory inside its atomic hold.
-     */
+    // Only an admitted token can hold, and only once.
     public ClaimResult claimForHold(String tokenId, String eventId) {
         QueueToken token = tokens.get(tokenId);
         if (token == null || !token.eventId().equals(eventId)) {

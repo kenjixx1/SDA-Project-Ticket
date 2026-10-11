@@ -6,10 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import th.ac.kmitl.sda.ticketqueue.contract.PaymentProvider;
 
-/**
- * Key → plug-in. Slide 8.2's fix for the {@code if (method.equals("stripe"))}
- * chain: the core looks a plug-in up by key and never names its class.
- */
+// Finds plug-ins by key, so the core never names a plug-in class.
 public final class PluginRegistry {
 
     private final Map<String, PaymentProvider> paymentProviders = new ConcurrentHashMap<>();

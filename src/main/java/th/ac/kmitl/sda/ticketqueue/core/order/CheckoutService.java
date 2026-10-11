@@ -9,12 +9,6 @@ import th.ac.kmitl.sda.ticketqueue.core.event.EventBus;
 import th.ac.kmitl.sda.ticketqueue.core.event.PaymentCompleted;
 import th.ac.kmitl.sda.ticketqueue.core.registry.PluginRegistry;
 
-/**
- * Checkout and pay.
- *
- * <p>Calling the provider is a direct call — Kenji is waiting for the answer.
- * What happens after "authorised" is an event: {@link PaymentCompleted}.
- */
 public final class CheckoutService {
 
     private final ReservationStore store;
@@ -37,8 +31,8 @@ public final class CheckoutService {
                 .orElseThrow(() -> new IllegalArgumentException("No reservation " + reservationId));
 
         switch (reservation.state()) {
-            case CONFIRMED:
-                return CheckoutResult.CONFIRMED;  // a double tap; charged once
+            case CONFIRMED:  // already paid: a double tap is not charged twice
+                return CheckoutResult.CONFIRMED;
             case EXPIRED:
             case RELEASED:
                 return CheckoutResult.HOLD_EXPIRED;
@@ -50,7 +44,7 @@ public final class CheckoutService {
             return CheckoutResult.HOLD_EXPIRED;
         }
 
-        PaymentProvider provider = registry.payment(providerKey);  // by key, never by class
+        PaymentProvider provider = registry.payment(providerKey);  // found by key, never by class name
         PaymentResult result = provider.authorise(new PaymentRequest(
                 reservationId, reservation.idempotencyKey(), reservation.totalAmount()));
         if (!result.authorised()) {

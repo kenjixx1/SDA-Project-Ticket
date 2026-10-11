@@ -16,10 +16,7 @@ import th.ac.kmitl.sda.ticketqueue.core.queue.JoinResult;
 import th.ac.kmitl.sda.ticketqueue.core.queue.QueueStatus;
 import th.ac.kmitl.sda.ticketqueue.core.queue.QueueTokenState;
 
-/**
- * Runs the story from the docs: Chai sets up the sale, Kenji queues behind
- * 4,181 fans, buys 2 × VIP, and someone else's hold expires.
- */
+// Kenji's purchase from the docs, start to finish.
 public final class EventFlowDemo {
 
     public static void main(String[] args) {

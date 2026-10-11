@@ -11,13 +11,7 @@ import java.util.concurrent.atomic.LongAccumulator;
 
 import th.ac.kmitl.sda.ticketqueue.core.inventory.TicketTier;
 
-/**
- * The traffic spike: the whole crowd of 40,000 joins at once — faster than
- * the 60-second ramp the requirement asks for — and every request must finish
- * inside the response-time limits.
- *
- * <p>This measures the code, not a network.
- */
+// 40,000 fans join at once. Measured inside Java, not over a network.
 public final class QueueLoadTest {
 
     private static final int CROWD = 40_000;

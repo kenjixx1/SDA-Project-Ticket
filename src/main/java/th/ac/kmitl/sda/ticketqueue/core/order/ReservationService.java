@@ -10,12 +10,6 @@ import th.ac.kmitl.sda.ticketqueue.core.event.PaymentCompleted;
 import th.ac.kmitl.sda.ticketqueue.core.event.PaymentVoided;
 import th.ac.kmitl.sda.ticketqueue.core.registry.PluginRegistry;
 
-/**
- * Owns the reservation lifecycle: HELD → CONFIRMED / EXPIRED.
- *
- * <p>Listens to {@link PaymentCompleted}. Publishes {@link OrderConfirmed},
- * {@link HoldExpired} and {@link PaymentVoided}.
- */
 public final class ReservationService {
 
     private final ReservationStore store;
@@ -32,27 +26,23 @@ public final class ReservationService {
         bus.subscribe(PaymentCompleted.class, this::onPaymentCompleted);
     }
 
-    /**
-     * Expires the hold if its ten minutes are up and nothing confirmed it first.
-     * Returns whether this call did the expiring.
-     */
     public boolean expireIfDue(Reservation reservation) {
         if (!reservation.isDue(clock.instant())) {
             return false;
         }
         if (!reservation.moveState(ReservationState.HELD, ReservationState.EXPIRED)) {
-            return false;  // already confirmed or already expired
+            return false;
         }
         bus.publish(new HoldExpired(reservation.reservationId(), reservation.tokenId(),
                                     reservation.tierId(), reservation.quantity()));
         return true;
     }
 
-    /** Confirm only while still HELD and before expiresAt. Otherwise void the payment. */
     private void onPaymentCompleted(PaymentCompleted payment) {
         Reservation reservation = store.find(payment.reservationId()).orElseThrow();
         PaymentProvider provider = registry.payment(payment.providerKey());
 
+        // Confirm only if the hold is still alive. Otherwise cancel the payment.
         boolean stillAlive = !reservation.isDue(clock.instant());
         if (stillAlive && reservation.moveState(ReservationState.HELD, ReservationState.CONFIRMED)) {
             provider.capture(payment.providerReference());
@@ -60,8 +50,8 @@ public final class ReservationService {
                     reservation.tierId(), reservation.quantity(), reservation.totalAmount()));
             return;
         }
-        if (reservation.state() == ReservationState.CONFIRMED) {
-            return;  // the same payment arrived twice; it was already counted
+        if (reservation.state() == ReservationState.CONFIRMED) {  // same payment twice, already counted
+            return;
         }
         expireIfDue(reservation);  // the hold ran out while the bank was answering
         provider.voidAuthorisation(payment.providerReference());

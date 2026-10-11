@@ -9,16 +9,9 @@ import java.util.concurrent.TimeUnit;
 import th.ac.kmitl.sda.ticketqueue.core.event.EventBus;
 import th.ac.kmitl.sda.ticketqueue.core.event.UserAdmitted;
 
-/**
- * Lets the next batch in, every second, strictly first in first out. The
- * batch size is the organizer's admission rate.
- *
- * <p>Publishes {@link UserAdmitted} for each customer let in. Also expires
- * admitted tokens that never placed a hold.
- */
 public final class AdmissionScheduler {
 
-    /** An admitted customer has this long to place a hold. */
+    // Admitted fans have 5 minutes to hold seats, or they lose their place.
     public static final Duration ADMISSION_WINDOW = Duration.ofMinutes(5);
 
     private final QueueService queue;
@@ -32,11 +25,10 @@ public final class AdmissionScheduler {
         this.clock = clock;
     }
 
-    /** Admits one batch for one event. Returns how many were let in. */
     public int admitBatch(String eventId) {
         QueueService.Line line = queue.line(eventId);
         int admitted = 0;
-        synchronized (line) {  // one batch at a time keeps the order exact
+        synchronized (line) {  // one batch at a time keeps the line in order
             while (admitted < line.admissionRate) {
                 QueueToken next = line.waiting.poll();
                 if (next == null) {
@@ -51,7 +43,7 @@ public final class AdmissionScheduler {
         return admitted;
     }
 
-    /** Admitted but did nothing. Returns how many tokens expired. */
+    // Admitted but never held anything.
     public int expireIdle() {
         int expired = 0;
         for (QueueToken token : queue.allTokens()) {
@@ -64,7 +56,6 @@ public final class AdmissionScheduler {
         return expired;
     }
 
-    /** Runs admission for one event once a second in the background. */
     public synchronized void start(String eventId) {
         if (timer == null) {
             timer = Executors.newSingleThreadScheduledExecutor();

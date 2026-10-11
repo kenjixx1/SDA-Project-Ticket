@@ -1,5 +1,5 @@
 package th.ac.kmitl.sda.ticketqueue.contract;
 
-/** What the core sends a payment provider. No card number, ever. */
+// No card numbers here. The provider handles those.
 public record PaymentRequest(String reservationId, String idempotencyKey, Money amount) {
 }

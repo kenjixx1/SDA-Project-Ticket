@@ -5,10 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 
-/**
- * A server clock that can be moved forward by hand, so the demo and the tests
- * can show ten minutes passing without waiting ten minutes.
- */
+// A clock we can move forward, so ten minutes can pass instantly.
 public final class SettableClock extends Clock {
 
     public static final ZoneId BANGKOK = ZoneId.of("Asia/Bangkok");

@@ -25,7 +25,6 @@ import th.ac.kmitl.sda.ticketqueue.core.queue.JoinResult;
 import th.ac.kmitl.sda.ticketqueue.core.queue.QueueStatus;
 import th.ac.kmitl.sda.ticketqueue.core.queue.QueueTokenState;
 
-/** Joining the waiting room, and how the queue hands over to the hold. */
 public final class QueueTest {
 
     @Test
@@ -103,8 +102,8 @@ public final class QueueTest {
                 app.queue().join("kenji", vip.eventId()).outcome(), "sold out");
     }
 
-    /** Fairness: 10,000 tokens, batches of 200, admitted order = issued order. */
     @Test
+    // Fairness: fans are let in in exactly the order they joined.
     public void tenThousandFans_admittedInExactlyTheOrderTheyJoined() {
         EventFlow app = new EventFlow(Fixtures.clock());
         TicketTier vip = Fixtures.vip(app, 500);
@@ -187,7 +186,6 @@ public final class QueueTest {
                 app.queue().join("kenji", vip.eventId()).outcome(), "may rejoin");
     }
 
-    /** The brief's primary workflow, start to finish. */
     @Test
     public void joinToPaid_endToEnd() {
         EventFlow app = new EventFlow(Fixtures.clock());

@@ -3,12 +3,7 @@ package th.ac.kmitl.sda.ticketqueue.core.queue;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * A customer's numbered place in the waiting room.
- *
- * <p>Also the identity for the whole purchase: the token
- * that was admitted is the token that holds, and it can hold only once.
- */
+// A fan's place in line. The same token follows them from queue to order.
 public final class QueueToken {
 
     private final String tokenId;
@@ -28,7 +23,6 @@ public final class QueueToken {
         this.issuedAt = issuedAt;
     }
 
-    /** Moves the state only if it is still {@code from}. Returns whether this call won. */
     boolean moveState(QueueTokenState from, QueueTokenState to) {
         return state.compareAndSet(from, to);
     }
@@ -46,7 +40,7 @@ public final class QueueToken {
     public String tokenId()         { return tokenId; }
     public String eventId()         { return eventId; }
     public String customerId()      { return customerId; }
-    /** 1 for the first person in line, 2 for the next. Sets the place in line. */
+
     public long sequence()          { return sequence; }
     public Instant issuedAt()       { return issuedAt; }
     public Instant admittedAt()     { return admittedAt; }

@@ -1,6 +1,5 @@
 package th.ac.kmitl.sda.ticketqueue.contract;
 
-/** An amount in whole Thai baht. ฿6,500 is {@code Money.baht(6500)}. */
 public record Money(long baht) {
 
     public Money {

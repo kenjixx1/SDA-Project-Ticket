@@ -15,13 +15,7 @@ import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 import th.ac.kmitl.sda.ticketqueue.plugin.payment.PromptPayPlugin;
 
-/**
- * Payments and the expiry sweep race for the same holds.
- *
- * <p>Who wins each race differs from run to run. What must never differ:
- * every hold ends either paid-and-sold or expired-and-returned, and money and
- * seats always move together.
- */
+// Payment and expiry race for the same holds. Either way, nobody pays without seats.
 public final class PaymentExpiryRaceTest {
 
     private static final int RUNS = 20;
@@ -34,12 +28,12 @@ public final class PaymentExpiryRaceTest {
             confirmed += raceOnce(run);
         }
         int total = RUNS * HOLDS;
-        // Guard against a test that never really races: both sides must win sometimes.
+
+        // Make sure a real race happened: both sides must win sometimes.
         Check.that(confirmed > 0 && confirmed < total,
                 "expected a mix of paid and expired holds, got " + confirmed + " paid of " + total);
     }
 
-    /** Returns how many holds ended up paid. */
     private static int raceOnce(int run) throws Exception {
         SettableClock clock = Fixtures.clock();
         EventFlow app = new EventFlow(clock);
@@ -48,7 +42,7 @@ public final class PaymentExpiryRaceTest {
         for (String token : Fixtures.admitFans(app, vip, HOLDS)) {
             holds.add(app.inventory().hold(token, vip.tierId(), 2).reservation());
         }
-        clock.advance(Duration.ofMinutes(9).plusSeconds(59));  // one second left
+        clock.advance(Duration.ofMinutes(9).plusSeconds(59));
 
         ExecutorService pool = Executors.newFixedThreadPool(HOLDS + 1);
         CountDownLatch go = new CountDownLatch(1);
@@ -62,8 +56,9 @@ public final class PaymentExpiryRaceTest {
                 return null;
             });
         }
-        pool.submit(() -> {  // the deadline passes while half the buyers are mid-payment
+        pool.submit(() -> {
             go.await();
+            // The deadline passes while half the buyers are paying.
             while (started.get() < HOLDS / 2) {
                 Thread.onSpinWait();
             }

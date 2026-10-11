@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-/** Runs every {@link Test} method and exits non-zero if any fails. No libraries needed. */
+// A tiny test runner, so no JUnit is needed.
 public final class TestRunner {
 
     private static final List<Class<?>> SUITES = List.of(

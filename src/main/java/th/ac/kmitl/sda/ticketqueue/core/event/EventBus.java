@@ -6,15 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-/**
- * The event channel. Publishers do not know who is listening.
- *
- * <p>Broker topology: there is no central controller. Each listener does its
- * one job and may publish a new event.
- *
- * <p>Delivery is in-process and on the publisher's thread, so when
- * {@link #publish} returns, every listener has run.
- */
+// Passes each event to everyone listening for it. The sender never knows who listens.
 public final class EventBus {
 
     private final Map<Class<?>, List<Consumer<Object>>> listeners = new ConcurrentHashMap<>();
@@ -25,6 +17,7 @@ public final class EventBus {
                  .add(event -> listener.accept(type.cast(event)));
     }
 
+    // Listeners run right away, on the same thread.
     public void publish(DomainEvent event) {
         history.add(event);
         for (Consumer<Object> listener : listeners.getOrDefault(event.getClass(), List.of())) {
@@ -32,7 +25,6 @@ public final class EventBus {
         }
     }
 
-    /** Every event published so far, in order. For the demo, the dashboard and tests. */
     public List<DomainEvent> history() {
         return List.copyOf(history);
     }

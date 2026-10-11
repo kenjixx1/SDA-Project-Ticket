@@ -8,7 +8,6 @@ import th.ac.kmitl.sda.ticketqueue.core.order.CheckoutResult;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 
-/** An abandoned hold gives its seats back after exactly ten minutes. */
 public final class HoldExpiryTest {
 
     @Test
@@ -54,7 +53,7 @@ public final class HoldExpiryTest {
         Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
         clock.advance(Duration.ofMinutes(11));
 
-        // No sweep has run yet: checkout itself notices the hold is dead.
+        // No sweep has run yet. Checkout notices the hold is dead by itself.
         CheckoutResult result = app.checkout().checkout(r.reservationId(), "promptpay");
 
         Check.equal(CheckoutResult.HOLD_EXPIRED, result, "checkout");

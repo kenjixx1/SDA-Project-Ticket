@@ -12,17 +12,11 @@ import th.ac.kmitl.sda.ticketqueue.core.inventory.TicketTier;
 import th.ac.kmitl.sda.ticketqueue.core.order.CheckoutResult;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 
-/**
- * No overselling: tickets confirmed must never exceed tickets that exist.
- *
- * <p>Many buyers press "hold" at the same instant for the last VIP seats. The
- * answer must be exactly right on every run, not just most runs.
- */
+// 200 buyers race for the last seats. The answer must be exact on every run.
 public final class NoOversellingTest {
 
     private static final int RUNS = 50;
 
-    /** 200 buyers race for the last 10 seats; exactly 10 are sold. */
     @Test
     public void twoHundredBuyersOneSeatEach_exactlyTenSold_everyRun() throws Exception {
         for (int run = 1; run <= RUNS; run++) {
@@ -30,7 +24,6 @@ public final class NoOversellingTest {
         }
     }
 
-    /** 200 buyers × 2 seats, 10 left → exactly 5 holds. */
     @Test
     public void twoHundredBuyersTwoSeatsEach_exactlyFiveHolds_everyRun() throws Exception {
         for (int run = 1; run <= RUNS; run++) {

@@ -10,7 +10,6 @@ import th.ac.kmitl.sda.ticketqueue.core.inventory.TicketTier;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 
-/** The rules on a single hold. */
 public final class HoldRulesTest {
 
     @Test
