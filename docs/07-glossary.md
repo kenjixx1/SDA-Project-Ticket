@@ -143,6 +143,16 @@ This is "no overselling", written as a rule a computer can check.
 
 ---
 
+### Degraded
+Part of the system has stopped, but the rest still works.
+
+*Like a café whose card machine is down: you can still order and pay cash.*
+
+**Example:** the card provider stops answering. Kenji can still join the queue,
+hold seats and pay by PromptPay (NFR-05, `10-operation.md` §10.5).
+
+---
+
 ### Dialog
 A small window in the middle of a desktop screen that asks one question and blocks the page behind it until answered.
 
@@ -507,6 +517,17 @@ thing to avoid.
 ### Reservation
 Seats held for one customer with a deadline. Entity **E-04**, and the most
 important entity in the system — it is where overselling is prevented.
+
+---
+
+### Runbook
+A short list of "when you see this, do that" steps, written before anything
+goes wrong, so nobody has to think under pressure.
+
+*Like the fire-drill card on a hotel door.*
+
+**Example:** "Waiting number not going down → raise the admission rate towards
+12 per second" (`10-operation.md` §10.5).
 
 ---
 
