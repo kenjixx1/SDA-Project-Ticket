@@ -1,6 +1,7 @@
 package th.ac.kmitl.sda.ticketqueue.web;
 
 import io.javalin.Javalin;
+import io.javalin.http.BadRequestResponse;
 import io.javalin.http.staticfiles.Location;
 import th.ac.kmitl.sda.ticketqueue.web.fake.DevControls;
 import th.ac.kmitl.sda.ticketqueue.web.fake.FakeBookingGateway;
@@ -45,6 +46,9 @@ public final class WebServer {
         Javalin app = Javalin.create(config -> config.staticFiles.add("/public", Location.CLASSPATH));
         app.get("/api/health", ctx -> ctx.json(Map.of("ok", true)));
         app.exception(GatewayException.class, (e, ctx) -> Reply.error(ctx, gateway, e));
+        // A body that is not valid JSON, or a field of the wrong type, gets the same envelope as any refusal.
+        app.exception(BadRequestResponse.class, (e, ctx) -> Reply.error(ctx, gateway,
+                new GatewayException(400, "BAD_REQUEST", "The request could not be read", null, null)));
         EventRoutes.register(app, gateway);
         QueueRoutes.register(app, gateway);
         HoldRoutes.register(app, gateway);

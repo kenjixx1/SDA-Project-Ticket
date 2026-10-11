@@ -504,4 +504,10 @@ class FakeOrganizerTest {
         assertEquals(5850, gw.orders("kenji").get(0).paidAmount());
         assertEquals(before + 5850, org.dashboard("chai", "the-1975").revenue());
     }
+
+    @Test
+    void updateTierTrimsTheName() {
+        OrgEvent e = org.updateTier("chai", "the-1975", "vip", new TierInput(" VIP ", null, null));
+        assertEquals("VIP", row(e, "vip").name());
+    }
 }

@@ -170,6 +170,8 @@ row, counted from 0; the second tier row is `tiers[1]`.
 | Status | Code | Field | Message | When |
 |---|---|---|---|---|
 | 400 | `REQUIRED` | `name`, `venue`, `eventDateTime` or `saleOpensAt` | `Required` | The field is missing or empty (O-02, O-04) |
+| 400 | `REQUIRED` | `details`, `tiers`, `tiers[i]` or `tier` | `Required` | The body, the tier list or one tier row is missing (O-02, O-04 to O-07) |
+| 400 | `BAD_REQUEST` | — | `The request could not be read` | The body is not valid JSON, or a field has the wrong type |
 | 400 | `TOO_LONG` | `name` | `Up to 40 characters` | Longer than 40 (O-02, O-04) |
 | 400 | `TOO_LONG` | `venue` | `Up to 30 characters` | Longer than 30 (O-02, O-04) |
 | 400 | `SALE_IN_PAST` | `saleOpensAt` | `The sale must open in the future.` | The sale time is not in the future (O-02, O-04) |

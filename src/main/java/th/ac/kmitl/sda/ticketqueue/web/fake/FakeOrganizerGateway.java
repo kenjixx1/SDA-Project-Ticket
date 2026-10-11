@@ -126,11 +126,17 @@ public class FakeOrganizerGateway implements OrganizerGateway {
             if (!e.draft) {
                 throw notDraft();
             }
+            if (tiers == null) {
+                throw GatewayException.invalid("REQUIRED", "tiers", "Required");
+            }
             if (tiers.size() > MAX_TIERS) {
                 throw GatewayException.invalid("TOO_MANY_TIERS", "tiers", "Up to 8 tiers.");
             }
             for (int i = 0; i < tiers.size(); i++) {
                 TierInput in = tiers.get(i);
+                if (in == null) {
+                    throw GatewayException.invalid("REQUIRED", "tiers[" + i + "]", "Required");
+                }
                 checkRow(i, "tiers[" + i + "].", in.name(), in.price(), in.total());
             }
             List<FakeBookingGateway.Tier> built = new ArrayList<>();
@@ -152,6 +158,9 @@ public class FakeOrganizerGateway implements OrganizerGateway {
             if (!editable(fake.orgState(e))) {
                 throw locked();
             }
+            if (tier == null) {
+                throw GatewayException.invalid("REQUIRED", "tier", "Required");
+            }
             if (e.tiers.size() >= MAX_TIERS) {
                 throw GatewayException.invalid("TOO_MANY_TIERS", "tiers", "Up to 8 tiers.");
             }
@@ -171,8 +180,11 @@ public class FakeOrganizerGateway implements OrganizerGateway {
             if (!editable(fake.orgState(e))) {
                 throw locked();
             }
+            if (tier == null) {
+                throw GatewayException.invalid("REQUIRED", "tier", "Required");
+            }
             FakeBookingGateway.Tier t = e.tier(tierId);
-            String name = tier.name() == null ? t.name : tier.name();
+            String name = tier.name() == null ? t.name : tier.name().trim();
             Long price = tier.price() == null ? t.price : tier.price();
             Integer total = tier.total() == null ? t.total : tier.total();
             checkRow(0, "", name, price, total);

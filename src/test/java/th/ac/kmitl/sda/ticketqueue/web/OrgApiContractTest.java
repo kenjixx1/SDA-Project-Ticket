@@ -174,4 +174,58 @@ class OrgApiContractTest {
             assertFalse(found);
         });
     }
+
+    /** Sends a raw body exactly as written, so malformed JSON and a literal null can be tested. */
+    private static Response raw(io.javalin.testtools.HttpClient client, String method, String path, String json) {
+        return client.request(path, b -> b.header("X-Customer", "chai")
+                .method(method, okhttp3.RequestBody.create(json, okhttp3.MediaType.get("application/json"))));
+    }
+
+    private String draftId(io.javalin.testtools.HttpClient client) throws IOException {
+        return body(client.post("/api/org/events", newEvent(), as("chai"))).get("data").get("eventId").asText();
+    }
+
+    @Test
+    void emptyTierBodyIsRequired() {
+        JavalinTest.test(WebServer.create(fake, org, null), (server, client) -> {
+            Response r = raw(client, "PUT", "/api/org/events/" + draftId(client) + "/tiers", "{}");
+            assertEquals(400, r.code());
+            JsonNode err = body(r).get("error");
+            assertEquals("REQUIRED", err.get("code").asText());
+            assertEquals("tiers", err.get("field").asText());
+        });
+    }
+
+    @Test
+    void nullTierRowIsRequired() {
+        JavalinTest.test(WebServer.create(fake, org, null), (server, client) -> {
+            Response r = raw(client, "PUT", "/api/org/events/" + draftId(client) + "/tiers", "{\"tiers\":[null]}");
+            assertEquals(400, r.code());
+            JsonNode err = body(r).get("error");
+            assertEquals("REQUIRED", err.get("code").asText());
+            assertEquals("tiers[0]", err.get("field").asText());
+        });
+    }
+
+    @Test
+    void nullTierBodyIsRequired() {
+        JavalinTest.test(WebServer.create(fake, org, null), (server, client) -> {
+            Response r = raw(client, "POST", "/api/org/events/" + draftId(client) + "/tiers", "null");
+            assertEquals(400, r.code());
+            JsonNode err = body(r).get("error");
+            assertEquals("REQUIRED", err.get("code").asText());
+            assertEquals("tier", err.get("field").asText());
+        });
+    }
+
+    @Test
+    void malformedJsonGetsTheEnvelope() {
+        JavalinTest.test(WebServer.create(fake, org, null), (server, client) -> {
+            Response r = raw(client, "POST", "/api/org/events", "{\"name\":");
+            assertEquals(400, r.code());
+            JsonNode b = body(r);
+            assertEquals("BAD_REQUEST", b.get("error").get("code").asText());
+            assertEquals(true, b.has("serverNow"));
+        });
+    }
 }
