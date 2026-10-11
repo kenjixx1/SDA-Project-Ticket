@@ -50,6 +50,8 @@
 /* A field keeps room for its error line, so a refused save does not move the buttons. */
 .sheet .field:not(:has(.err)){padding-bottom:19px}
 .sheet .note{font:400 13px/1.45 var(--f);color:var(--mu);text-wrap:pretty}
+/* The rate preview goes away entirely when the typed rate cannot work. */
+[data-rate-preview][hidden]{display:none}
 .sheet .lock{display:inline-flex;align-items:center;color:var(--mu)}
 
 @media (hover:hover){

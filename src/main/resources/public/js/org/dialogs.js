@@ -1,7 +1,7 @@
 // SCR-35 to SCR-39: the dialogs the event overview opens. Each one draws with sheet() from parts.js.
 // Which dialog is open and what was typed lives in ctx.state.dialog, so typing never redraws the page.
 import { org } from './api.js';
-import { ApiError } from '../api.js';
+import { ApiError, serverNow } from '../api.js';
 import { html, raw, num, sheet } from '../parts.js';
 import { field, toEpoch, dateInput, timeInput } from './parts.js';
 
@@ -9,12 +9,14 @@ import { field, toEpoch, dateInput, timeInput } from './parts.js';
 let live = null;
 export const bindDialogs = (ctx) => { live = ctx; };
 
-/** A redraw would take the caret out of the box being typed in, so hold the screen's 5-second poll. */
-const holdPoll = (ctx) => { ctx.run.busy = !!ctx.state.dialog; };
-
 const LOCK = raw('<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="9.5" rx="2.5"/><path d="M8.5 10.5v-3a3.5 3.5 0 0 1 7 0v3"/></svg>');
 
 const tierOf = (e, tierId) => e.tiers.find((t) => t.tierId === tierId);
+
+/** The sale time belongs to the sale, so it stops being editable once the sale is on (SCR-35b). */
+const saleFrozen = (e) => !(e.state === 'DRAFT' || e.state === 'SCHEDULED');
+/** A price belongs to the sale too, so it locks the moment the sale is on (SCR-36b). */
+const priceFrozen = (e) => e.state === 'ON_SALE';
 
 const number = (v) => {
   const s = String(v).trim();
@@ -23,10 +25,25 @@ const number = (v) => {
   return Number.isFinite(n) ? n : null;
 };
 
-/** The server counts baht as whole numbers, so a typed 6,500.4 goes in as 6,500. */
-const whole = (v) => { const n = number(v); return n === null ? null : Math.round(n); };
+/** Baht, seats and the rate are whole numbers, so a typed fraction is refused, never rounded into place. */
+const isWhole = (n) => Number.isInteger(n);
 
 // ----- the live checks, in the server's own words (docs/09 §9.4) -----
+
+/** SCR-35: the same required fields as SCR-31. The sale time is only checked while its inputs are editable. */
+function detailsChecks(e, d) {
+  const f = d.f;
+  const err = {};
+  if (!f.name.trim()) err.name = 'Required';
+  if (!f.venue.trim()) err.venue = 'Required';
+  if (saleFrozen(e)) return err;
+  const sale = toEpoch(f.saleDate, f.saleTime);
+  const event = toEpoch(f.evDate, f.evTime);
+  if (sale === null) err.sale = 'Required';
+  else if (sale <= serverNow()) err.sale = 'The sale must open in the future.';
+  else if (event !== null && sale >= event) err.sale = 'The sale must open before the event.';
+  return err;
+}
 
 /** SCR-36: the same row rules as SCR-32, plus FR-28 — a tier cannot shrink below what is sold and held. */
 function tierChecks(e, d) {
@@ -34,7 +51,7 @@ function tierChecks(e, d) {
   const err = rowChecks(d.f);
   const total = number(d.f.total);
   if (!err.total && total !== null && total < t.sold + t.held) {
-    err.total = `${d.f.name.trim() || t.name}: ${num(t.sold)} sold and ${num(t.held)} held. Cannot reduce below ${num(t.sold + t.held)}.`;
+    err.total = `${t.name}: ${num(t.sold)} sold and ${num(t.held)} held. Cannot reduce below ${num(t.sold + t.held)}.`;
   }
   return err;
 }
@@ -49,18 +66,21 @@ function rowChecks(f) {
   if (!name) err.name = `${label} · Name is required.`;
   const price = number(f.price);
   if (price === null || price < 0) err.price = `${label} · Price cannot be below ฿0.`;
+  else if (!isWhole(price)) err.price = `${label} · Price must be a whole number of baht.`;
   const total = number(f.total);
   if (total === null || total <= 0) err.total = `${label} · Seats must be more than 0.`;
+  else if (!isWhole(total)) err.total = `${label} · Seats must be a whole number.`;
   return err;
 }
 
 /** SCR-38: a rate below 1 would stop the queue moving at all. */
 function rateChecks(e, d) {
   const rate = number(d.f.rate);
-  return rate === null || rate < 1 ? { rate: 'Must be at least 1.' } : {};
+  if (rate === null || rate < 1) return { rate: 'Must be at least 1.' };
+  return isWhole(rate) ? {} : { rate: 'Must be a whole number.' };
 }
 
-const CHECKS = { details: () => ({}), tier: tierChecks, add: addChecks, rate: rateChecks, close: () => ({}) };
+const CHECKS = { details: detailsChecks, tier: tierChecks, add: addChecks, rate: rateChecks, close: () => ({}) };
 const checks = (e, d) => CHECKS[d.name](e, d);
 
 /** A refusal from the server names a field; this is the error line that field belongs under. */
@@ -71,6 +91,24 @@ const KEY = {
   rate: { admitPerSecond: 'rate' },
   close: {},
 };
+
+/** The inputs behind each error line, so we can tell whether the person can still clear it. */
+const INPUTS = { name: ['name'], venue: ['venue'], ev: ['evDate', 'evTime'], sale: ['saleDate', 'saleTime'], price: ['price'], total: ['total'], rate: ['rate'] };
+
+/** True while every input of that error line is on screen and can still be typed in. */
+function clearable(key) {
+  const root = document.getElementById('app');
+  return INPUTS[key].every((n) => { const el = root.querySelector(`[name="f_${n}"]`); return el && !el.disabled; });
+}
+
+/**
+ * Where a refusal shows. Under its own field normally. In the dialog's general line when that
+ * field is locked or gone: the person could never clear it there, and Save would never come back.
+ */
+function refusal(d, e) {
+  const key = KEY[d.name][e.field] || null;
+  return { key: key && clearable(key) ? key : null, message: e.message };
+}
 
 /** What the error line under one field says right now: the server's refusal, or a live check of a field already typed in. */
 const lineOf = (e, d, key) => (d.err && d.err.key === key ? d.err.message : d.touched[key] || d.asked ? checks(e, d)[key] || '' : '');
@@ -95,7 +133,7 @@ export function dialogSheet(st) {
 /** SCR-35 Edit details. The sale time belongs to the sale, so it stops being editable once the sale is on. */
 function detailsSheet(e, d) {
   const f = d.f;
-  const frozen = !(e.state === 'DRAFT' || e.state === 'SCHEDULED');
+  const frozen = saleFrozen(e);
   const bad = (k) => (lineOf(e, d, k) ? 'bad' : '');
   return sheet({
     title: 'Edit details',
@@ -122,15 +160,15 @@ function detailsSheet(e, d) {
   });
 }
 
-/** SCR-36 Edit tier (b: the price is frozen while the sale is on). */
+/** SCR-36 Edit tier (b: the price is frozen while the sale is on, and shows the price the server holds). */
 function tierSheet(e, d) {
   const t = tierOf(e, d.tierId);
-  const frozen = e.state === 'ON_SALE';
+  const frozen = priceFrozen(e);
   const counts = `${num(t.sold)} sold · ${num(t.held)} held · ${num(t.remaining)} remaining`;
   const price = frozen
     ? html`<label class="field">
         <span class="fl"><b>Price (฿)</b><i class="lock">${LOCK}</i></span>
-        <span class="fi"><input name="f_price" value="${d.f.price}" disabled></span>
+        <span class="fi"><input name="f_price" value="${t.price}" disabled></span>
         <span class="note">Prices are frozen while the sale is on, so no customer sees a price change mid-purchase.</span>
       </label>`
     : field({ label: 'Price (฿)', name: 'f_price', value: d.f.price, error: lineOf(e, d, 'price'), extra: 'inputmode="numeric" placeholder="0"' });
@@ -194,8 +232,11 @@ function rateSheet(e, d) {
 }
 
 /** "At 12 per second, the 31,208 people now waiting are through in about 43 minutes." */
-const preview = (e, rate) =>
-  rate === null || rate < 1 ? '' : `At ${num(rate)} per second, the ${num(e.waiting)} people now waiting are through in about ${Math.ceil(e.waiting / rate / 60)} minutes.`;
+const preview = (e, rate) => {
+  if (rate === null || rate < 1) return '';
+  const m = Math.ceil(e.waiting / rate / 60);
+  return `At ${num(rate)} per second, the ${num(e.waiting)} people now waiting are through in about ${m} ${m === 1 ? 'minute' : 'minutes'}.`;
+};
 
 /** SCR-39 Close the sale? The seats inside a hold keep their time. */
 function closeSheet(e, d) {
@@ -216,28 +257,42 @@ function closeSheet(e, d) {
 
 // ----- opening, closing, saving -----
 
+/** Reads the event again, so the page a dialog has just changed is fresh. */
+const refresh = async (ctx) => { ctx.state.e = await org.event(ctx.params[0]); };
+
 function open(ctx, dialog) {
   ctx.state.dialog = { touched: {}, asked: false, err: null, working: false, ...dialog };
-  holdPoll(ctx);
 }
 
+/** Closing a dialog always reloads the event once: nothing polls the page while a dialog is open. */
 export function closeDialog(ctx) {
   ctx.state.dialog = null;
-  holdPoll(ctx);
+  return refresh(ctx);
 }
 
-const detailsOf = (f) => ({
-  name: f.name.trim(),
-  venue: f.venue.trim(),
-  eventDateTime: toEpoch(f.evDate, f.evTime),
-  saleOpensAt: toEpoch(f.saleDate, f.saleTime),
-});
+/** The PATCH. The sale time only goes in when its inputs are editable and the value actually changed. */
+const detailsOf = (e, d) => {
+  const f = d.f;
+  const body = { name: f.name.trim(), venue: f.venue.trim(), eventDateTime: toEpoch(f.evDate, f.evTime) };
+  const sale = toEpoch(f.saleDate, f.saleTime);
+  if (!saleFrozen(e) && sale !== null && sale !== e.saleOpensAt) body.saleOpensAt = sale;
+  return body;
+};
 
-const tierOfForm = (f) => ({ name: f.name.trim(), price: whole(f.price), total: whole(f.total) });
+const tierOfForm = (f) => ({ name: f.name.trim(), price: number(f.price), total: number(f.total) });
+
+/** SCR-36's PATCH. A frozen price stays out of the body: the server holds the real one and would refuse a change. */
+const tierOfChange = (e, d) => {
+  const f = d.f;
+  const body = { name: f.name.trim(), total: number(f.total) };
+  if (!priceFrozen(e)) body.price = number(f.price);
+  return body;
+};
 
 async function save(ctx, run) {
   const st = ctx.state;
   const d = st.dialog;
+  if (d.working) return;
   d.asked = true;
   if (Object.keys(checks(st.e, d)).length) return;
   d.err = null;
@@ -245,11 +300,13 @@ async function save(ctx, run) {
   ctx.render();
   try {
     st.e = await run();
-    closeDialog(ctx);
+    await closeDialog(ctx);
   } catch (e) {
     d.working = false;
     if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
-    d.err = { key: KEY[d.name][e.field] || null, message: e.message };
+    await refresh(ctx); // the refusal may say the event moved on: draw the dialog as the server now has it
+    ctx.render();
+    d.err = refusal(d, e);
   }
 }
 
@@ -260,7 +317,7 @@ async function closeSale(ctx, id) {
   ctx.render();
   try {
     st.e = await org.close(id);
-    closeDialog(ctx);
+    await closeDialog(ctx);
   } catch (e) {
     d.working = false;
     if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
@@ -288,10 +345,10 @@ export const dialogActions = {
     open(ctx, { name: 'close' });
   },
   dlgClose: (ctx) => closeDialog(ctx),
-  dlgSaveDetails: (ctx, data, id) => save(ctx, () => org.update(id, detailsOf(ctx.state.dialog.f))),
-  dlgSaveTier: (ctx, data, id) => save(ctx, () => org.updateTier(id, ctx.state.dialog.tierId, tierOfForm(ctx.state.dialog.f))),
+  dlgSaveDetails: (ctx, data, id) => save(ctx, () => org.update(id, detailsOf(ctx.state.e, ctx.state.dialog))),
+  dlgSaveTier: (ctx, data, id) => save(ctx, () => org.updateTier(id, ctx.state.dialog.tierId, tierOfChange(ctx.state.e, ctx.state.dialog))),
   dlgSaveAdd: (ctx, data, id) => save(ctx, () => org.addTier(id, tierOfForm(ctx.state.dialog.f))),
-  dlgSaveRate: (ctx, data, id) => save(ctx, () => org.setRate(id, whole(ctx.state.dialog.f.rate))),
+  dlgSaveRate: (ctx, data, id) => save(ctx, () => org.setRate(id, number(ctx.state.dialog.f.rate))),
   dlgCloseSale: (ctx, data, id) => closeSale(ctx, id),
 };
 

@@ -14,8 +14,8 @@ const ALLOWED = {
 };
 const can = (state, what) => !!((ALLOWED[state] || {})[what]);
 
-/** "148 seats are inside someone's 10 minutes." */
-const inside = (n) => `${num(n)} ${n === 1 ? 'seat is' : 'seats are'} inside someone's 10 minutes.`;
+/** "148 seats are still inside someone's 10 minutes." */
+const inside = (n) => `${num(n)} ${n === 1 ? 'seat is' : 'seats are'} still inside someone's 10 minutes.`;
 
 const note = (lead, text = '', stop = false) =>
   html`<div class="ov-note ${stop ? 'stop' : ''}" role="status"><b>${lead}</b>${text ? html`<span>${text}</span>` : ''}</div>`;
@@ -78,6 +78,9 @@ async function load(ctx, id) {
   ctx.state.e = await org.event(id);
 }
 
+/** The 5-second poll stops while a dialog is open, so it never redraws the page under someone typing. */
+const poll = { every: 5000, paused: (s) => !!s.dialog, run: load };
+
 export const screens = [
   {
     id: 'event',
@@ -87,7 +90,7 @@ export const screens = [
       ctx.state.banner = false;
       return load(ctx, id);
     },
-    poll: { every: 5000, run: load },
+    poll,
     view,
     actions: { ...dialogActions },
   },
@@ -99,7 +102,7 @@ export const screens = [
       ctx.state.banner = true;
       return load(ctx, id);
     },
-    poll: { every: 5000, run: load },
+    poll,
     view,
     actions: { ...dialogActions },
   },
