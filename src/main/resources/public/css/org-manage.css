@@ -54,6 +54,29 @@
 [data-rate-preview][hidden]{display:none}
 .sheet .lock{display:inline-flex;align-items:center;color:var(--mu)}
 
+/* ---- SCR-40 the live dashboard: two big figures, the tier bars, the revenue row ---- */
+.ov-name.live-head{justify-content:space-between;width:100%}
+.ov-queue{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.ov-fig-n{font:600 44px/1 var(--fm);font-variant-numeric:tabular-nums}
+.ov-fig-u{font:400 14px/1 var(--f);color:var(--mu)}
+.ov-live{display:flex;flex-direction:column;gap:12px}
+.ov-live-tbl .ov-th,.ov-live-tbl .ov-row{grid-template-columns:minmax(0,1.4fr) repeat(4,minmax(0,.8fr)) minmax(0,1.5fr)}
+.ov-live-tbl .ov-row.all{font-weight:600}
+.ov-live-tbl .ov-row.all .ov-tname{font-weight:700}
+.ov-bar{display:flex;height:6px;border-radius:999px;background:var(--s3);overflow:hidden}
+.ov-bar i{height:100%}
+.ov-bar i:first-child{background:var(--tx)}
+.ov-bar i:last-child{background:var(--ac)}
+.ov-sold{color:var(--st)}
+.ov-hint{margin:0;font:400 14px/1.45 var(--f);color:var(--mu)}
+.ov-rev{flex-direction:row;align-items:baseline;justify-content:space-between}
+.ov-foot{display:flex}
+.ov-note[hidden]{display:none}
+/* A figure that changed eases from lime to its own colour; a figure whose data is old fades back. */
+[data-fig].bump{animation:ov-fade .6s ease-out}
+[data-fig].dim{opacity:.45}
+@keyframes ov-fade{from{color:var(--ac)}}
+
 @media (hover:hover){
   .ov-link:hover{color:var(--tx)}
 }
