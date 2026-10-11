@@ -30,6 +30,36 @@ function keepMethod(st) {
   if (st.method && !st.h.paymentMethods.some((m) => m.key === st.method && m.available)) st.method = null;
 }
 
+// SCR-14: the simulated provider opens its own page with its own form. The values live outside
+// ctx.state so that typing never redraws the screen and the caret stays where it is.
+const card = { num: '', exp: '', cvc: '', name: '' };
+let cardTried = false;
+const CARD_TYPE = {
+  num: (v) => v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})(?=.)/g, '$1 '),
+  exp: (v) => { const d = v.replace(/\D/g, '').slice(0, 4); return d.length > 2 ? `${d.slice(0, 2)} / ${d.slice(2)}` : d; },
+  cvc: (v) => v.replace(/\D/g, '').slice(0, 4),
+  name: (v) => v.slice(0, 40),
+};
+const TEST_CARD = { num: '4242 4242 4242 4242', exp: '12 / 28', cvc: '123', name: 'Kenji' };
+
+function cardErrors() {
+  const digits = card.num.replace(/\s/g, '');
+  const exp = card.exp.replace(/\D/g, '');
+  const month = Number(exp.slice(0, 2));
+  return {
+    num: digits.length < 15 ? 'Enter the full card number.' : '',
+    exp: exp.length < 4 || month < 1 || month > 12 ? 'Enter a valid expiry date.' : '',
+    cvc: card.cvc.length < 3 ? 'Enter the 3-digit code.' : '',
+    name: card.name.trim() ? '' : 'Enter the name on the card.',
+  };
+}
+
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  if (!(el instanceof HTMLInputElement) || !CARD_TYPE[el.dataset.card]) return;
+  el.value = card[el.dataset.card] = CARD_TYPE[el.dataset.card](el.value);
+});
+
 async function startPay(ctx, rid) {
   const st = ctx.state;
   st.working = true;
@@ -64,6 +94,16 @@ async function answer(ctx, rid, pid, approve) {
   }
 }
 
+/** SCR-14: the provider takes the card, then tells us whether it went through (FR-19). */
+async function cardPay(ctx, rid, pid) {
+  cardTried = true;
+  if (Object.values(cardErrors()).some(Boolean)) {
+    ctx.render();
+    return;
+  }
+  await answer(ctx, rid, pid, !card.num.replace(/\s/g, '').endsWith('0002'));
+}
+
 async function loadHeld(ctx, rid) {
   const h = await api.getHold(rid);
   if (await follow(ctx, h)) return false;
@@ -72,48 +112,74 @@ async function loadHeld(ctx, rid) {
   return true;
 }
 
+/** SCR-13a: the QR Kenji scans, beside the bank's own wording. */
 function promptPayView(st) {
   const { h, p } = st;
-  return html`<section class="screen">
-    <div><h1 class="title sm">Pay ${baht(h.totalAmount)}</h1><p class="sub">PromptPay</p></div>
-    ${countdown(h.expiresAt)}
-    <div class="qr">${qr(`PROMPTPAY|${p.paymentId}|${h.totalAmount}`, 220)}</div>
-    <p class="hint">This code expires with your hold</p>
-    <div class="card"><b>Do not close this page.</b><p>Your tickets are confirmed as soon as the bank answers.</p></div>
-  </section>
-  <div class="foot">
-    ${button({ label: 'I have paid', action: 'approve', working: st.working ? 'Confirming…' : '' })}
-    <button class="textlink" data-action="go" data-to="#/checkout/${h.reservationId}">Use another way to pay</button>
-  </div>`;
-}
-
-function cardView(st) {
-  const h = st.h;
-  const off = st.working ? raw('disabled') : '';
-  return html`<section class="screen">
-    ${countdown(h.expiresAt)}
-    <div class="provider">
-      <span class="brand">Card provider · simulated</span>
-      <span class="amt">Amount ${baht(h.totalAmount)}</span>
-      <p>Merchant: Event Ticket &amp; Queue</p>
-      <p>This is a simulated provider for the project demo. No real card is used.</p>
-      <button class="btn ok" data-action="approve" ${off}>${st.working === 'yes' ? 'Approving…' : 'Approve payment'}</button>
-      <button class="btn no" data-action="decline" ${off}>${st.working === 'no' ? 'Declining…' : 'Decline payment'}</button>
+  return html`<section class="screen timed">
+    <div class="col">
+      <div class="head"><h1 class="title">Pay ${baht(h.totalAmount)}</h1><p class="sub">PromptPay</p></div>
+      <div class="payqr">
+        <div class="frame"><span class="scan"></span>${qr(`PROMPTPAY|${p.paymentId}|${h.totalAmount}`, 208)}</div>
+        <div class="say"><b>Scan with your banking app</b>
+          <p>Open any Thai banking app, scan this code and confirm ${baht(h.totalAmount)}.</p>
+          <span>This code expires with your hold</span></div>
+      </div>
     </div>
+    <aside class="side">
+      ${countdown(h.expiresAt)}
+      ${button({ label: 'I have paid', action: 'approve', working: st.working ? 'Confirming…' : '' })}
+      <button class="textlink" data-action="go" data-to="#/checkout/${h.reservationId}">Use another way to pay</button>
+      <div class="card note"><b>Do not close this page.</b><p>Your tickets are confirmed as soon as the bank answers.</p></div>
+    </aside>
   </section>`;
 }
 
+/** SCR-14a: the provider's own page. Card numbers never reach our server (CON-03). */
+function cardView(st) {
+  const h = st.h;
+  const err = cardTried ? cardErrors() : {};
+  const off = st.working ? raw('disabled') : '';
+  const field = (f, label, placeholder, numeric = true) => html`<label class="fld"><span>${label}</span>
+    <input data-card="${f}" value="${card[f]}" placeholder="${placeholder}" ${numeric ? raw('inputmode="numeric"') : ''} ${off} class="${err[f] ? 'bad' : ''}">
+    ${err[f] ? html`<span class="err">${err[f]}</span>` : ''}</label>`;
+  return html`<section class="screen timed">
+    <div class="col">
+      <div class="head"><h1 class="title">Pay ${baht(h.totalAmount)}</h1><p class="sub">Credit or debit card</p></div>
+      <div class="paycard">
+        <div class="chead"><span class="logo"><i></i>PayCard</span><span>Card provider · simulated</span></div>
+        <div class="cbody">
+          ${field('num', 'Card number', '1234 1234 1234 1234')}
+          <div class="three">
+            ${field('exp', 'Expiry', 'MM / YY')}
+            ${field('cvc', 'CVC', '123')}
+            ${field('name', 'Name on card', 'Kenji Tanaka', false)}
+          </div>
+          <div class="act">
+            <button class="textlink" data-action="fillTest">Use test card</button>
+            ${button({ label: `Pay ${baht(h.totalAmount)}`, action: 'pay', working: st.working ? 'Processing…' : '' })}
+          </div>
+          <p class="note">This is a simulated provider for the project demo. No real card is used. Card numbers ending in 0002 are declined.</p>
+        </div>
+      </div>
+    </div>
+    <aside class="side">${countdown(h.expiresAt)}</aside>
+  </section>`;
+}
+
+/** SCR-13b / SCR-14b: the bank said no. The seats are still held, so Kenji picks again. */
 function declinedView(st) {
   const { h, p } = st;
-  return html`<section class="screen">
-    <div><h1 class="title sm">Pay ${baht(h.totalAmount)}</h1><p class="sub">${p.providerKey === 'promptpay' ? 'PromptPay' : 'Credit or debit card'}</p></div>
-    <div class="banner" role="status"><b>The payment did not go through.</b>
-      <p>You were not charged. Your seats are still held for <span data-countdown="${h.expiresAt}"><span data-cd-text>${mmss(h.expiresAt - serverNow())}</span></span>.</p></div>
-    ${countdown(h.expiresAt)}
-    <span class="label">How do you want to pay</span>
-    ${methodRows(h, st)}
-  </section>
-  ${payFooter(h, st, allDown(h))}`;
+  return html`<section class="screen timed">
+    <div class="col">
+      <div class="head"><h1 class="title">Pay ${baht(h.totalAmount)}</h1>
+        <p class="sub">${p.providerKey === 'promptpay' ? 'PromptPay' : 'Credit or debit card'}</p></div>
+      <div class="banner" role="status"><b>The payment did not go through.</b>
+        <p>You were not charged. Your seats are still held for <span data-countdown="${h.expiresAt}"><span data-cd-text>${mmss(h.expiresAt - serverNow())}</span></span>.</p></div>
+      <span class="label">How do you want to pay</span>
+      ${methodRows(h, st)}
+    </div>
+    <aside class="side">${countdown(h.expiresAt)}${payFooter(h, st, allDown(h), false)}</aside>
+  </section>`;
 }
 
 async function checkPay(ctx, rid, pid) {
@@ -159,6 +225,8 @@ export const screens = [
     async enter(ctx, rid, pid) {
       if (!(await loadHeld(ctx, rid))) return;
       ctx.state.p = await api.payment(pid);
+      Object.assign(card, { num: '', exp: '', cvc: '', name: '' });
+      cardTried = false;
     },
     onZero: atZero,
     view(st) {
@@ -167,9 +235,12 @@ export const screens = [
     },
     actions: {
       approve: (ctx, data, rid, pid) => answer(ctx, rid, pid, true),
-      decline: (ctx, data, rid, pid) => answer(ctx, rid, pid, false),
+      fillTest(ctx) { Object.assign(card, TEST_CARD); cardTried = false; },
+      pay(ctx, data, rid, pid) {
+        const p = ctx.state.p;
+        return p.providerKey === 'card' && p.state === 'PENDING' ? cardPay(ctx, rid, pid) : startPay(ctx, rid);
+      },
       choose(ctx, data) { ctx.state.method = data.key; },
-      pay: (ctx, data, rid) => startPay(ctx, rid),
     },
   },
   {
@@ -183,14 +254,20 @@ export const screens = [
     poll: { every: 1000, run: (ctx, rid, pid) => checkPay(ctx, rid, pid) },
     view(st) {
       const slow = Date.now() - st.since > 8000;
-      return html`<section class="screen center">
-        <div class="spinner" role="img" aria-label="Waiting"></div>
-        <h1 class="status-title">Confirming your payment</h1>
-        <p class="status-text">${slow
-          ? 'The bank is taking longer than usual. We are still checking. You will not be charged twice.'
-          : 'Waiting for the bank. This usually takes a few seconds.'}</p>
-        ${countdown(st.h.expiresAt)}
-        <div class="card" style="width:100%;text-align:left"><b>Do not close this page.</b></div>
+      return html`<section class="screen timed">
+        <div class="col">
+          <div class="confirm">
+            <span class="dual" role="img" aria-label="Waiting"><i></i><i></i></span>
+            <h1 class="status-title">Confirming your payment</h1>
+            <p class="status-text">${slow
+              ? 'The bank is taking longer than usual. We are still checking. You will not be charged twice.'
+              : 'Waiting for the bank. This usually takes a few seconds.'}</p>
+          </div>
+        </div>
+        <aside class="side">
+          ${countdown(st.h.expiresAt)}
+          <div class="card note"><b>Do not close this page.</b></div>
+        </aside>
       </section>`;
     },
   },
