@@ -147,7 +147,8 @@ export const slimHeader = (title, meta, artwork) => html`<div class="slim">
   ${artwork ? html`<img src="${artwork}" alt="">` : html`<div class="ph"></div>`}<div><b>${title}</b><span>${meta}</span></div></div>`;
 
 const NAME = customer.charAt(0).toUpperCase() + customer.slice(1);
-const tabOf = (path) => (/^\/(tickets|ticket\/|confirmed\/)/.test(path) ? 'tickets' : /^\/account/.test(path) ? 'account' : 'events');
+// As the design: only the three main pages light a tab; purchase and ticket screens light none.
+const tabOf = (path) => (path === '/events' ? 'events' : path === '/tickets' ? 'tickets' : path === '/account' ? 'account' : '');
 /** The customer top bar drawn above every screen. */
 export const topNav = (path = '') => {
   const on = tabOf(path);
@@ -160,13 +161,14 @@ export const tabBar = () => html``;
 
 /** tone: 'stop' (coral), 'calm' (grey), 'go' (lime). card: [title, text]. primary/secondary: button() options. */
 export function statusScreen({ tone, icon, title, text, card, primary, secondary }) {
-  return html`<section class="screen center">
+  // Design lines 252–271: centred in the page, 520px column, quiet button left and main button right.
+  return html`<section class="screen center result">
     <div class="ring ${tone}">${icon}</div>
     <h1 class="status-title ${tone === 'stop' ? 'stop' : ''}">${title}</h1>
     <p class="status-text">${text}</p>
-    ${card ? html`<div class="card" style="text-align:left;width:100%"><b>${card[0]}</b><p>${card[1]}</p></div>` : ''}
-  </section>
-  <div class="foot">${button(primary)}${secondary ? button({ ...secondary, quiet: true }) : ''}</div>`;
+    ${card ? html`<div class="card result-card"><b>${card[0]}</b><p>${card[1]}</p></div>` : ''}
+    <div class="result-acts ${secondary ? 'two' : ''}">${secondary ? button({ ...secondary, quiet: true }) : ''}${button(primary)}</div>
+  </section>`;
 }
 
 /** A tap on the dark backdrop runs the close action (default: the last button). extra is drawn between the text and the buttons. */

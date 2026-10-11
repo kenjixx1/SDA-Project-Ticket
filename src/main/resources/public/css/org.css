@@ -2,6 +2,12 @@
 .topnav.org{height:64px;padding:0 32px;gap:36px}
 .topnav.org .brand{font-size:15px}
 .topnav.org .who b{width:32px;height:32px}
+/* organizer bar, design lines 40–44: plain dot, "Events" 14px white with a 2px lime line right under the text, Chai in --tx */
+.topnav.org .brand i{animation:none}
+.topnav.org nav{height:auto}
+.topnav.org nav a{font:500 14px/1 var(--f);color:var(--tx);padding:6px 0;box-shadow:none;border-bottom:2px solid transparent}
+.topnav.org nav a.on{color:var(--tx);box-shadow:none;border-bottom-color:var(--ac)}
+.topnav.org .who{color:var(--tx)}
 .org-page{max-width:1120px;margin:0 auto;padding:44px 40px 80px;display:flex;flex-direction:column;gap:26px}
 
 .chip{display:inline-block;font:600 11px/1 var(--fm);letter-spacing:.1em;padding:5px 9px;border-radius:999px;border:1px solid var(--l2);color:var(--mu);white-space:nowrap}
