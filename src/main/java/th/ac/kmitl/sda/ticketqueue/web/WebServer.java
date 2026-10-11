@@ -5,10 +5,12 @@ import io.javalin.http.staticfiles.Location;
 import th.ac.kmitl.sda.ticketqueue.web.fake.DevControls;
 import th.ac.kmitl.sda.ticketqueue.web.fake.FakeBookingGateway;
 import th.ac.kmitl.sda.ticketqueue.web.fake.FakeClock;
+import th.ac.kmitl.sda.ticketqueue.web.fake.FakeOrganizerGateway;
 import th.ac.kmitl.sda.ticketqueue.web.routes.DevRoutes;
 import th.ac.kmitl.sda.ticketqueue.web.routes.EventRoutes;
 import th.ac.kmitl.sda.ticketqueue.web.routes.HoldRoutes;
 import th.ac.kmitl.sda.ticketqueue.web.routes.MeRoutes;
+import th.ac.kmitl.sda.ticketqueue.web.routes.OrgRoutes;
 import th.ac.kmitl.sda.ticketqueue.web.routes.PaymentRoutes;
 import th.ac.kmitl.sda.ticketqueue.web.routes.QueueRoutes;
 import th.ac.kmitl.sda.ticketqueue.web.routes.Reply;
@@ -29,11 +31,17 @@ public final class WebServer {
         // THE SWITCH. When core/ is ready: gateway = new CoreBookingGateway(...); dev = null;
         BookingGateway gateway = fake;
         DevControls dev = fake;
+        // THE SWITCH, organizer side: organizer = new CoreOrganizerGateway(...)
+        OrganizerGateway organizer = new FakeOrganizerGateway(fake);
 
-        create(gateway, dev).start(port);
+        create(gateway, organizer, dev).start(port);
     }
 
     public static Javalin create(BookingGateway gateway, DevControls dev) {
+        return create(gateway, null, dev);
+    }
+
+    public static Javalin create(BookingGateway gateway, OrganizerGateway organizer, DevControls dev) {
         Javalin app = Javalin.create(config -> config.staticFiles.add("/public", Location.CLASSPATH));
         app.get("/api/health", ctx -> ctx.json(Map.of("ok", true)));
         app.exception(GatewayException.class, (e, ctx) -> Reply.error(ctx, gateway, e));
@@ -42,6 +50,9 @@ public final class WebServer {
         HoldRoutes.register(app, gateway);
         PaymentRoutes.register(app, gateway);
         MeRoutes.register(app, gateway);
+        if (organizer != null) {
+            OrgRoutes.register(app, gateway, organizer);
+        }
         if (dev != null) {
             DevRoutes.register(app, gateway, dev);
         }

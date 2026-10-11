@@ -51,8 +51,14 @@ A refusal or error:
 
 ```json
 { "serverNow": 1790823980000, "clockRate": 1,
-  "error": { "code": "NOT_ENOUGH", "message": "Not enough seats left in this tier", "remaining": 1 } }
+  "error": { "code": "NOT_ENOUGH", "message": "Not enough seats left in this tier", "remaining": 1, "field": null } }
 ```
+
+**`field` names the form field the page must mark**, or `null` when the
+refusal is not about one field. The organizer's tier rows name both the row
+and the field: `tiers[1].total` is the seats box of the second tier row
+(SCR-32b). `remaining` is filled only where it means something, like the
+seats left when a hold is refused.
 
 | Status | Means | Page shows |
 |---|---|---|
@@ -91,6 +97,97 @@ paymentId}`. `state` is `HELD`, `CONFIRMED`, `EXPIRED` or `RELEASED`.
 **Story values.** Kenji holds 2 VIP at 10:06:20: `unitPrice` 6500,
 `promotions` `[{"name":"Early Bird −10%","amount":1300}]`, `totalAmount`
 11700, `remainingBefore` 16, `remainingAfter` 14, `expiresAt` 10:16:20.
+
+## Organizer messages (O-01 to O-11)
+
+**The organizer console sends these to the same server, in the same envelope,
+with the header `X-Customer: chai`.** As for the customer, the header is the
+whole of "who is asking"; there is no organizer sign-in (ASM-08). What Chai
+sends must match the event's `organizerId` (E-01). An event that belongs to
+someone else answers **404**, exactly like an event that does not exist (UC-06).
+
+**Analogy.** The same cafe counter with a second menu behind it. Customers
+order from the front menu; the organizer changes what is on it.
+
+**Real example.** Chai lists his events (O-01). Then, at 10:06:20, he reads the
+live figures for The 1975 Bangkok (O-11): 31,208 waiting, VIP 484 sold and 16
+left.
+
+| # | Method and path | Body | Answer `data` | Status | Use case | Requirements |
+|---|---|---|---|---|---|---|
+| O-01 | `GET /api/org/events` | — | `OrgEventRow[]` | 200 | UC-05, UC-06 trigger | FR-23 |
+| O-02 | `POST /api/org/events` | `EventDetails` | `OrgEvent` | 201 | UC-05 steps 1–2 | FR-23 |
+| O-03 | `GET /api/org/events/{eventId}` | — | `OrgEvent` | 200 | UC-06 step 1 | FR-23, FR-24 |
+| O-04 | `PATCH /api/org/events/{eventId}` | `EventDetails` | `OrgEvent` | 200 | UC-06 | FR-23, FR-26 |
+| O-05 | `PUT /api/org/events/{eventId}/tiers` | `TierList` | `OrgEvent` | 200 | UC-05 steps 3–4 | FR-24 |
+| O-06 | `POST /api/org/events/{eventId}/tiers` | `TierInput` | `OrgEvent` | 201 | UC-06 | FR-24, FR-27 |
+| O-07 | `PATCH /api/org/events/{eventId}/tiers/{tierId}` | `TierInput` | `OrgEvent` | 200 | UC-06 | FR-26, FR-27, FR-28 |
+| O-08 | `POST /api/org/events/{eventId}/publish` | — | `OrgEvent` | 200 | UC-05 steps 5–6 | FR-25 |
+| O-09 | `PUT /api/org/events/{eventId}/rate` | `RateInput` | `OrgEvent` | 200 | UC-06 | FR-30 |
+| O-10 | `POST /api/org/events/{eventId}/close` | — | `OrgEvent` | 200 | UC-06, ext 4a | FR-29 |
+| O-11 | `GET /api/org/events/{eventId}/dashboard` | — | `Dashboard` | 200 | UC-07 | FR-31 – FR-34 |
+
+**The four request shapes.**
+
+- `EventDetails` = `{name, venue, eventDateTime, saleOpensAt, admitPerSecond}`.
+- `TierInput` = `{name, price, total}`. `price` is whole baht: `6500` is ฿6,500.
+- `TierList` = `{tiers: [TierInput, ...]}`. O-05 replaces every tier at once.
+- `RateInput` = `{admitPerSecond}`.
+
+A field left out means "not given": on O-04 and O-07 what is not sent keeps its
+current value. Times are epoch milliseconds in Bangkok time, as everywhere else.
+
+**The three reply shapes.**
+
+- `OrgEventRow` = `{eventId, name, venue, eventDateTime, saleOpensAt, state, sold, total}`.
+- `OrgEvent` = `{eventId, name, venue, eventDateTime, saleOpensAt, state, admitPerSecond, tiers, heldNow, waiting, closedAt}`.
+- `Dashboard` = `{eventId, name, state, waiting, admitPerSecond, tiers, all, revenue, closedAt}`.
+
+`tiers` is a list of `OrgTier` = `{tierId, name, price, total, held, sold,
+remaining}`. In every tier `held + sold + remaining == total`, always, and
+`held + sold ≤ total` — that is INV-01, the no-overselling rule (FR-28 protects
+it). `held` is not sold and not available: it is inside somebody's 10 minutes.
+`waiting` is the number of people in the queue right now, `heldNow` is the sum
+of `held`. In `Dashboard`, `all` is the sum row — `tierId` `"all"`, `name`
+`"All"`, `price` 0 — and `revenue` counts confirmed orders only, in baht.
+`closedAt` is `null` until the event is `CLOSED`.
+
+**The six states.** `DRAFT → SCHEDULED → ON_SALE → CLOSING → CLOSED`, plus
+`CANCELLED` in place of any of them.
+
+| State | Plain meaning | What a customer sees |
+|---|---|---|
+| `DRAFT` | Chai is still building it. | Nothing. A draft answers **404**, like a missing event |
+| `SCHEDULED` | Published; the sale time has not come. | The event, priced, not yet on sale |
+| `ON_SALE` | The sale is open. | Selling, or sold out |
+| `CLOSING` | No new buyers; the holds already made are finishing. | Read as closed (SCR-05e) |
+| `CLOSED` | No seat is held any more. `closedAt` is stamped. | SALE CLOSED |
+| `CANCELLED` | The event was called off. | Hidden from the list; its tickets read CANCELLED |
+
+**Every refusal names the field that caused it.** `i` in a field name is the
+row, counted from 0; the second tier row is `tiers[1]`.
+
+| Status | Code | Field | Message | When |
+|---|---|---|---|---|
+| 400 | `REQUIRED` | `name`, `venue`, `eventDateTime` or `saleOpensAt` | `Required` | The field is missing or empty (O-02, O-04) |
+| 400 | `TOO_LONG` | `name` | `Up to 40 characters` | Longer than 40 (O-02, O-04) |
+| 400 | `TOO_LONG` | `venue` | `Up to 30 characters` | Longer than 30 (O-02, O-04) |
+| 400 | `SALE_IN_PAST` | `saleOpensAt` | `The sale must open in the future.` | The sale time is not in the future (O-02, O-04) |
+| 400 | `SALE_AFTER_EVENT` | `saleOpensAt` | `The sale must open before the event.` | The sale time is after the event (O-02, O-04) |
+| 400 | `RATE_TOO_LOW` | `admitPerSecond` | `Must be at least 1.` | The rate is missing or below 1 (O-02, O-09) |
+| 400 | `TOO_MANY_TIERS` | `tiers` | `Up to 8 tiers.` | A ninth tier (O-05, O-06) |
+| 400 | `TIER_NAME_REQUIRED` | `tiers[i].name`, or `name` on O-06 and O-07 | `Tier 2 · Name is required.` | The row has no name. A nameless row is named by its number |
+| 400 | `PRICE_NEGATIVE` | `tiers[i].price`, or `price` | `VIP · Price cannot be below ฿0.` | The price is missing or below 0 |
+| 400 | `SEATS_ZERO` | `tiers[i].total`, or `total` | `Zone B · Seats must be more than 0.` | The seats are missing or 0 |
+| 404 | `NOT_FOUND` | — | `Event not found` | Another organizer's event, or a missing one |
+| 404 | `NOT_FOUND` | — | `Tier not found` | No such tier in the event |
+| 409 | `NOT_DRAFT` | — | `Only a draft can do this.` | O-05 or O-08 after the event was published |
+| 409 | `NO_TIERS` | — | `An event needs at least one tier before it can be published.` | O-08 with no tier defined (FR-25) |
+| 409 | `EVENT_LOCKED` | — | `This event can no longer be changed.` | O-04, O-06, O-07 or O-09 on a closing or closed event |
+| 409 | `EVENT_LOCKED` | `saleOpensAt` | `The sale time cannot change once the sale is on.` | O-04 changes the sale time while `ON_SALE` |
+| 409 | `PRICE_FROZEN` | `price` | `Prices are frozen while the sale is on, so no customer sees a price change mid-purchase.` | O-07 changes a price while `ON_SALE` (FR-26, ext 3a) |
+| 409 | `BELOW_HELD_SOLD` | `total` | `VIP: 484 sold and 2 held. Cannot reduce below 486.` `remaining` is 486 | O-07 lowers a tier below held + sold (FR-28, ext 3b) |
+| 409 | `NOT_ON_SALE` | — | `Only a sale that is on can be closed.` | O-10 before the sale opens, or twice (FR-29) |
 
 ## 9.5 Demo-only messages
 

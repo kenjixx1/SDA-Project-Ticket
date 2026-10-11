@@ -37,6 +37,7 @@ public final class Reply {
         err.put("code", e.code);
         err.put("message", e.getMessage());
         err.put("remaining", e.remaining);
+        err.put("field", e.field);
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("serverNow", g.now());
         body.put("clockRate", g.clockRate());
