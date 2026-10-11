@@ -10,7 +10,7 @@ import th.ac.kmitl.sda.ticketqueue.core.event.PaymentCompleted;
 import th.ac.kmitl.sda.ticketqueue.core.registry.PluginRegistry;
 
 /**
- * UC-03 · Checkout & Pay.
+ * Checkout and pay.
  *
  * <p>Calling the provider is a direct call — Kenji is waiting for the answer.
  * What happens after "authorised" is an event: {@link PaymentCompleted}.
@@ -38,7 +38,7 @@ public final class CheckoutService {
 
         switch (reservation.state()) {
             case CONFIRMED:
-                return CheckoutResult.CONFIRMED;  // a double tap; charged once (FR-18)
+                return CheckoutResult.CONFIRMED;  // a double tap; charged once
             case EXPIRED:
             case RELEASED:
                 return CheckoutResult.HOLD_EXPIRED;

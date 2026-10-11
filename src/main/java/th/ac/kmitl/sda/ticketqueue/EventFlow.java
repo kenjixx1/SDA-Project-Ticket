@@ -9,12 +9,15 @@ import th.ac.kmitl.sda.ticketqueue.core.order.CheckoutService;
 import th.ac.kmitl.sda.ticketqueue.core.order.HoldExpiryScheduler;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationService;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationStore;
+import th.ac.kmitl.sda.ticketqueue.core.queue.AdmissionScheduler;
+import th.ac.kmitl.sda.ticketqueue.core.queue.QueueService;
 import th.ac.kmitl.sda.ticketqueue.core.registry.PluginRegistry;
 import th.ac.kmitl.sda.ticketqueue.plugin.payment.PromptPayPlugin;
 
 /**
  * Wires the whole system together. This is the only class that names a
- * plug-in, and it sits outside {@code core/} on purpose (NFR-08).
+ * plug-in, and it sits outside {@code core/} on purpose: the core never
+ * knows a plug-in by name.
  *
  * <p>Adding a payment method = write the plug-in, add one
  * {@code registry.register(...)} line here. Zero core files change.
@@ -24,6 +27,8 @@ public final class EventFlow {
     private final EventBus bus = new EventBus();
     private final PluginRegistry registry = new PluginRegistry();
     private final ReservationStore store = new ReservationStore();
+    private final QueueService queue;
+    private final AdmissionScheduler admission;
     private final InventoryService inventory;
     private final ReservationService reservations;
     private final CheckoutService checkout;
@@ -33,16 +38,25 @@ public final class EventFlow {
     public EventFlow(Clock clock) {
         registry.register(new PromptPayPlugin());
 
-        inventory = new InventoryService(store, bus, clock);
+        queue = new QueueService(bus, clock, this::soldOut);
+        admission = new AdmissionScheduler(queue, bus, clock);
+        inventory = new InventoryService(store, queue, bus, clock);
         reservations = new ReservationService(store, bus, registry, clock);
         checkout = new CheckoutService(store, reservations, registry, bus, clock);
         expiry = new HoldExpiryScheduler(store, reservations);
-        events = new EventService(inventory);
+        events = new EventService(inventory, queue);
+    }
+
+    /** Lets the queue ask "is this event sold out?" without depending on inventory's class. */
+    private boolean soldOut(String eventId) {
+        return inventory.soldOut(eventId);
     }
 
     public EventBus bus()                   { return bus; }
     public PluginRegistry registry()        { return registry; }
     public ReservationStore store()         { return store; }
+    public QueueService queue()             { return queue; }
+    public AdmissionScheduler admission()   { return admission; }
     public InventoryService inventory()     { return inventory; }
     public ReservationService reservations() { return reservations; }
     public CheckoutService checkout()       { return checkout; }

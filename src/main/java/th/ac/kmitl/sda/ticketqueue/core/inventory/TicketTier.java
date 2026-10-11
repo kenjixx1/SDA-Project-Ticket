@@ -3,9 +3,9 @@ package th.ac.kmitl.sda.ticketqueue.core.inventory;
 import th.ac.kmitl.sda.ticketqueue.contract.Money;
 
 /**
- * E-02 · One price band within an event: VIP ฿6,500, 500 seats.
+ * One price band within an event: VIP ฿6,500, 500 seats.
  *
- * <p>The counters change only through {@link InventoryService} (R-E02-4). The
+ * <p>The counters change only through {@link InventoryService}. The
  * changing methods are package-private, so nothing outside this package can
  * even call them.
  */
@@ -21,7 +21,7 @@ public final class TicketTier {
 
     TicketTier(String tierId, String eventId, String name, Money price, int totalQuantity) {
         if (totalQuantity <= 0) {
-            throw new IllegalArgumentException("A tier needs at least one seat (R-E02-1)");
+            throw new IllegalArgumentException("A tier needs at least one seat");
         }
         this.tierId = tierId;
         this.eventId = eventId;

@@ -412,9 +412,9 @@ th.ac.kmitl.sda.ticketqueue
 │   │   ├── HoldExpired.java
 │   │   └── PaymentVoided.java
 │   ├── queue/                        the waiting room
-│   │   ├── QueueToken.java
-│   │   ├── QueueService.java             issue · position · reconnect
-│   │   └── AdmissionScheduler.java       admits a batch per second → UserAdmitted
+│   │   ├── QueueToken.java               WAITING → ADMITTED → SPENT / EXPIRED
+│   │   ├── QueueService.java             join · position · reconnect · claim for a hold
+│   │   └── AdmissionScheduler.java       admits a FIFO batch per second → UserAdmitted
 │   ├── inventory/
 │   │   └── InventoryService.java     ◄── the ONLY writer of held/sold → TicketHeld
 │   ├── order/
@@ -452,15 +452,21 @@ th.ac.kmitl.sda.ticketqueue
     └── SalesDashboardService.java    UC-07 · listens to every event
 ```
 
-**Built so far.** Slice 1 of `03-prd.md` §3.6: `core/event`, `core/inventory`,
-`core/order` (without `PricingService`), `core/registry`, `contract/` (payment
-only), the simulated `PromptPayPlugin`, `admin/EventService` and `EventFlow`.
-`src/README.md` lists what is built and what the tests prove.
+**Built so far.** Slices 1 and 2 of `03-prd.md` §3.6: `core/event`,
+`core/queue`, `core/inventory`, `core/order` (without `PricingService`),
+`core/registry`, `contract/` (payment only), the simulated `PromptPayPlugin`,
+`admin/EventService` and `EventFlow`. `src/README.md` lists what is built and
+what the tests prove.
+
+**How the queue hands over to the hold.** `InventoryService` asks
+`QueueService.claimForHold` inside its atomic hold: the token must be
+`ADMITTED` for this event, and the hold moves it to `SPENT` (locked
+decision 3). This is a direct request, not an event — the hold needs the
+answer before it can continue.
 
 **Event broker implementation.** `EventBus` is a small in-process class: a
-map from event type (the channel) to its listeners. No message-broker product is needed to
-demonstrate the style. Whether a real one is used in production is an
-Operation question (§6.8).
+map from event type (the channel) to its listeners. No message-broker product
+is needed to demonstrate the style.
 
 ### The one dependency rule
 
@@ -518,19 +524,13 @@ An architecture document that lists only benefits has not made any choices.
 
 ---
 
-## 6.8 What is not designed yet
+## 6.8 Limits of this design
 
-Honest gaps, so they are not mistaken for oversights.
+Stated plainly, so they are not mistaken for oversights.
 
-- **Deployment topology.** The in-process `EventBus` could later become a
-  real message broker — slide 11.1 names RabbitMQ and ActiveMQ — running on
-  its own machines. The slide also notes that cloud platforms suit EDA well,
-  because their elastic infrastructure matches the style. How many instances of
-  what, and where, belongs to Deliverable 5 (Operation).
-- **The queue's own storage.** It must be fast and it must survive a restart
-  without losing positions. The choice is an Operation concern.
-- **Monitoring and alerting.** NFR-04 states 99.9% availability; how it is
-  observed is Operation.
-- **Load-test harness.** The NFR-01 and NFR-02 fitness functions are defined in
-  `02-requirements.md`. Building them is part of Deliverable 4
-  (Implementation), slice 1.
+- **One process.** The whole system runs as a single Java program on one
+  machine. It is not split across servers.
+- **Data in memory.** Queue positions, holds and orders are kept in memory and
+  are lost when the program stops.
+- **No monitoring.** NFR-04 sets 99.9% availability; this design does not
+  include a way to observe it.

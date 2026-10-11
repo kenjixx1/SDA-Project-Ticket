@@ -6,8 +6,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Every reservation, by id. Stands in for the single database (§6.2 data
- * topology). The database is the truth; events are only announcements.
+ * Every reservation, by id. Stands in for the single shared database. The
+ * database is the truth; events are only announcements.
  */
 public final class ReservationStore {
 

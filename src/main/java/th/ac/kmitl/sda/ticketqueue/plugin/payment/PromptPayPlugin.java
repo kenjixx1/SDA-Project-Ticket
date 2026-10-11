@@ -8,10 +8,10 @@ import th.ac.kmitl.sda.ticketqueue.contract.PaymentRequest;
 import th.ac.kmitl.sda.ticketqueue.contract.PaymentResult;
 
 /**
- * PromptPay, simulated (ASM-04). Always authorises. No network, no keys.
+ * PromptPay, simulated. Always authorises. No network, no keys.
  *
  * <p>It honours the idempotency key like a real provider would: the same key
- * returns the same reference, so a double tap is one payment (R-E05-2).
+ * returns the same reference, so a double tap is one payment.
  */
 public final class PromptPayPlugin implements PaymentProvider {
 

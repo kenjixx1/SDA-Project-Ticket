@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * NFR-08 · the structural fitness function.
+ * Checks the shape of the code, not its behaviour.
  *
  * <p>The core system must never import a plug-in. If this fails, someone has
  * written {@code if (method.equals("stripe"))} somewhere in the core.

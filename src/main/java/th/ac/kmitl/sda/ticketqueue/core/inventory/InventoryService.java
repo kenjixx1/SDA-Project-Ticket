@@ -14,29 +14,33 @@ import th.ac.kmitl.sda.ticketqueue.core.event.OrderConfirmed;
 import th.ac.kmitl.sda.ticketqueue.core.event.TicketHeld;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationStore;
+import th.ac.kmitl.sda.ticketqueue.core.queue.ClaimResult;
+import th.ac.kmitl.sda.ticketqueue.core.queue.QueueService;
 
 /**
- * The ONLY writer of {@code heldQuantity} and {@code soldQuantity} (INV-01).
+ * The ONLY writer of {@code heldQuantity} and {@code soldQuantity}, so seats
+ * can never be oversold.
  *
  * <p>Takes the atomic hold and publishes {@link TicketHeld}. Listens to
  * {@link HoldExpired} (seats go back) and {@link OrderConfirmed} (held → sold).
  */
 public final class InventoryService {
 
-    /** FR-11 · ASM-02. */
+    /** The most tickets one order may hold. */
     public static final int ORDER_LIMIT = 4;
 
     private final Map<String, TicketTier> tiers = new ConcurrentHashMap<>();
-    private final Set<String> usedTokens = ConcurrentHashMap.newKeySet();
     private final Set<String> settled = ConcurrentHashMap.newKeySet();
     private final AtomicLong nextReservation = new AtomicLong(1001);
     private final AtomicLong nextTier = new AtomicLong(1);
     private final ReservationStore store;
+    private final QueueService queue;
     private final EventBus bus;
     private final Clock clock;
 
-    public InventoryService(ReservationStore store, EventBus bus, Clock clock) {
+    public InventoryService(ReservationStore store, QueueService queue, EventBus bus, Clock clock) {
         this.store = store;
+        this.queue = queue;
         this.bus = bus;
         this.clock = clock;
         bus.subscribe(HoldExpired.class, this::onHoldExpired);
@@ -65,12 +69,21 @@ public final class InventoryService {
                 .toList();
     }
 
+    /** True when every tier of the event has nothing left. */
+    public boolean soldOut(String eventId) {
+        List<TicketTier> eventTiers = tiersOf(eventId);
+        return !eventTiers.isEmpty() && eventTiers.stream().allMatch(t -> t.remaining() == 0);
+    }
+
     /**
-     * UC-02 · the atomic hold (R-E04-1).
+     * The atomic hold.
      *
      * <p>Checking what is left, counting the seats as held and saving the
      * reservation all happen inside one lock on the tier. No two requests can
-     * both read "10 left" before either writes. 2 or 0 — never 1 (R-E04-2).
+     * both read "10 left" before either writes. 2 or 0 — never 1.
+     *
+     * <p>Only an admitted queue token may hold, and holding spends it. A
+     * refused hold leaves the token unspent.
      */
     public HoldResult hold(String tokenId, String tierId, int quantity) {
         if (quantity < 1 || quantity > ORDER_LIMIT) {
@@ -82,7 +95,11 @@ public final class InventoryService {
             if (tier.remaining() < quantity) {
                 return HoldResult.refused(HoldResult.Outcome.NOT_ENOUGH_SEATS);
             }
-            if (!usedTokens.add(tokenId)) {
+            ClaimResult claim = queue.claimForHold(tokenId, tier.eventId());
+            if (claim == ClaimResult.NOT_ADMITTED) {
+                return HoldResult.refused(HoldResult.Outcome.NOT_ADMITTED);
+            }
+            if (claim == ClaimResult.ALREADY_USED) {
                 return HoldResult.refused(HoldResult.Outcome.TOKEN_ALREADY_USED);
             }
             reservation = new Reservation("R-" + nextReservation.getAndIncrement(), tokenId,
@@ -96,14 +113,14 @@ public final class InventoryService {
         return new HoldResult(HoldResult.Outcome.HELD, reservation);
     }
 
-    /** R-E04-5 · the seats are back on sale. */
+    /** The hold expired: the seats are back on sale. */
     private void onHoldExpired(HoldExpired event) {
         if (settled.add(event.reservationId())) {  // idempotent: twice = once
             tier(event.tierId()).release(event.quantity());
         }
     }
 
-    /** R-E04-4 · held goes down and sold goes up by the same amount, in one step. */
+    /** The order is paid: held goes down and sold goes up by the same amount, in one step. */
     private void onOrderConfirmed(OrderConfirmed event) {
         if (settled.add(event.reservationId())) {
             tier(event.tierId()).sell(event.quantity());

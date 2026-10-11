@@ -16,6 +16,15 @@ of the solution, not people with goals.
 
 ---
 
+### Admission window
+How long an admitted customer has to place a hold before their queue token
+expires. **5 minutes** (ASM-07).
+
+*Like a restaurant table held for you when your number is called. Wander off
+too long and the table goes to the next person.*
+
+---
+
 ### Admission rate
 How many customers the waiting room lets into the buying part each second.
 Chai sets it. In our story it is **200 per second**.

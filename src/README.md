@@ -1,8 +1,13 @@
 # src — Implementation (Deliverable 4)
 
-**Slice 1 is built:** the core booking engine — atomic hold, 10-minute
-expiry, checkout with a simulated PromptPay, and the events that connect them.
-Slices 2 (queue) and 3 (more plug-ins, tickets, dashboard) are not built yet.
+**Slices 1 and 2 are built:**
+
+- **Slice 1 — the booking engine:** atomic hold, 10-minute expiry, checkout
+  with a simulated PromptPay, and the events that connect them.
+- **Slice 2 — the waiting room:** join, place in line, FIFO admission in
+  batches, and the hand-over from an admitted token to a hold.
+
+Slice 3 (more plug-ins, tickets, dashboard) is not built yet.
 
 ## How to run
 
@@ -10,7 +15,7 @@ Needs only a JDK, version 17 or newer. No Maven, no Gradle, no libraries.
 
 ```bash
 ./run.sh test   # compile and run all tests
-./run.sh demo   # Kenji buys 2 × VIP; another fan's hold expires
+./run.sh demo   # Kenji queues behind 4,181 fans, buys 2 × VIP; a fan's hold expires
 ```
 
 Run from the repository root. Compiled classes go to `out/` (git-ignored).
@@ -19,14 +24,16 @@ Run from the repository root. Compiled classes go to `out/` (git-ignored).
 
 | Part | Class | Requirement |
 |---|---|---|
-| Event channel | `core/event/EventBus` + 5 events: `TicketHeld`, `PaymentCompleted`, `OrderConfirmed`, `HoldExpired`, `PaymentVoided` | §6.2 |
-| Atomic hold, the only writer of held/sold | `core/inventory/InventoryService` | FR-08 … FR-11, INV-01 |
+| Event broker | `core/event/EventBus` + 6 events: `UserAdmitted`, `TicketHeld`, `PaymentCompleted`, `OrderConfirmed`, `HoldExpired`, `PaymentVoided` | §6.2 |
+| Waiting room: join, place, reconnect | `core/queue/QueueService` | FR-01 … FR-04, FR-06 |
+| FIFO admission in batches, idle expiry | `core/queue/AdmissionScheduler` | FR-05, FR-30, NFR-09, ASM-07 |
+| Atomic hold, the only writer of held/sold; needs an admitted token | `core/inventory/InventoryService` | FR-08 … FR-11, INV-01, locked decision 3 |
 | Reservation lifecycle, confirm-or-expire race | `core/order/ReservationService` | FR-16, FR-17, R-E04-6 |
 | 10-minute expiry that returns seats | `core/order/HoldExpiryScheduler` | FR-12 |
 | Checkout, charge once | `core/order/CheckoutService` | FR-15, FR-18, FR-19 |
 | Plug-in lookup by key | `core/registry/PluginRegistry` | NFR-08 |
 | Simulated PromptPay | `plugin/payment/PromptPayPlugin` | ASM-04 |
-| Create event and tiers | `admin/EventService` | FR-23 … FR-25 |
+| Create event and tiers, open the sale, set the admission rate | `admin/EventService` | FR-23 … FR-25, FR-30 |
 | Wiring (the only class that names a plug-in) | `EventFlow` | NFR-08 |
 
 ## What the tests prove
@@ -38,6 +45,8 @@ Run from the repository root. Compiled classes go to `out/` (git-ignored).
 | `HoldRulesTest` | 4-ticket limit, no partial holds, one token buys once, server-stamped 10 minutes |
 | `HoldExpiryTest` | Seats return at exactly 10:00, not 9:59 |
 | `CheckoutTest` | Happy path, double tap charged once, slow bank voided, declined card keeps the hold |
+| `QueueTest` | Kenji behind 4,181 fans is at 4,182; ten tabs get one token; reconnect keeps the place; 10,000 fans admitted in exactly the order they joined (NFR-09); a waiting token cannot hold; idle tokens expire; join → pay end to end |
+| `QueueLoadTest` | 40,000 fans join at once: every one gets a token, inside the NFR-03 time limits (NFR-01, measured in process) |
 | `ArchitectureTest` | No class in `core/` imports `plugin/` (NFR-08) |
 
 The overselling test has been checked against a broken hold: with the lock
@@ -45,11 +54,12 @@ removed, 42 buyers got the last 10 seats and the test failed.
 
 ## Not built yet
 
-- `core/queue/` — waiting room and `UserAdmitted` (Slice 2)
 - `PricingRule` plug-ins and `PricingService` (Slice 3)
 - `ticket/` — digital tickets and `TicketIssued` (Slice 3)
 - `SalesDashboardService` (Slice 3)
-- A real database and a web API. Everything is in memory.
+- A database and a web API. Everything is in memory.
+
+`QueueLoadTest` measures the code in one Java process, not over a network.
 
 ## Package layout
 

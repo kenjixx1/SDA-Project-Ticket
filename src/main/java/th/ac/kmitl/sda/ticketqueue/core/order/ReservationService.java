@@ -43,12 +43,12 @@ public final class ReservationService {
         if (!reservation.moveState(ReservationState.HELD, ReservationState.EXPIRED)) {
             return false;  // already confirmed or already expired
         }
-        bus.publish(new HoldExpired(reservation.reservationId(),
+        bus.publish(new HoldExpired(reservation.reservationId(), reservation.tokenId(),
                                     reservation.tierId(), reservation.quantity()));
         return true;
     }
 
-    /** R-E04-6: confirm only while still HELD and before expiresAt. Otherwise void. */
+    /** Confirm only while still HELD and before expiresAt. Otherwise void the payment. */
     private void onPaymentCompleted(PaymentCompleted payment) {
         Reservation reservation = store.find(payment.reservationId()).orElseThrow();
         PaymentProvider provider = registry.payment(payment.providerKey());
@@ -61,7 +61,7 @@ public final class ReservationService {
             return;
         }
         if (reservation.state() == ReservationState.CONFIRMED) {
-            return;  // the same payment arrived twice; it was already counted (FR-18)
+            return;  // the same payment arrived twice; it was already counted
         }
         expireIfDue(reservation);  // the hold ran out while the bank was answering
         provider.voidAuthorisation(payment.providerReference());

@@ -10,9 +10,16 @@ import th.ac.kmitl.sda.ticketqueue.contract.Money;
 import th.ac.kmitl.sda.ticketqueue.core.event.DomainEvent;
 import th.ac.kmitl.sda.ticketqueue.core.inventory.HoldResult;
 import th.ac.kmitl.sda.ticketqueue.core.inventory.TicketTier;
+import th.ac.kmitl.sda.ticketqueue.core.event.UserAdmitted;
 import th.ac.kmitl.sda.ticketqueue.core.order.CheckoutResult;
+import th.ac.kmitl.sda.ticketqueue.core.queue.JoinResult;
+import th.ac.kmitl.sda.ticketqueue.core.queue.QueueStatus;
+import th.ac.kmitl.sda.ticketqueue.core.queue.QueueTokenState;
 
-/** Runs the story from the docs: Chai sets up the sale, Kenji buys 2 × VIP, someone else's hold expires. */
+/**
+ * Runs the story from the docs: Chai sets up the sale, Kenji queues behind
+ * 4,181 fans, buys 2 × VIP, and someone else's hold expires.
+ */
 public final class EventFlowDemo {
 
     public static void main(String[] args) {
@@ -20,7 +27,7 @@ public final class EventFlowDemo {
                 ZonedDateTime.of(2026, 10, 1, 10, 4, 40, 0, SettableClock.BANGKOK).toInstant());
         EventFlow app = new EventFlow(clock);
 
-        title("Chai creates the event (UC-05)");
+        title("Chai creates the event");
         Event concert = app.events().createEvent("BLACKPINK — Bangkok", "Impact Arena",
                 LocalDate.of(2026, 11, 14), LocalDateTime.of(2026, 10, 1, 10, 0));
         TicketTier vip = app.events().addTier(concert.eventId(), "VIP", Money.baht(6_500), 500);
@@ -29,22 +36,51 @@ public final class EventFlowDemo {
         app.events().openSale(concert.eventId());
         printTiers(app, concert);
 
-        title("Kenji holds 2 × VIP (UC-02)");
-        HoldResult kenji = app.inventory().hold("token-kenji", vip.tierId(), 2);
+        title("4,181 fans join first, then Kenji");
+        String firstFan = null;
+        for (int i = 1; i <= 4_181; i++) {
+            String token = app.queue().join("fan-" + i, concert.eventId()).token().tokenId();
+            firstFan = firstFan == null ? token : firstFan;
+        }
+        JoinResult joined = app.queue().join("kenji", concert.eventId());
+        String kenjiToken = joined.token().tokenId();
+        QueueStatus place = app.queue().status(kenjiToken);
+        say("join: " + joined.outcome() + " · token " + kenjiToken
+                + " · position " + String.format("%,d", place.position())
+                + " · about " + place.estimatedWait().toSeconds() + " s at "
+                + app.queue().admissionRate(concert.eventId()) + " per second");
+        say("Kenji opens a second tab: " + app.queue().join("kenji", concert.eventId()).outcome()
+                + ", same token " + app.queue().join("kenji", concert.eventId()).token().tokenId());
+
+        title("The waiting room admits a batch every second");
+        int batches = 0;
+        while (app.queue().token(kenjiToken).state() == QueueTokenState.WAITING) {
+            app.admission().admitBatch(concert.eventId());
+            batches++;
+            if (batches % 7 == 0 || app.queue().token(kenjiToken).state() != QueueTokenState.WAITING) {
+                say("after batch " + batches + ": Kenji is "
+                        + describe(app.queue().status(kenjiToken)));
+            }
+        }
+
+        title("Kenji tries 5 seats (the limit is 4)");
+        say("hold: " + app.inventory().hold(kenjiToken, vip.tierId(), 5).outcome());
+
+        title("Kenji holds 2 × VIP");
+        HoldResult kenji = app.inventory().hold(kenjiToken, vip.tierId(), 2);
         say("hold: " + kenji.outcome() + " · " + kenji.reservation()
                 + " · expires " + time(clock, kenji.reservation().expiresAt()));
         say("VIP now: " + vip);
 
-        title("Kenji tries 5 seats with another token (FR-11)");
-        say("hold: " + app.inventory().hold("token-kenji-2", vip.tierId(), 5).outcome());
+        say("the same token again: " + app.inventory().hold(kenjiToken, vip.tierId(), 2).outcome());
 
-        title("Kenji pays with PromptPay (UC-03)");
+        title("Kenji pays with PromptPay");
         CheckoutResult paid = app.checkout().checkout(kenji.reservation().reservationId(), "promptpay");
         say("checkout: " + paid + " · total " + kenji.reservation().totalAmount());
         say("VIP now: " + vip);
 
-        title("Another fan holds 2 × VIP and walks away");
-        HoldResult walkAway = app.inventory().hold("token-fan", vip.tierId(), 2);
+        title("Fan #1 holds 2 × VIP and walks away");
+        HoldResult walkAway = app.inventory().hold(firstFan, vip.tierId(), 2);
         say("hold: " + walkAway.outcome() + " · VIP now: " + vip);
         clock.advance(Duration.ofMinutes(10));
         say("… 10 minutes later (" + time(clock, clock.instant()) + "), the expiry sweep runs");
@@ -53,8 +89,17 @@ public final class EventFlowDemo {
         say("trying to pay now: "
                 + app.checkout().checkout(walkAway.reservation().reservationId(), "promptpay"));
 
-        title("Every event on the channel, in order");
+        title("Every event through the broker, in order");
+        long admissions = 0;
         for (DomainEvent e : app.bus().history()) {
+            if (e instanceof UserAdmitted) {
+                admissions++;
+                continue;
+            }
+            if (admissions > 0) {
+                say(String.format("UserAdmitted × %,d", admissions));
+                admissions = 0;
+            }
             say(e.toString());
         }
     }
@@ -65,6 +110,12 @@ public final class EventFlowDemo {
         for (TicketTier tier : app.inventory().tiersOf(concert.eventId())) {
             say(tier.toString());
         }
+    }
+
+    private static String describe(QueueStatus status) {
+        return status.state() == QueueTokenState.WAITING
+                ? String.format("at position %,d", status.position())
+                : status.state().toString();
     }
 
     private static String time(SettableClock clock, java.time.Instant instant) {

@@ -15,6 +15,8 @@ public final class TestRunner {
             HoldExpiryTest.class,
             CheckoutTest.class,
             PaymentExpiryRaceTest.class,
+            QueueTest.class,
+            QueueLoadTest.class,
             ArchitectureTest.class);
 
     public static void main(String[] args) throws Exception {

@@ -8,7 +8,7 @@ import th.ac.kmitl.sda.ticketqueue.core.order.CheckoutResult;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 
-/** FR-12 · an abandoned hold gives its seats back after exactly ten minutes. */
+/** An abandoned hold gives its seats back after exactly ten minutes. */
 public final class HoldExpiryTest {
 
     @Test
@@ -16,7 +16,8 @@ public final class HoldExpiryTest {
         SettableClock clock = Fixtures.clock();
         EventFlow app = new EventFlow(clock);
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
 
         clock.advance(Duration.ofMinutes(9).plusSeconds(59));
 
@@ -30,7 +31,8 @@ public final class HoldExpiryTest {
         SettableClock clock = Fixtures.clock();
         EventFlow app = new EventFlow(clock);
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
 
         clock.advance(Duration.ofMinutes(10));
 
@@ -48,7 +50,8 @@ public final class HoldExpiryTest {
         SettableClock clock = Fixtures.clock();
         EventFlow app = new EventFlow(clock);
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
         clock.advance(Duration.ofMinutes(11));
 
         // No sweep has run yet: checkout itself notices the hold is dead.

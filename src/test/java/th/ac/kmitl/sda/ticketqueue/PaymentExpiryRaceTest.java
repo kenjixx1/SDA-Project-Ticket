@@ -16,11 +16,11 @@ import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 import th.ac.kmitl.sda.ticketqueue.plugin.payment.PromptPayPlugin;
 
 /**
- * R-E04-6 under load · payments and the expiry sweep race for the same holds.
+ * Payments and the expiry sweep race for the same holds.
  *
  * <p>Who wins each race differs from run to run. What must never differ:
  * every hold ends either paid-and-sold or expired-and-returned, and money and
- * seats always move together (INV-05, INV-06).
+ * seats always move together.
  */
 public final class PaymentExpiryRaceTest {
 
@@ -45,8 +45,8 @@ public final class PaymentExpiryRaceTest {
         EventFlow app = new EventFlow(clock);
         TicketTier vip = Fixtures.vip(app, 500);
         List<Reservation> holds = new ArrayList<>();
-        for (int i = 0; i < HOLDS; i++) {
-            holds.add(app.inventory().hold("token-" + i, vip.tierId(), 2).reservation());
+        for (String token : Fixtures.admitFans(app, vip, HOLDS)) {
+            holds.add(app.inventory().hold(token, vip.tierId(), 2).reservation());
         }
         clock.advance(Duration.ofMinutes(9).plusSeconds(59));  // one second left
 

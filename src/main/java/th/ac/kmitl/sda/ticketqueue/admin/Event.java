@@ -3,7 +3,7 @@ package th.ac.kmitl.sda.ticketqueue.admin;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/** E-01 · The concert being sold: BLACKPINK at Impact Arena. */
+/** The concert being sold: BLACKPINK at Impact Arena. */
 public final class Event {
 
     private final String eventId;

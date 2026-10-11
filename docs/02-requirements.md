@@ -399,6 +399,7 @@ down rather than hidden.
 | ASM-04 | Payment providers are **simulated** for this project, behind the real interface. | Only the plug-in bodies change; the architecture does not. |
 | ASM-05 | The queue admits customers strictly first-in-first-out. No priority lanes, no presale windows in this version. | Fan-club presale is already anticipated as a `PricingRule` plug-in, but queue priority would be a new mechanism. |
 | ASM-06 | One event's sale at a time is the case being designed for. Concurrent sales are possible but not the design target. | Capacity planning changes; the model does not. |
+| ASM-07 | An admitted customer has **5 minutes** to place a hold. After that the token expires and they must rejoin at the back (UC-01 extension 6a). The brief gives no number. | One constant changes in `AdmissionScheduler`. Cheap. |
 
 ---
 

@@ -11,6 +11,7 @@ import th.ac.kmitl.sda.ticketqueue.core.event.OrderConfirmed;
 import th.ac.kmitl.sda.ticketqueue.core.event.PaymentCompleted;
 import th.ac.kmitl.sda.ticketqueue.core.event.PaymentVoided;
 import th.ac.kmitl.sda.ticketqueue.core.event.TicketHeld;
+import th.ac.kmitl.sda.ticketqueue.core.event.UserAdmitted;
 import th.ac.kmitl.sda.ticketqueue.core.inventory.TicketTier;
 import th.ac.kmitl.sda.ticketqueue.core.order.CheckoutResult;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
@@ -18,14 +19,15 @@ import th.ac.kmitl.sda.ticketqueue.core.order.ReservationState;
 import th.ac.kmitl.sda.ticketqueue.core.registry.UnknownPaymentProviderException;
 import th.ac.kmitl.sda.ticketqueue.plugin.payment.PromptPayPlugin;
 
-/** UC-03 · Checkout & Pay. */
+/** Checkout and pay. */
 public final class CheckoutTest {
 
     @Test
     public void kenjiPays_seatsMoveFromHeldToSold_eventsInOrder() {
         EventFlow app = new EventFlow(Fixtures.clock());
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
 
         CheckoutResult result = app.checkout().checkout(r.reservationId(), "promptpay");
 
@@ -34,7 +36,7 @@ public final class CheckoutTest {
         Check.equal(2, vip.soldQuantity(), "sold");
         List<Class<?>> order = app.bus().history().stream()
                 .<Class<?>>map(DomainEvent::getClass).toList();
-        Check.equal(List.of(TicketHeld.class, PaymentCompleted.class, OrderConfirmed.class),
+        Check.equal(List.of(UserAdmitted.class, TicketHeld.class, PaymentCompleted.class, OrderConfirmed.class),
                 order, "event order");
         Check.invariants(app, vip);
     }
@@ -43,7 +45,8 @@ public final class CheckoutTest {
     public void doubleTapOnPay_chargedOnce() {
         EventFlow app = new EventFlow(Fixtures.clock());
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
 
         app.checkout().checkout(r.reservationId(), "promptpay");
         CheckoutResult second = app.checkout().checkout(r.reservationId(), "promptpay");
@@ -51,11 +54,11 @@ public final class CheckoutTest {
         Check.equal(CheckoutResult.CONFIRMED, second, "second tap");
         long confirmations = app.bus().history().stream()
                 .filter(e -> e instanceof OrderConfirmed).count();
-        Check.equal(1L, confirmations, "OrderConfirmed count (FR-18)");
+        Check.equal(1L, confirmations, "OrderConfirmed count");
         Check.equal(2, vip.soldQuantity(), "sold");
     }
 
-    /** 05-domain-model §5.4, the version where the bank is slow. */
+    /** The bank is slow: its answer arrives after the hold has expired. */
     @Test
     public void bankAnswersAfterExpiry_paymentVoided_seatsBackOnSale() {
         SettableClock clock = Fixtures.clock();
@@ -63,14 +66,15 @@ public final class CheckoutTest {
         SlowBank bank = new SlowBank(clock, Duration.ofSeconds(8));
         app.registry().register(bank);  // a new plug-in, zero core changes
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
         clock.advance(Duration.ofMinutes(9).plusSeconds(58));  // 10:14:38, 2 s left
 
         CheckoutResult result = app.checkout().checkout(r.reservationId(), "slowbank");
 
         Check.equal(CheckoutResult.HOLD_EXPIRED, result, "checkout");
         Check.equal(ReservationState.EXPIRED, r.state(), "state");
-        Check.that(bank.voided, "the late authorisation was voided (FR-17)");
+        Check.that(bank.voided, "the late authorisation was voided");
         Check.that(!bank.captured, "Kenji was not charged");
         Check.that(app.bus().history().stream().anyMatch(e -> e instanceof PaymentVoided),
                 "PaymentVoided published");
@@ -83,11 +87,12 @@ public final class CheckoutTest {
         EventFlow app = new EventFlow(Fixtures.clock());
         app.registry().register(new DecliningBank());
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
 
         Check.equal(CheckoutResult.DECLINED,
                 app.checkout().checkout(r.reservationId(), "declining"), "first try");
-        Check.equal(ReservationState.HELD, r.state(), "still held (FR-19)");
+        Check.equal(ReservationState.HELD, r.state(), "still held");
         Check.equal(CheckoutResult.CONFIRMED,
                 app.checkout().checkout(r.reservationId(), "promptpay"), "second try");
     }
@@ -96,7 +101,8 @@ public final class CheckoutTest {
     public void capturedOnlyAfterConfirm() {
         EventFlow app = new EventFlow(Fixtures.clock());
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
         app.checkout().checkout(r.reservationId(), "promptpay");
 
         PromptPayPlugin promptPay = (PromptPayPlugin) app.registry().payment("promptpay");
@@ -108,7 +114,8 @@ public final class CheckoutTest {
     public void unknownProviderKey_isRefused() {
         EventFlow app = new EventFlow(Fixtures.clock());
         TicketTier vip = Fixtures.vip(app, 500);
-        Reservation r = app.inventory().hold("token-kenji", vip.tierId(), 2).reservation();
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
         try {
             app.checkout().checkout(r.reservationId(), "paypal");
             throw new AssertionError("expected UnknownPaymentProviderException");

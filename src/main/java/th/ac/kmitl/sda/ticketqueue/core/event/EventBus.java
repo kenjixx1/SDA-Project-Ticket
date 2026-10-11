@@ -13,8 +13,7 @@ import java.util.function.Consumer;
  * one job and may publish a new event.
  *
  * <p>Delivery is in-process and on the publisher's thread, so when
- * {@link #publish} returns, every listener has run. A real message broker could
- * replace this class later without changing any publisher or listener.
+ * {@link #publish} returns, every listener has run.
  */
 public final class EventBus {
 

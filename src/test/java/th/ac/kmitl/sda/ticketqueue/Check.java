@@ -24,7 +24,7 @@ public final class Check {
         }
     }
 
-    /** INV-01, INV-02 and INV-03 for one tier. */
+    /** The seat-count rules for one tier: never oversold, and counters match the reservations. */
     public static void invariants(EventFlow app, TicketTier tier) {
         int held = 0;
         int sold = 0;
@@ -39,8 +39,8 @@ public final class Check {
             }
         }
         that(tier.heldQuantity() + tier.soldQuantity() <= tier.totalQuantity(),
-                "INV-01 broken, oversold: " + tier);
-        equal(held, tier.heldQuantity(), "INV-02 heldQuantity vs HELD reservations");
-        equal(sold, tier.soldQuantity(), "INV-03 soldQuantity vs CONFIRMED reservations");
+                "oversold: " + tier);
+        equal(held, tier.heldQuantity(), "heldQuantity vs HELD reservations");
+        equal(sold, tier.soldQuantity(), "soldQuantity vs CONFIRMED reservations");
     }
 }

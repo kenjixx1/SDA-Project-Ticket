@@ -13,7 +13,7 @@ import th.ac.kmitl.sda.ticketqueue.core.order.CheckoutResult;
 import th.ac.kmitl.sda.ticketqueue.core.order.Reservation;
 
 /**
- * NFR-02 · the fitness function for "no overselling" (INV-01).
+ * No overselling: tickets confirmed must never exceed tickets that exist.
  *
  * <p>Many buyers press "hold" at the same instant for the last VIP seats. The
  * answer must be exactly right on every run, not just most runs.
@@ -22,7 +22,7 @@ public final class NoOversellingTest {
 
     private static final int RUNS = 50;
 
-    /** PRD slice 1: 200 buyers race for the last 10 seats; exactly 10 are sold. */
+    /** 200 buyers race for the last 10 seats; exactly 10 are sold. */
     @Test
     public void twoHundredBuyersOneSeatEach_exactlyTenSold_everyRun() throws Exception {
         for (int run = 1; run <= RUNS; run++) {
@@ -30,7 +30,7 @@ public final class NoOversellingTest {
         }
     }
 
-    /** 02-requirements NFR-02: 200 threads × 2 seats, 10 left → exactly 5 holds. */
+    /** 200 buyers × 2 seats, 10 left → exactly 5 holds. */
     @Test
     public void twoHundredBuyersTwoSeatsEach_exactlyFiveHolds_everyRun() throws Exception {
         for (int run = 1; run <= RUNS; run++) {
@@ -42,13 +42,14 @@ public final class NoOversellingTest {
             throws Exception {
         EventFlow app = new EventFlow(Fixtures.clock());
         TicketTier vip = Fixtures.vip(app, seats);
+        List<String> tokens = Fixtures.admitFans(app, vip, buyers);
         List<Reservation> won = new CopyOnWriteArrayList<>();
 
         ExecutorService pool = Executors.newFixedThreadPool(buyers);
         CountDownLatch ready = new CountDownLatch(buyers);
         CountDownLatch go = new CountDownLatch(1);
         for (int i = 0; i < buyers; i++) {
-            String token = "token-" + i;
+            String token = tokens.get(i);
             pool.submit(() -> {
                 ready.countDown();
                 go.await();  // everyone presses at the same moment

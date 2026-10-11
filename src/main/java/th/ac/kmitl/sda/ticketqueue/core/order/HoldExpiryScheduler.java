@@ -5,7 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * UC-02 extension 6a · gives the seats back when ten minutes pass (FR-12).
+ * Gives the seats back when a hold's ten minutes pass with no payment.
  *
  * <p>It scans the store for HELD reservations past their {@code expiresAt}
  * rather than trusting a timer per hold. The store is the truth, so a lost
