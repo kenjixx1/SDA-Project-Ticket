@@ -1,0 +1,55 @@
+/* Purchase screens SCR-09 to SCR-18 (moved from app.css, phone rules unchanged). Owned by Lane C. */
+/* C-02 countdown */
+.countdown{border:1.5px solid var(--ac);border-radius:var(--r);padding:16px 18px 14px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(var(--acw),var(--acw)),var(--bg);width:100%}
+.countdown .top{display:flex;justify-content:space-between;align-items:center}
+.countdown .lbl{display:flex;align-items:center;gap:8px;color:var(--ac);font-weight:500}
+.countdown .lbl i{width:8px;height:8px;border-radius:50%;background:var(--ac)}
+.countdown .v{font:600 44px/1 var(--fm);color:var(--ac);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--s3);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:3px;transition:width .6s linear}
+
+/* C-03 order summary, and the ticket detail rows */
+.rows{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:4px 18px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--l1)}
+.row:last-child{border-bottom:0}
+.row .k{color:var(--mu)}
+.row .v{font:600 15px var(--fm);text-align:right}
+.row .v.txt{font-family:var(--f)}
+.row.sum .k{color:var(--tx);font-weight:600}
+.row.sum .v{font:600 26px/1 var(--f)}
+/* SCR-17: the QR sits on the event's artwork, like the design */
+.ticket-hero{position:relative;border-radius:var(--r);overflow:hidden;padding:24px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:14px;background:var(--s2)}
+.ticket-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6}
+.ticket-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.75))}
+.ticket-hero>.qrwrap,.ticket-hero>p{position:relative;z-index:1}
+/* QR, ticket stub (C-05), ticket (SCR-17) */
+.qr{background:var(--qr);border-radius:16px;padding:14px;display:grid;place-items:center;align-self:center}
+.qr svg{display:block}
+.qrwrap{position:relative;align-self:center}
+.qrwrap.void .qr{opacity:.35}
+.stamp{position:absolute;inset:0;display:grid;place-items:center;font:700 22px/1 var(--fm);color:var(--st);transform:rotate(-12deg)}
+.stub{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden;text-align:left}
+.stub .top{display:flex;justify-content:space-between;padding:14px 16px;font:500 12px var(--fm);color:var(--mu)}
+.stub .top b{color:var(--tx)}
+.stub .tear{border-top:1.5px dashed var(--l2);margin:0 12px;position:relative}
+.stub .tear::before,.stub .tear::after{content:"";position:absolute;top:-10px;width:20px;height:20px;border-radius:50%;background:var(--bg)}
+.stub .tear::before{left:-22px}
+.stub .tear::after{right:-22px}
+.stub .body{display:flex;gap:16px;padding:16px;align-items:center}
+.stub .body .qr{padding:8px;border-radius:10px}
+.stub .info{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.stub .info .tier{color:var(--ac);font-weight:600}
+.stub .info span{color:var(--mu)}
+.dots{display:flex;justify-content:center;gap:8px}
+.dots button{width:8px;height:8px;border-radius:50%;background:var(--l2)}
+.dots button.on{background:var(--ac)}
+.screen.past{opacity:.6}
+/* SCR-14 the simulated card provider's own page */
+.provider{background:#F7F7F9;color:#1A1A1C;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.provider .brand{font:600 12px var(--fm);letter-spacing:.08em;color:#6B6B73;text-transform:uppercase}
+.provider .amt{font:600 28px/1 var(--f)}
+.provider p{margin:0;color:#4A4A52;font-size:13px}
+.provider .btn{box-shadow:none}
+.provider .btn.ok{background:#1A1A1C;color:#FFFFFF}
+.provider .btn.no{background:transparent;color:#1A1A1C;border:1px solid #C9C9D0}
+.spinner{width:56px;height:56px;border-radius:50%;border:3px solid var(--acw);border-top-color:var(--ac);animation:tq-spin 1.4s linear infinite}

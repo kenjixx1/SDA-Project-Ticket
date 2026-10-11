@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E7E7E7;font-family:system-ui,sans-serif}a{color:#2b3a55}a:hover{color:#0B1220}input::placeholder{color:#5c5c62}@keyframes tq-slideL{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:none}}@keyframes tq-slideR{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:none}}@keyframes tq-modal{from{opacity:0;transform:translate(-50%,-46%) scale(.96)}to{opacity:1;transform:translate(-50%,-50%)}}@keyframes tq-dot{0%,100%{box-shadow:0 0 0 0 rgba(197,242,90,.5)}50%{box-shadow:0 0 0 6px rgba(197,242,90,0)}}[data-webframe] button{transition:transform .15s cubic-bezier(.2,.8,.2,1),filter .2s,box-shadow .25s,background .2s}[data-webframe] button:not(:disabled):hover{filter:brightness(1.08);transform:translateY(-1px)}[data-webframe] button:not(:disabled):active{transform:scale(.97)}[data-card]:hover [data-card-img]{transform:scale(1.08)}[data-card]:hover [data-card-price]{color:var(--ac)}[data-row]:hover [data-row-arrow]{transform:translateX(5px)}[data-tab]{transition:color .2s,box-shadow .25s}[data-tab]:hover{color:var(--tx)!important}[data-feat]:hover [data-feat-img]{transform:scale(1.07)}[data-feat]:hover [data-feat-shade]{opacity:.85}[data-feat]:hover [data-feat-sheen]{animation:tq-sheen 1.4s ease-out}[data-feat]:hover [data-feat-cta]{opacity:1;transform:none}[data-feat]:hover [data-feat-arrow]{transform:translateX(4px)}[data-webframe]:fullscreen{width:100vw!important;height:100vh!important;border-radius:0!important}[data-webframe].tq-full{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;border-radius:0!important;z-index:9999!important}</style>
+<style>@keyframes tq-spin{to{transform:rotate(360deg)}}@keyframes tq-pulse{0%,100%{opacity:1}50%{opacity:.45}}@keyframes tq-up{from{transform:translateY(100%)}to{transform:none}}@keyframes tq-fade{from{opacity:0}to{opacity:1}}@keyframes tq-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}@keyframes tq-scr{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}@keyframes tq-pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.1);opacity:1}100%{transform:scale(1)}}@keyframes tq-draw{from{stroke-dashoffset:30}to{stroke-dashoffset:0}}@keyframes tq-drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(28%,14%) scale(1.25)}}@keyframes tq-drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-32%,-8%) scale(1.15)}}@keyframes tq-sheen{0%{transform:translateX(-150%) skewX(-20deg)}55%,100%{transform:translateX(350%) skewX(-20deg)}}@keyframes tq-ripple{0%{transform:scale(1);opacity:.55}100%{transform:scale(3.4);opacity:0}}@keyframes tq-flow{from{transform:translateX(0)}to{transform:translateX(-18px)}}@keyframes tq-shim{from{transform:translateX(-100%)}to{transform:translateX(250%)}}@keyframes tq-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}@keyframes tq-glow{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:.6;transform:scale(1.12)}}@keyframes tq-kb{from{transform:scale(1) translate(0,0)}to{transform:scale(1.08) translate(-2%,1%)}}@keyframes tq-scan{0%,100%{top:12px}50%{top:calc(100% - 14px)}}@keyframes tq-reveal{from{clip-path:circle(0% at 50% 45%)}to{clip-path:circle(150% at 50% 45%)}}@keyframes tq-ring{from{transform:scale(.8);opacity:.6}to{transform:scale(2.6);opacity:0}}</style>
+</helmet>
+<section id="t3" style="padding:40px 48px 48px;display:flex;flex-direction:column;gap:22px">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:900px">
+    <div style="display:flex;align-items:center;gap:10px"><a href="#t3" style="font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#0B1220;color:#fff;border-radius:4px;text-decoration:none">3</a><span style="font:600 15px/1.2 system-ui,sans-serif;color:#0B1220">Customer app, web (SCR-01 to SCR-18)</span></div>
+    <p style="margin:0;font:400 13px/1.55 system-ui,sans-serif;color:#4a5568;text-wrap:pretty">Desktop, 1440 × 900, look 1a. Same flow, copy and live timers as the phone version; layouts widen into two columns where there is a decision and a summary. Bottom sheets become centred dialogs. Use the menu to jump to any variant.</p>
+  </div>
+  <div id="3a" style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="#3a" style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(11,18,32,.1);color:#0B1220;border-radius:5px;text-decoration:none">3a</a>
+      <select value="{{ preset }}" onChange="{{ onJump }}" style="width:320px;height:34px;border-radius:8px;border:1px solid rgba(0,0,0,.15);background:#fff;color:#1a1a1a;font:500 13px/1 system-ui,sans-serif;padding:0 10px">
+        <sc-for list="{{ presets }}" as="p" hint-placeholder-count="3"><option value="{{ p.v }}">{{ p.label }}</option></sc-for>
+      </select>
+      <button onClick="{{ reset }}" style="height:34px;padding:0 14px;border-radius:8px;border:1px solid rgba(0,0,0,.15);background:#fff;color:#1a1a1a;font:500 13px/1 system-ui,sans-serif;cursor:pointer">Restart</button>
+      <button onClick="{{ toggleFull }}" style="height:34px;padding:0 14px;border-radius:8px;border:0;background:#0B1220;color:#fff;font:500 13px/1 system-ui,sans-serif;cursor:pointer">Full screen</button>
+    </div>
+    <div ref="{{ frameRef }}" data-webframe="1" style="--bg:#000000;--s1:#111112;--s2:#1A1A1C;--s3:#252527;--l1:rgba(255,255,255,.08);--l2:rgba(255,255,255,.18);--tx:#F2F2F2;--mu:#8F8F94;--ac:#C5F25A;--a2:#5B8CFF;--ac2:#8FE3B0;--aci:#000000;--acw:rgba(197,242,90,.09);--st:#FF8B7B;--stw:rgba(255,139,123,.11);--qr:#F3F6FA;--r:22px;--rb:16px;--f:'Instrument Sans',system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,monospace;position:relative;width:1440px;height:900px;flex:none;background:var(--bg);color:var(--tx);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.25);font-family:var(--f)">
+
+      <div style="flex:none;height:68px;padding:0 40px;display:flex;align-items:center;gap:40px;border-bottom:1px solid var(--l1)">
+        <div onClick="{{ goEvents }}" style="display:flex;align-items:center;gap:10px;cursor:pointer"><span style="width:10px;height:10px;border-radius:50%;background:var(--ac);animation:tq-dot 2.4s ease-in-out infinite"></span><span style="font:600 16px/1 var(--f)">Ticket &amp; Queue</span></div>
+        <sc-if value="{{ true }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:28px;height:100%">
+            <span data-tab="1" onClick="{{ goEvents }}" style="display:flex;align-items:center;font:500 15px/1 var(--f);color:{{ tabEvC }};cursor:pointer;box-shadow:inset 0 -2px 0 {{ tabEvU }}">Events</span>
+            <span data-tab="1" onClick="{{ goTickets }}" style="display:flex;align-items:center;font:500 15px/1 var(--f);color:{{ tabTkC }};cursor:pointer;box-shadow:inset 0 -2px 0 {{ tabTkU }}">Tickets</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isFull }}"><span onClick="{{ toggleFull }}" style-hover="color:var(--tx)" style="margin-left:auto;font:500 13px/1 var(--fm);color:var(--mu);cursor:pointer;padding:8px 12px;border:1px solid var(--l2);border-radius:10px">Exit full screen · Esc</span></sc-if>
+        <div onClick="{{ goAccount }}" style="margin-left:{{ acctML }};display:flex;align-items:center;gap:10px;cursor:pointer"><span style="width:34px;height:34px;border-radius:50%;background:var(--ac);color:var(--aci);display:flex;align-items:center;justify-content:center;font:700 14px/1 var(--f)">K</span><span style="font:500 14px/1 var(--f);color:{{ tabAcC }}">Kenji</span></div>
+      </div>
+
+      <div style="flex:1;min-height:0;position:relative">
+
+        <!-- SCR-01 Events -->
+        <sc-if value="{{ s.events }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;animation:tq-fade .3s both">
+            <div style="max-width:1200px;margin:0 auto;padding:44px 40px 70px;display:flex;flex-direction:column;gap:28px">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                <div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 44px/1 var(--f);letter-spacing:-0.02em">Events</span><span style="font:400 16px/1 var(--f);color:var(--mu)">Bangkok</span></div>
+                <sc-if value="{{ eventsAny }}" hint-placeholder-val="{{ true }}">
+                  <div style="width:380px;display:flex;align-items:center;gap:10px;height:48px;padding:0 16px;border-radius:var(--rb);background:var(--s1);border:1px solid {{ searchBorder }};transition:border-color .2s">
+                    <span style="position:relative;width:16px;height:16px;flex:none"><span style="position:absolute;left:0;top:0;width:11px;height:11px;border-radius:50%;border:2px solid var(--mu);box-sizing:border-box"></span><span style="position:absolute;left:10px;top:9px;width:6px;height:2px;border-radius:2px;background:var(--mu);transform:rotate(45deg);transform-origin:left center"></span></span>
+                    <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search events or venues" style="flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;color:var(--tx);font:400 15px/1 var(--f)">
+                    <sc-if value="{{ hasQuery }}"><button onClick="{{ clearQuery }}" style="width:24px;height:24px;flex:none;border-radius:50%;border:0;background:var(--s3);color:var(--tx);font:500 14px/1 var(--f);cursor:pointer">×</button></sc-if>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ eventsEmpty }}">
+                <div style="border:1px dashed var(--l2);border-radius:var(--r);padding:110px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+                  <span style="width:64px;height:64px;border-radius:50%;border:1.5px dashed var(--l2);margin-bottom:8px"></span>
+                  <span style="font:600 22px/1.3 var(--f)">Nothing on sale right now</span>
+                  <span style="font:400 15px/1.5 var(--f);color:var(--mu)">New events show up here as soon as they are announced.</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ eventsAny }}" hint-placeholder-val="{{ true }}">
+                <sc-if value="{{ browsing }}" hint-placeholder-val="{{ true }}">
+                  <div data-feat="1" onClick="{{ openFeat }}" style-hover="border-color:var(--ac);transform:translateY(-4px);box-shadow:0 30px 70px -30px var(--ac)" style="position:relative;height:400px;border-radius:var(--r);overflow:hidden;border:1px solid var(--l1);cursor:pointer;display:flex;align-items:flex-end;transition:transform .5s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .5s;animation:tq-in .5s cubic-bezier(.2,.8,.2,1) both">
+                    <div data-feat-img="1" style="position:absolute;inset:-4%;transition:transform .9s cubic-bezier(.2,.8,.2,1)"><div style="position:absolute;inset:0;background:{{ featBg }};animation:tq-kb 18s ease-in-out infinite alternate"></div></div>
+                    <div data-feat-shade="1" style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 45%,rgba(0,0,0,.05) 100%);transition:opacity .5s"></div>
+                    <div data-feat-sheen="1" style="position:absolute;top:0;bottom:0;left:0;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);transform:translateX(-150%) skewX(-20deg);pointer-events:none"></div>
+                    <div data-feat-cta="1" style="position:absolute;right:36px;bottom:40px;display:flex;align-items:center;gap:10px;height:48px;padding:0 22px;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);opacity:0;transform:translateX(-14px);transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1)">View event<span data-feat-arrow="1" style="display:inline-block;transition:transform .35s cubic-bezier(.2,.8,.2,1)">→</span></div>
+                    <div style="position:relative;padding:44px;display:flex;flex-direction:column;gap:16px;max-width:620px">
+                      <div style="display:flex"><span style="font:600 12px/1 var(--fm);letter-spacing:.06em;padding:7px 10px;border-radius:999px;background:{{ feat.pillBg }};color:{{ feat.pillColor }}">{{ feat.pill }}</span></div>
+                      <span style="font:700 72px/0.94 var(--f);letter-spacing:-0.03em;text-transform:uppercase">{{ feat.name }}</span>
+                      <span style="font:400 16px/1.4 var(--f);color:var(--mu)">{{ feat.meta }}</span>
+                      <span style="font:600 17px/1.3 var(--f);color:var(--ac)">{{ feat.line }}</span>
+                    </div>
+                  </div>
+                  <span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--mu);margin-top:8px">ALSO ON SALE</span>
+                </sc-if>
+                <sc-if value="{{ searching }}"><span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--mu)">{{ resultLabel }}</span></sc-if>
+                <sc-if value="{{ noResults }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:80px 24px">
+                    <span style="width:56px;height:56px;border-radius:50%;border:1.5px dashed var(--l2);margin-bottom:8px"></span>
+                    <span style="font:600 19px/1.3 var(--f)">{{ noResultsT }}</span>
+                    <span style="font:400 15px/1.5 var(--f);color:var(--mu)">Try an artist or a venue name.</span>
+                  </div>
+                </sc-if>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+                  <sc-for list="{{ others }}" as="o" hint-placeholder-count="3">
+                    <div data-card="1" onClick="{{ o.onTap }}" style-hover="transform:translateY(-6px);border-color:var(--l2);box-shadow:0 24px 50px -24px rgba(0,0,0,.9)" style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .2s,box-shadow .35s;animation:tq-in .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:{{ o.delay }}">
+                      <div style="height:200px;overflow:hidden"><div data-card-img="1" style="height:100%;background:{{ o.bg }};transition:transform .7s cubic-bezier(.2,.8,.2,1)"></div></div>
+                      <div style="padding:18px 20px 20px;display:flex;flex-direction:column;gap:8px">
+                        <span style="font:600 19px/1.2 var(--f)">{{ o.name }}</span>
+                        <span style="font:400 13px/1.2 var(--fm);color:var(--mu)">{{ o.meta }}</span>
+                        <span data-card-price="1" style="font:500 15px/1 var(--fm);margin-top:6px;transition:color .25s">From {{ o.price }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-02 / 03 Tickets -->
+        <sc-if value="{{ s.tickets }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;animation:tq-fade .3s both">
+            <div style="max-width:960px;margin:0 auto;padding:44px 40px 70px;display:flex;flex-direction:column;gap:14px">
+              <span style="font:600 44px/1 var(--f);letter-spacing:-0.02em">Tickets</span>
+              <sc-if value="{{ ticketsAny }}">
+                <span style="font:400 16px/1 var(--f);color:var(--mu)">{{ tkCount }}</span>
+                <sc-if value="{{ hasUp }}"><span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--mu);margin-top:22px">UPCOMING</span></sc-if>
+                <sc-for list="{{ upcoming }}" as="o">
+                  <div data-row="1" onClick="{{ o.onTap }}" style-hover="background:var(--s2);border-color:var(--l2)" style="display:flex;align-items:center;gap:24px;padding:20px 24px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);cursor:pointer;transition:background .15s;animation:tq-in .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:{{ o.delay }}">
+                    <div style="width:56px;display:flex;flex-direction:column;align-items:center;gap:5px;padding-right:22px;border-right:1px solid var(--l1)"><span style="font:600 28px/1 var(--f)">{{ o.day }}</span><span style="font:500 11px/1 var(--fm);color:var(--mu);letter-spacing:.08em">{{ o.mon }}</span></div>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px"><span style="font:600 19px/1.2 var(--f)">{{ o.name }}</span><span style="font:400 13px/1.2 var(--fm);color:var(--mu)">{{ o.meta }}</span></div>
+                    <span style="font:600 12px/1 var(--fm);padding:7px 10px;border-radius:999px;border:1px solid {{ o.pillColor }};color:{{ o.pillColor }}">{{ o.pill }}</span>
+                    <span style="font:500 14px/1 var(--f);color:var(--ac);display:flex;gap:6px">Show ticket<span data-row-arrow="1" style="display:inline-block;transition:transform .3s cubic-bezier(.2,.8,.2,1)">›</span></span>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ hasPast }}"><span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--mu);margin-top:22px">PAST</span></sc-if>
+                <sc-for list="{{ past }}" as="o">
+                  <div onClick="{{ o.onTap }}" style="display:flex;align-items:center;gap:24px;padding:20px 24px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);cursor:pointer;opacity:.5">
+                    <div style="width:56px;display:flex;flex-direction:column;align-items:center;gap:5px;padding-right:22px;border-right:1px solid var(--l1)"><span style="font:600 28px/1 var(--f)">{{ o.day }}</span><span style="font:500 11px/1 var(--fm);color:var(--mu);letter-spacing:.08em">{{ o.mon }}</span></div>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px"><span style="font:600 19px/1.2 var(--f)">{{ o.name }}</span><span style="font:400 13px/1.2 var(--fm);color:var(--mu)">{{ o.meta }}</span></div>
+                    <span style="font:600 12px/1 var(--fm);padding:7px 10px;border-radius:999px;border:1px solid var(--l2);color:var(--mu)">PAST</span>
+                  </div>
+                </sc-for>
+              </sc-if>
+              <sc-if value="{{ ticketsEmpty }}">
+                <div style="margin-top:20px;border:1px dashed var(--l2);border-radius:var(--r);padding:100px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+                  <span style="width:64px;height:64px;border-radius:50%;border:1.5px dashed var(--l2);margin-bottom:8px"></span>
+                  <span style="font:600 22px/1.3 var(--f)">No tickets yet</span>
+                  <span style="font:400 15px/1.5 var(--f);color:var(--mu)">Tickets you buy show up here, ready to scan at the gate.</span>
+                  <button onClick="{{ goEvents }}" style-active="transform:scale(0.97)" style="margin-top:14px;height:48px;padding:0 24px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer">Browse events</button>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-04 Account -->
+        <sc-if value="{{ s.account }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;animation:tq-fade .3s both">
+            <div style="max-width:640px;margin:0 auto;padding:44px 40px 70px;display:flex;flex-direction:column;gap:14px">
+              <span style="font:600 44px/1 var(--f);letter-spacing:-0.02em;margin-bottom:18px">Account</span>
+              <div style="display:flex;align-items:center;gap:18px;margin-bottom:16px">
+                <span style="width:64px;height:64px;border-radius:50%;background:var(--ac);color:var(--aci);display:flex;align-items:center;justify-content:center;font:700 26px/1 var(--f);animation:tq-pop .5s cubic-bezier(.2,.8,.2,1) both">K</span>
+                <div style="display:flex;flex-direction:column;gap:7px"><span style="font:600 21px/1 var(--f)">Kenji</span><span style="font:400 14px/1 var(--fm);color:var(--mu)">k•••••@gmail.com</span></div>
+              </div>
+              <div style-hover="background:var(--s2);transform:translateX(4px)" style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:0 22px;min-height:58px;display:flex;align-items:center;justify-content:space-between;font:500 16px/1 var(--f);cursor:pointer;transition:background .2s,transform .3s cubic-bezier(.2,.8,.2,1);animation:tq-in .45s .1s cubic-bezier(.2,.8,.2,1) both"><span>Help</span><span style="color:var(--mu)">›</span></div>
+              <div onClick="{{ openSignout }}" style-hover="background:var(--stw);transform:translateX(4px)" style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:0 22px;min-height:58px;display:flex;align-items:center;font:500 16px/1 var(--f);color:var(--st);cursor:pointer;transition:background .2s,transform .3s cubic-bezier(.2,.8,.2,1);animation:tq-in .45s .18s cubic-bezier(.2,.8,.2,1) both">Sign out</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-05 Event -->
+        <sc-if value="{{ s.event }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;animation:tq-fade .3s both">
+            <div style="max-width:1200px;margin:0 auto;padding:30px 40px 70px;display:flex;flex-direction:column;gap:22px">
+              <span onClick="{{ goEvents }}" style-hover="color:var(--tx);transform:translateX(-4px)" style="align-self:flex-start;font:500 14px/1 var(--f);color:var(--mu);cursor:pointer;transition:color .2s,transform .3s cubic-bezier(.2,.8,.2,1)">‹ All events</span>
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:32px;align-items:start">
+                <div style="display:flex;flex-direction:column;gap:22px;animation:tq-in .5s cubic-bezier(.2,.8,.2,1) both">
+                  <div style="position:relative;height:420px;border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:32px;box-sizing:border-box">
+                    <div style="position:absolute;inset:-4%;background:{{ ev.bg }};animation:tq-kb 18s ease-in-out infinite alternate"></div>
+                    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,transparent 35%,rgba(0,0,0,.85) 100%)"></div>
+                    <span style="position:relative;font:700 64px/0.95 var(--f);letter-spacing:-0.025em;text-transform:uppercase;animation:tq-in .6s .1s cubic-bezier(.2,.8,.2,1) both">{{ ev.name }}</span>
+                    <span style="position:relative;font:500 13px/1 var(--fm);letter-spacing:.08em;opacity:.8;margin-top:14px">{{ ev.meta }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    <span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--mu)">TIERS</span>
+                    <div style="display:flex;flex-direction:column;border-radius:var(--r);border:1px solid var(--l1);overflow:hidden;background:var(--s1)">
+                      <sc-for list="{{ ev.rows }}" as="r" hint-placeholder-count="3">
+                        <div style-hover="background:var(--s2);padding-left:30px" style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-top:1px solid {{ r.border }};transition:background .2s,padding .3s cubic-bezier(.2,.8,.2,1);animation:tq-in .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:{{ r.delay }}"><span style="font:500 16px/1 var(--f)">{{ r.name }}</span><span style="font:500 16px/1 var(--fm)">{{ r.price }}</span></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+                <div style="position:sticky;top:0;display:flex;flex-direction:column;gap:16px;animation:tq-in .5s .12s cubic-bezier(.2,.8,.2,1) both">
+                  <div style="position:relative;overflow:hidden;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:30px 26px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+                    <sc-if value="{{ e.a }}" hint-placeholder-val="{{ true }}">
+                      <span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--mu)">SALE OPENS</span>
+                      <span style="font:600 72px/1 var(--fm);letter-spacing:-0.03em;font-variant-numeric:tabular-nums;text-shadow:0 0 40px var(--acw)">{{ ev.sale }}</span>
+                      <span style="font:400 15px/1.3 var(--f);color:var(--mu)">{{ ev.saleDay }}</span>
+                      <span style="font:500 14px/1 var(--fm);color:var(--ac);margin-top:6px;font-variant-numeric:tabular-nums">{{ opensText }}</span>
+                    </sc-if>
+                    <sc-if value="{{ e.b }}"><div style="display:flex;align-items:center;gap:10px;padding:18px 0"><span style="position:relative;width:10px;height:10px"><span style="position:absolute;inset:0;border-radius:50%;background:var(--ac);animation:tq-ripple 1.8s ease-out infinite"></span><span style="position:absolute;inset:0;border-radius:50%;background:var(--ac)"></span></span><span style="font:600 17px/1 var(--fm);letter-spacing:.08em;color:var(--ac)">ON SALE NOW</span></div></sc-if>
+                    <sc-if value="{{ e.c }}"><span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--ac)">YOU ARE IN THE QUEUE</span><span style="font:600 30px/1.1 var(--f)">{{ posText }}</span></sc-if>
+                    <sc-if value="{{ e.d }}"><span style="font:600 17px/1 var(--fm);letter-spacing:.08em;color:var(--st)">SOLD OUT</span><span style="font:400 15px/1.4 var(--f);color:var(--mu)">Every ticket has been sold.</span></sc-if>
+                    <sc-if value="{{ e.e }}"><span style="font:600 17px/1 var(--fm);letter-spacing:.08em;color:var(--st)">SALE CLOSED</span><span style="font:400 15px/1.4 var(--f);color:var(--mu)">The organizer has closed this sale.</span></sc-if>
+                    <sc-if value="{{ e.f }}"><span style="font:600 17px/1 var(--fm);letter-spacing:.08em;color:var(--st)">EVENT CANCELLED</span></sc-if>
+                  </div>
+                  <sc-if value="{{ e.joinable }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ join }}" disabled="{{ e.joinDis }}" style-active="transform:scale(0.98)" style="height:58px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 16px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac);display:flex;align-items:center;justify-content:center;gap:10px;opacity:{{ e.joinOp }}">
+                      <sc-if value="{{ joinWorking }}"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:tq-spin .8s linear infinite"></span>Joining…</sc-if>
+                      <sc-if value="{{ joinIdle }}" hint-placeholder-val="{{ true }}">Join the queue</sc-if>
+                    </button>
+                    <span style="font:400 13px/1.3 var(--f);color:var(--mu);text-align:center">{{ e.hint }}</span>
+                  </sc-if>
+                  <sc-if value="{{ e.c }}"><button onClick="{{ backToPlace }}" style-active="transform:scale(0.98)" style="height:58px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 16px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac)">Back to my place</button></sc-if>
+                  <sc-if value="{{ e.closed }}"><button onClick="{{ goEvents }}" style-hover="background:var(--s2)" style="height:54px;border:1px solid var(--l2);border-radius:var(--rb);background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Back to events</button></sc-if>
+                  <div style="padding:18px 4px 0;border-top:1px solid var(--l1);display:flex;flex-direction:column;gap:4px">
+                    <span style="font:600 15px/1.35 var(--f)">Everyone waits in the same line.</span>
+                    <span style="font:400 14px/1.4 var(--f);color:var(--mu)">Joining early does not help.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-06 Queue -->
+        <sc-if value="{{ s.queue }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;animation:tq-fade .3s both">
+            <div style="width:640px;padding:36px 0 40px;display:flex;flex-direction:column;gap:26px;flex:1">
+              <div style="display:flex;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--l1)">
+                <span style="width:44px;height:44px;border-radius:12px;background:radial-gradient(circle at 30% 30%,var(--ac),transparent 60%),radial-gradient(circle at 75% 70%,var(--a2),transparent 65%),var(--s2);animation:tq-glow 4s ease-in-out infinite"></span>
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font:700 16px/1 var(--f);letter-spacing:.02em">{{ q.short }}</span><span style="font:400 13px/1 var(--fm);color:var(--mu)">{{ q.meta }}</span></div>
+                <div style="margin-left:auto;display:flex;align-items:center;gap:9px"><span style="position:relative;width:8px;height:8px"><span style="position:absolute;inset:0;border-radius:50%;background:{{ q.dot }};opacity:{{ q.rip }};animation:tq-ripple 1.8s ease-out infinite"></span><span style="position:absolute;inset:0;border-radius:50%;background:{{ q.dot }}"></span></span><span style="font:400 12px/1 var(--fm);color:var(--mu)">{{ q.live }}</span></div>
+              </div>
+              <sc-if value="{{ q.welcome }}"><div style="padding:14px 18px;border-radius:var(--rb);background:var(--acw);display:flex;gap:8px;animation:tq-fade .3s"><span style="font:600 15px/1.3 var(--f);color:var(--ac)">Welcome back.</span><span style="font:400 15px/1.3 var(--f)">Your place was kept.</span></div></sc-if>
+              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:30px">
+                <sc-if value="{{ q.joining }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:18px"><div style="width:280px;height:120px;border-radius:18px;background:var(--s2);animation:tq-pulse 1.2s ease-in-out infinite"></div><span style="font:500 16px/1.3 var(--f);color:var(--mu)">Getting your place in line…</span></div>
+                </sc-if>
+                <sc-if value="{{ q.ready }}" hint-placeholder-val="{{ true }}">
+                  <div style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;opacity:{{ q.op }};transition:opacity .4s">
+                    <div style="position:absolute;left:50%;top:50%;width:380px;height:380px;margin:-190px 0 0 -190px;border-radius:50%;background:radial-gradient(closest-side,var(--acw),transparent);animation:tq-glow 3.5s ease-in-out infinite;pointer-events:none"></div>
+                    <div style="position:absolute;left:50%;top:50%;width:180px;height:180px;margin:-90px 0 0 -90px;border-radius:50%;border:1px solid var(--ac);opacity:0;animation:tq-ring 3.5s ease-out infinite;pointer-events:none"></div>
+                    <span style="position:relative;font:600 13px/1 var(--fm);letter-spacing:.14em;color:var(--ac)">YOUR POSITION</span>
+                    <span style="position:relative;font:600 140px/1 var(--f);letter-spacing:-0.045em;font-variant-numeric:tabular-nums">{{ q.pos }}</span>
+                    <span style="position:relative;font:400 17px/1.3 var(--f);color:var(--mu)">{{ q.ahead }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:12px;opacity:{{ q.op }}">
+                    <div style="height:8px;border-radius:8px;background:var(--s2);overflow:hidden"><div style="position:relative;overflow:hidden;height:100%;width:{{ q.pct }};background:var(--ac);border-radius:8px;transition:width .5s linear"><span style="position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:tq-shim 2.2s ease-in-out infinite"></span></div></div>
+                    <div style="display:flex;justify-content:space-between;font:500 14px/1 var(--fm)"><span style="color:var(--mu)">{{ q.moved }}</span><span style="color:var(--ac)">{{ q.eta }}</span></div>
+                  </div>
+                </sc-if>
+                <div style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;gap:6px">
+                  <span style="font:600 16px/1.3 var(--f)">{{ q.cardT }}</span>
+                  <span style="font:400 15px/1.45 var(--f);color:var(--mu);text-wrap:pretty">{{ q.cardB }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-07 / 10 / 11 / 18 Results -->
+        <sc-if value="{{ r.show }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;display:flex;align-items:center;justify-content:center;animation:tq-fade .3s both">
+            <div style="width:520px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:40px 0">
+              <sc-if value="{{ r.ringGrey }}"><div style="animation:tq-pop .55s cubic-bezier(.2,.8,.2,1) both;width:76px;height:76px;border-radius:50%;border:3px solid var(--mu);box-sizing:border-box"></div></sc-if>
+              <sc-if value="{{ r.check }}"><div style="animation:tq-pop .55s cubic-bezier(.2,.8,.2,1) both;width:76px;height:76px;border-radius:50%;border:3px solid var(--mu);box-sizing:border-box;display:flex;align-items:center;justify-content:center;color:var(--mu)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17 19 7"></polyline></svg></div></sc-if>
+              <sc-if value="{{ r.slash }}"><div style="animation:tq-pop .55s cubic-bezier(.2,.8,.2,1) both;width:76px;height:76px;border-radius:50%;border:3px solid var(--st);box-sizing:border-box;position:relative"><span style="position:absolute;left:50%;top:7px;bottom:7px;width:3px;margin-left:-1.5px;background:var(--st);transform:rotate(45deg)"></span></div></sc-if>
+              <span style="font:600 36px/1.1 var(--f);letter-spacing:-0.02em;color:{{ r.titleC }};text-wrap:balance;animation:tq-in .45s .12s cubic-bezier(.2,.8,.2,1) both">{{ r.title }}</span>
+              <span style="font:400 16px/1.55 var(--f);color:var(--mu);text-wrap:pretty;animation:tq-in .45s .2s cubic-bezier(.2,.8,.2,1) both">{{ r.body }}</span>
+              <sc-if value="{{ r.tryCard }}">
+                <div style="margin-top:8px;align-self:stretch;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:18px 22px;display:flex;flex-direction:column;gap:5px;text-align:left"><span style="font:600 15px/1.3 var(--f)">{{ r.cardT }}</span><span style="font:400 14px/1.45 var(--f);color:var(--mu)">{{ r.cardB }}</span></div>
+              </sc-if>
+              <div style="align-self:stretch;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+                <button onClick="{{ backToEvent }}" style-hover="background:var(--s2)" style="height:54px;border:1px solid var(--l2);border-radius:var(--rb);background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Back to the event</button>
+                <button onClick="{{ joinAgain }}" style-active="transform:scale(0.98)" style="height:54px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac)">Join the queue again</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-08 Select -->
+        <sc-if value="{{ s.select }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;animation:tq-fade .3s both">
+            <div style="max-width:1100px;margin:0 auto;padding:40px 40px 70px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:18px">
+                  <span style="font:600 40px/1.05 var(--f);letter-spacing:-0.02em">{{ sl.title }}</span>
+                  <span style="font:400 16px/1.45 var(--f);color:var(--mu)">{{ sl.sub }}</span>
+                </div>
+                <sc-if value="{{ sl.banner }}"><div style="padding:14px 18px;border-radius:var(--rb);background:var(--stw);display:flex;flex-direction:column;gap:3px;animation:tq-fade .3s"><span style="font:600 15px/1.3 var(--f);color:var(--st)">{{ sl.bannerT }}</span><span style="font:400 14px/1.35 var(--f)">{{ sl.bannerB }}</span></div></sc-if>
+                <div style="display:flex;flex-direction:column;gap:12px;pointer-events:{{ sl.pe }}">
+                  <sc-for list="{{ tierRows }}" as="t" hint-placeholder-count="3">
+                    <div onClick="{{ t.onTap }}" style-hover="transform:translateX(6px)" style="animation:tq-in .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:{{ t.delay }};padding:20px 22px;border-radius:var(--r);background:{{ t.bg }};border:2px solid {{ t.border }};display:flex;align-items:center;gap:20px;opacity:{{ t.op }};cursor:{{ t.cursor }};transition:background .2s,border-color .2s,transform .3s cubic-bezier(.2,.8,.2,1)">
+                      <span style="width:22px;height:22px;flex:none;border-radius:50%;box-shadow:inset 0 0 0 2px {{ t.border }};display:flex;align-items:center;justify-content:center"><sc-if value="{{ t.sel }}"><span style="width:22px;height:22px;border-radius:50%;background:var(--ac);color:var(--aci);display:flex;align-items:center;justify-content:center;animation:tq-pop .35s both"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17 19 7"></polyline></svg></span></sc-if></span>
+                      <span style="flex:1;font:600 19px/1.2 var(--f)">{{ t.name }}</span>
+                      <span style="font:500 13px/1 var(--fm);color:{{ t.leftC }};width:140px;text-align:right">{{ t.left }}</span>
+                      <span style="font:600 19px/1.2 var(--fm);color:{{ t.priceC }};width:110px;text-align:right">{{ t.price }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="position:sticky;top:0;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;gap:18px;animation:tq-in .5s .15s cubic-bezier(.2,.8,.2,1) both">
+                <sc-if value="{{ sl.notAllSold }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;flex-direction:column;gap:10px;pointer-events:{{ sl.pe }}">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                      <span style="font:600 16px/1 var(--f)">How many</span>
+                      <div style="display:flex;align-items:center;gap:6px">
+                        <button onClick="{{ minus }}" disabled="{{ sl.minusDis }}" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--l2);background:transparent;color:var(--tx);font:500 22px/1 var(--f);cursor:pointer;opacity:{{ sl.minusOp }}">−</button>
+                        <span style="width:36px;text-align:center;font:600 22px/1 var(--fm);overflow:hidden;height:26px;display:flex;flex-direction:column">{{ qtyEl }}</span>
+                        <button onClick="{{ plus }}" disabled="{{ sl.plusDis }}" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--l2);background:transparent;color:var(--tx);font:500 22px/1 var(--f);cursor:pointer;opacity:{{ sl.plusOp }}">+</button>
+                      </div>
+                    </div>
+                    <span style="font:400 13px/1.3 var(--f);color:{{ sl.hintC }}">{{ sl.hint }}</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:18px;border-top:1px solid var(--l1)"><span style="font:500 14px/1 var(--fm);color:var(--mu)">{{ sl.totL }}</span><span style="font:600 30px/1 var(--f);letter-spacing:-0.02em;display:flex">{{ totEl }}</span></div>
+                  <button onClick="{{ hold }}" disabled="{{ sl.holdDis }}" style-active="transform:scale(0.98)" style="height:56px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 16px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac);display:flex;align-items:center;justify-content:center;gap:10px;opacity:{{ sl.holdOp }}">
+                    <sc-if value="{{ sl.holding }}"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:tq-spin .8s linear infinite"></span>Holding…</sc-if>
+                    <sc-if value="{{ sl.idle }}" hint-placeholder-val="{{ true }}">Hold these seats</sc-if>
+                  </button>
+                  <span style="font:400 13px/1.3 var(--f);color:var(--mu);text-align:center">Holding takes them out of the sale for 10 minutes</span>
+                </sc-if>
+                <sc-if value="{{ sl.allSold }}"><button onClick="{{ goEvents }}" style-hover="background:var(--s2)" style="height:54px;border:1px solid var(--l2);border-radius:var(--rb);background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Back to events</button></sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-09 / 12 / 13 / 14 / 15 Timed -->
+        <sc-if value="{{ timed }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;animation:tq-fade .3s both">
+            <div style="max-width:1100px;margin:0 auto;padding:40px 40px 70px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <sc-if value="{{ s.confirming }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:90px 20px">
+                    <span style="position:relative;width:72px;height:72px;margin-bottom:10px"><span style="position:absolute;inset:0;border-radius:50%;border:3px solid var(--s3);border-top-color:var(--ac);animation:tq-spin 1.6s linear infinite"></span><span style="position:absolute;inset:13px;border-radius:50%;border:3px solid var(--s3);border-bottom-color:var(--a2);animation:tq-spin 2.4s linear infinite reverse"></span></span>
+                    <span style="font:600 30px/1.2 var(--f);letter-spacing:-0.02em">Confirming your payment</span>
+                    <span style="font:400 16px/1.5 var(--f);color:var(--mu);max-width:420px;text-wrap:pretty">{{ slowT }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ titled }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:10px"><span style="font:600 40px/1.05 var(--f);letter-spacing:-0.02em">{{ tt.title }}</span><span style="font:400 16px/1.45 var(--f);color:var(--mu)">{{ tt.sub }}</span></div>
+                </sc-if>
+                <sc-if value="{{ bannerDown }}"><div style="padding:14px 18px;border-radius:var(--rb);background:var(--stw);display:flex;flex-direction:column;gap:3px"><span style="font:600 15px/1.3 var(--f);color:var(--st)">Payment is not available right now.</span><span style="font:400 14px/1.35 var(--f)">Your seats are still held. Stay on this page, we will try again by ourselves.</span></div></sc-if>
+                <sc-if value="{{ bannerDeclined }}"><div style="padding:14px 18px;border-radius:var(--rb);background:var(--stw);display:flex;flex-direction:column;gap:3px"><span style="font:600 15px/1.3 var(--f);color:var(--st)">The payment did not go through.</span><span style="font:400 14px/1.35 var(--f)">You were not charged. Your seats are still held for {{ timer }}.</span></div></sc-if>
+                <sc-if value="{{ showSummary }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:6px 24px;animation:tq-in .45s .08s cubic-bezier(.2,.8,.2,1) both">
+                    <div style="display:flex;justify-content:space-between;padding:15px 0;font:400 15px/1 var(--f)"><span style="color:var(--mu)">Tier</span><span style="font-weight:600">{{ sum.tier }}</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:15px 0;border-top:1px solid var(--l1);font:400 15px/1 var(--f)"><span style="color:var(--mu)">Tickets</span><span style="font:500 15px/1 var(--fm)">{{ sum.qty }}</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:15px 0;border-top:1px solid var(--l1);font:400 15px/1 var(--f)"><span style="color:var(--mu)">Price each</span><span style="font:500 15px/1 var(--fm)">{{ sum.each }}</span></div>
+                    <sc-for list="{{ sum.promos }}" as="p"><div style="display:flex;justify-content:space-between;padding:15px 0;border-top:1px solid var(--l1);font:400 15px/1 var(--f)"><span style="color:var(--ac)">{{ p.name }}</span><span style="font:500 15px/1 var(--fm);color:var(--ac)">{{ p.amt }}</span></div></sc-for>
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:18px 0 14px;border-top:1px solid var(--l1)"><span style="font:600 16px/1 var(--f)">Total</span><span style="font:600 30px/1 var(--f);letter-spacing:-0.02em">{{ sum.total }}</span></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ s.held }}"><div style="border-radius:var(--r);background:var(--acw);padding:18px 22px;display:flex;flex-direction:column;gap:5px"><span style="font:600 15px/1.3 var(--f);color:var(--ac)">{{ droppedT }}</span><span style="font:400 14px/1.45 var(--f)">Your seats left the sale the moment you held them.</span></div></sc-if>
+                <sc-if value="{{ showMethods }}">
+                  <span style="font:600 12px/1 var(--fm);letter-spacing:.1em;color:var(--mu);margin-top:10px">HOW DO YOU WANT TO PAY</span>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <sc-for list="{{ methods }}" as="m" hint-placeholder-count="2">
+                      <div onClick="{{ m.onTap }}" style-hover="transform:translateY(-3px)" style="animation:tq-in .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:{{ m.delay }};display:flex;align-items:center;gap:14px;padding:18px;border-radius:var(--r);background:{{ m.bg }};border:2px solid {{ m.border }};opacity:{{ m.op }};cursor:{{ m.cursor }};transition:background .2s,border-color .2s,transform .3s cubic-bezier(.2,.8,.2,1)">
+                        <span style="width:48px;height:36px;border-radius:8px;background:var(--s3);display:flex;align-items:center;justify-content:center;font:600 10px/1 var(--fm)">{{ m.tile }}</span>
+                        <div style="flex:1;display:flex;flex-direction:column;gap:5px"><span style="font:600 15px/1.2 var(--f)">{{ m.name }}</span><span style="font:400 13px/1.2 var(--f);color:{{ m.lineC }}">{{ m.line }}</span></div>
+                        <sc-if value="{{ m.sel }}"><span style="width:22px;height:22px;border-radius:50%;background:var(--ac);color:var(--aci);display:flex;align-items:center;justify-content:center;animation:tq-pop .35s both"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17 19 7"></polyline></svg></span></sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ showQr }}">
+                  <div style="display:flex;align-items:center;gap:32px;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:28px;animation:tq-in .45s .08s cubic-bezier(.2,.8,.2,1) both">
+                    <div style="position:relative;overflow:hidden;width:240px;flex:none;padding:16px;border-radius:var(--rb);background:var(--qr);box-sizing:border-box;animation:tq-pop .5s both"><div style="position:absolute;left:10px;right:10px;height:2px;background:var(--ac);box-shadow:0 0 10px var(--ac);animation:tq-scan 2.6s ease-in-out infinite;z-index:1"></div><div style="display:grid;grid-template-columns:repeat(25,1fr);aspect-ratio:1"><sc-for list="{{ qrPay }}" as="c"><div style="background:{{ c }}"></div></sc-for></div></div>
+                    <div style="display:flex;flex-direction:column;gap:10px"><span style="font:600 18px/1.3 var(--f)">Scan with your banking app</span><span style="font:400 15px/1.5 var(--f);color:var(--mu)">Open any Thai banking app, scan this code and confirm {{ amountT }}.</span><span style="font:400 13px/1 var(--f);color:var(--mu);margin-top:6px">This code expires with your hold</span></div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ showCardPanel }}">
+                  <div style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden;animation:tq-in .45s .08s cubic-bezier(.2,.8,.2,1) both">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--s2);border-bottom:1px solid var(--l1)"><span style="display:flex;align-items:center;gap:8px;font:700 15px/1 var(--f)"><span style="width:16px;height:16px;border-radius:4px;background:var(--ac)"></span>PayCard</span><span style="font:400 12px/1 var(--fm);opacity:.7">Card provider · simulated</span></div>
+                    <div style="padding:22px 24px 24px;display:flex;flex-direction:column;gap:16px">
+                      <label style="display:flex;flex-direction:column;gap:7px"><span style="font:600 12px/1 var(--f);color:var(--mu)">Card number</span><input value="{{ cf.num }}" onChange="{{ cf.on_num }}" placeholder="1234 1234 1234 1234" inputMode="numeric" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--acw)" style="height:48px;box-sizing:border-box;padding:0 14px;border-radius:var(--rb);background:var(--bg);color:var(--tx);font:400 16px/1 var(--f);outline:0;border:1px solid {{ cf.b_num }}"><sc-if value="{{ cf.e_num }}"><span style="font:400 12px/1.3 var(--f);color:var(--st)">{{ cf.e_num }}</span></sc-if></label>
+                      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,2fr);gap:12px">
+                        <label style="display:flex;flex-direction:column;gap:7px"><span style="font:600 12px/1 var(--f);color:var(--mu)">Expiry</span><input value="{{ cf.exp }}" onChange="{{ cf.on_exp }}" placeholder="MM / YY" inputMode="numeric" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--acw)" style="height:48px;width:100%;box-sizing:border-box;padding:0 14px;border-radius:var(--rb);background:var(--bg);color:var(--tx);font:400 16px/1 var(--f);outline:0;border:1px solid {{ cf.b_exp }}"><sc-if value="{{ cf.e_exp }}"><span style="font:400 12px/1.3 var(--f);color:var(--st)">{{ cf.e_exp }}</span></sc-if></label>
+                        <label style="display:flex;flex-direction:column;gap:7px"><span style="font:600 12px/1 var(--f);color:var(--mu)">CVC</span><input value="{{ cf.cvc }}" onChange="{{ cf.on_cvc }}" placeholder="123" inputMode="numeric" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--acw)" style="height:48px;width:100%;box-sizing:border-box;padding:0 14px;border-radius:var(--rb);background:var(--bg);color:var(--tx);font:400 16px/1 var(--f);outline:0;border:1px solid {{ cf.b_cvc }}"><sc-if value="{{ cf.e_cvc }}"><span style="font:400 12px/1.3 var(--f);color:var(--st)">{{ cf.e_cvc }}</span></sc-if></label>
+                        <label style="display:flex;flex-direction:column;gap:7px"><span style="font:600 12px/1 var(--f);color:var(--mu)">Name on card</span><input value="{{ cf.name }}" onChange="{{ cf.on_name }}" placeholder="Kenji Tanaka" style-focus="border-color:var(--ac);box-shadow:0 0 0 3px var(--acw)" style="height:48px;width:100%;box-sizing:border-box;padding:0 14px;border-radius:var(--rb);background:var(--bg);color:var(--tx);font:400 16px/1 var(--f);outline:0;border:1px solid {{ cf.b_name }}"><sc-if value="{{ cf.e_name }}"><span style="font:400 12px/1.3 var(--f);color:var(--st)">{{ cf.e_name }}</span></sc-if></label>
+                      </div>
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:4px">
+                        <button onClick="{{ fillTest }}" style="border:0;background:transparent;padding:0;color:var(--ac);font:500 14px/1.3 var(--f);cursor:pointer;text-decoration:underline;text-underline-offset:3px">Use test card</button>
+                        <button onClick="{{ cardPay }}" disabled="{{ cardBusy }}" style-active="transform:scale(0.98)" style="height:50px;min-width:200px;padding:0 24px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 16px/1 var(--f);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+                          <sc-if value="{{ cardBusy }}"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:tq-spin .8s linear infinite"></span>Processing…</sc-if>
+                          <sc-if value="{{ cardIdle }}" hint-placeholder-val="{{ true }}">Pay {{ amountT }}</sc-if>
+                        </button>
+                      </div>
+                      <span style="font:400 12px/1.45 var(--f);color:var(--mu)">This is a simulated provider for the project demo. No real card is used. Card numbers ending in 0002 are declined.</span>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="position:sticky;top:0;display:flex;flex-direction:column;gap:14px;animation:tq-in .5s .1s cubic-bezier(.2,.8,.2,1) both">
+                <div style="position:relative;overflow:hidden;border:1.5px solid var(--ac);border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(135deg,var(--acw),transparent 60%)">
+                  <span style="display:flex;align-items:center;gap:8px;font:500 14px/1 var(--f);color:var(--ac)"><span style="position:relative;width:7px;height:7px"><span style="position:absolute;inset:0;border-radius:50%;background:var(--ac);animation:tq-ripple 1s ease-out infinite"></span><span style="position:absolute;inset:0;border-radius:50%;background:var(--ac)"></span></span>Time to pay</span>
+                  <span style="font:600 56px/1 var(--fm);letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:{{ timerC }};animation:{{ timerAnim }};transition:color .4s">{{ timer }}</span>
+                  <div style="height:3px;border-radius:3px;background:var(--s2);overflow:hidden"><div style="height:100%;width:{{ timerPct }};background:var(--ac);transition:width .3s linear"></div></div>
+                </div>
+                <sc-if value="{{ s.held }}">
+                  <button onClick="{{ toCheckout }}" style-active="transform:scale(0.98)" style="height:56px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 16px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac)">Continue to payment</button>
+                  <button onClick="{{ openRelease }}" style-hover="background:var(--s2)" style="height:52px;border:1px solid var(--l2);border-radius:var(--rb);background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Release these seats</button>
+                </sc-if>
+                <sc-if value="{{ payFooter }}">
+                  <button onClick="{{ pay }}" disabled="{{ payDis }}" style-active="transform:scale(0.98)" style="height:56px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 16px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac);opacity:{{ payOp }}">{{ payLabel }}</button>
+                  <span style="font:400 13px/1.3 var(--f);color:var(--mu);text-align:center">{{ payHint }}</span>
+                </sc-if>
+                <sc-if value="{{ ppFooter }}">
+                  <button onClick="{{ paid }}" disabled="{{ payWorking }}" style-active="transform:scale(0.98)" style="height:56px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 16px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac);display:flex;align-items:center;justify-content:center;gap:10px">
+                    <sc-if value="{{ payWorking }}"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:tq-spin .8s linear infinite"></span>Confirming…</sc-if>
+                    <sc-if value="{{ payIdle }}" hint-placeholder-val="{{ true }}">I have paid</sc-if>
+                  </button>
+                  <button onClick="{{ otherWay }}" style="height:40px;border:0;background:transparent;color:var(--mu);font:500 14px/1 var(--f);cursor:pointer;text-decoration:underline;text-underline-offset:3px">Use another way to pay</button>
+                </sc-if>
+                <sc-if value="{{ doNotClose }}">
+                  <div style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:18px 20px;display:flex;flex-direction:column;gap:5px"><span style="font:600 15px/1.3 var(--f)">Do not close this page.</span><sc-if value="{{ s.promptpay }}"><span style="font:400 14px/1.45 var(--f);color:var(--mu)">Your tickets are confirmed as soon as the bank answers.</span></sc-if></div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-16 Confirmed -->
+        <sc-if value="{{ s.confirmed }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;animation:tq-fade .3s both">
+            <div style="max-width:1000px;margin:0 auto;padding:48px 40px 70px;display:flex;flex-direction:column;gap:30px">
+              <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px">
+                <div style="position:relative;width:80px;height:80px;margin-bottom:6px"><span style="position:absolute;inset:0;border-radius:50%;border:2px solid var(--ac);animation:tq-ring 1.4s .3s ease-out both"></span><div style="position:absolute;inset:0;border-radius:50%;background:var(--ac);color:var(--aci);display:flex;align-items:center;justify-content:center;animation:tq-pop .6s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 12px 40px -10px var(--ac)"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17 19 7" style="stroke-dasharray:30;animation:tq-draw .45s .35s ease-out both"></polyline></svg></div></div>
+                <span style="font:600 40px/1.1 var(--f);letter-spacing:-0.02em;animation:tq-in .45s .3s cubic-bezier(.2,.8,.2,1) both">You are going</span>
+                <span style="font:400 16px/1.5 var(--f);color:var(--mu)">{{ paidT }} {{ countT }}</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:20px">
+                <sc-for list="{{ stubs }}" as="st" hint-placeholder-count="2">
+                  <div style-hover="transform:translateY(-5px) rotate(-0.4deg);border-color:var(--ac)" style="flex:0 0 440px;box-sizing:border-box;transition:transform .4s cubic-bezier(.2,.8,.2,1),border-color .3s;background:linear-gradient(90deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.6) 55%,rgba(0,0,0,.25) 100%),url(assets/the-1975.png) 60% 45%/cover,var(--s1);border:1px solid var(--l1);border-radius:var(--r);animation:tq-in .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:{{ st.delay }}">
+                    <div style="display:flex;justify-content:space-between;padding:16px 22px;font:500 12px/1 var(--fm)"><span>{{ st.head }}</span><span style="color:var(--mu)">{{ st.id }}</span></div>
+                    <div style="border-top:1.5px dashed var(--l2);margin:0 18px"></div>
+                    <div style="display:flex;gap:20px;padding:20px 22px 22px;align-items:center">
+                      <div style="width:110px;height:110px;padding:9px;border-radius:10px;background:var(--qr);box-sizing:border-box;flex:none"><div style="display:grid;grid-template-columns:repeat(25,1fr);aspect-ratio:1"><sc-for list="{{ st.qr }}" as="c"><div style="background:{{ c }}"></div></sc-for></div></div>
+                      <div style="display:flex;flex-direction:column;gap:5px;min-width:0"><span style="font:700 22px/1.1 var(--f);color:var(--ac)">{{ st.tier }}</span><span style="font:600 15px/1.2 var(--f)">{{ st.event }}</span><span style="font:400 14px/1.2 var(--f);color:var(--mu)">{{ st.venue }}</span><span style="font:400 13px/1.2 var(--fm);color:var(--mu)">{{ st.dt }}</span><span style="font:600 10px/1 var(--fm);letter-spacing:.12em;color:var(--mu);margin-top:4px">SINGLE USE</span></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:center;gap:12px">
+                <button onClick="{{ goTickets }}" style-hover="background:var(--s2)" style="height:54px;padding:0 26px;border:1px solid var(--l2);border-radius:var(--rb);background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Go to my tickets</button>
+                <button onClick="{{ openTicket1 }}" style-active="transform:scale(0.98)" style="height:54px;padding:0 28px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer;box-shadow:0 10px 30px -12px var(--ac)">Open ticket 1</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- SCR-17 Ticket -->
+        <sc-if value="{{ s.ticket }}">
+          <div style="position:absolute;inset:0;overflow-y:auto;opacity:{{ tk.dim }};animation:tq-fade .3s both">
+            <div style="max-width:1000px;margin:0 auto;padding:30px 40px 70px;display:flex;flex-direction:column;gap:22px">
+              <span onClick="{{ goTickets }}" style-hover="color:var(--tx);transform:translateX(-4px)" style="transition:color .2s,transform .3s cubic-bezier(.2,.8,.2,1);align-self:flex-start;font:500 14px/1 var(--f);color:var(--mu);cursor:pointer">‹ My tickets</span>
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px">
+                <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 36px/1 var(--f);letter-spacing:-0.01em">{{ tk.short }}</span><span style="font:500 12px/1 var(--fm);letter-spacing:.08em;color:var(--mu)">{{ tk.sub }}</span></div>
+                <sc-if value="{{ tk.past }}"><span style="font:600 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu);padding:7px 9px;border:1px solid var(--l2);border-radius:6px">PAST EVENT</span></sc-if>
+              </div>
+              <div style="display:grid;grid-template-columns:420px minmax(0,1fr);gap:28px;align-items:start">
+                <div style="animation:tq-in .5s cubic-bezier(.2,.8,.2,1) both;position:relative;overflow:hidden;background:{{ tk.bg }};border:1px solid var(--l1);border-radius:var(--r);padding:28px;display:flex;flex-direction:column;align-items:center;gap:16px">
+                  <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden"><div style="position:absolute;top:-20%;bottom:-20%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:tq-sheen 4.5s ease-in-out infinite"></div></div><div style="position:relative;width:300px;padding:18px;border-radius:calc(var(--r) - 6px);background:var(--qr);box-sizing:border-box;animation:tq-pop .5s both">
+                    {{ tkQrEl }}
+                    <sc-if value="{{ tk.cancelled }}">
+                      <span style="position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--st);transform:rotate(-45deg)"></span><span style="position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--st);transform:rotate(45deg)"></span>
+                      <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg);font:700 22px/1 var(--fm);letter-spacing:.12em;color:var(--st);border:2.5px solid var(--st);padding:9px 13px;border-radius:6px;background:var(--qr)">CANCELLED</span>
+                    </sc-if>
+                  </div>
+                  <span style="font:600 16px/1 var(--fm);letter-spacing:.06em;color:var(--ac)">{{ tkIdEl }}</span>
+                  <sc-if value="{{ tk.multi }}">
+                    <div style="align-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px">
+                      <button onClick="{{ tkPrev }}" disabled="{{ tkNav.prevDis }}" title="Previous ticket (←)" style="width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--l2);background:rgba(0,0,0,.45);color:var(--tx);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:{{ tkNav.prevOp }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+                        <div style="display:flex;gap:8px;align-items:center"><sc-for list="{{ dots }}" as="d"><span onClick="{{ d.onTap }}" style="width:{{ d.w }};height:8px;border-radius:8px;background:{{ d.bg }};cursor:pointer;transition:width .25s cubic-bezier(.2,.8,.2,1),background .25s"></span></sc-for></div>
+                        <span style="font:500 12px/1 var(--fm);color:var(--mu)">{{ tkNav.label }} · use ← →</span>
+                      </div>
+                      <button onClick="{{ tkNext }}" disabled="{{ tkNav.nextDis }}" title="Next ticket (→)" style="width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--l2);background:rgba(0,0,0,.45);color:var(--tx);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:{{ tkNav.nextOp }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+                    </div>
+                  </sc-if>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <div style="background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:4px 24px;animation:tq-in .5s .12s cubic-bezier(.2,.8,.2,1) both">
+                    <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;font:400 15px/1.3 var(--f)"><span style="color:var(--mu)">Holder</span><span style="font-weight:500">{{ tk.holder }}</span></div>
+                    <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;border-top:1px solid var(--l1);font:400 15px/1.3 var(--f)"><span style="color:var(--mu)">Event</span><span style="font-weight:500">{{ tk.event }}</span></div>
+                    <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;border-top:1px solid var(--l1);font:400 15px/1.3 var(--f)"><span style="color:var(--mu)">Venue</span><span style="font-weight:500">{{ tk.venue }}</span></div>
+                    <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;border-top:1px solid var(--l1);font:400 15px/1.3 var(--f)"><span style="color:var(--mu)">Date</span><span style="font-weight:500">{{ tk.date }}</span></div>
+                    <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;border-top:1px solid var(--l1);font:400 15px/1.3 var(--f)"><span style="color:var(--mu)">Tier</span><span style="font-weight:500">{{ tk.tier }}</span></div>
+                  </div>
+                  <div style="border-radius:var(--r);background:{{ tk.cardBg }};border:1px solid var(--l1);padding:18px 22px;display:flex;flex-direction:column;gap:4px"><span style="font:600 15px/1.3 var(--f);color:{{ tk.cardC }}">{{ tk.cardT }}</span><span style="font:400 14px/1.4 var(--f);color:var(--mu)">{{ tk.cardB }}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ flash }}">
+        <div style="position:absolute;inset:0;z-index:40;background:var(--ac);color:var(--aci);display:flex;align-items:center;justify-content:center;font:700 56px/1 var(--f);letter-spacing:-0.02em;animation:tq-reveal .6s cubic-bezier(.2,.8,.2,1) both"><span style="animation:tq-pop .6s .15s cubic-bezier(.2,.8,.2,1) both">It is your turn</span></div>
+      </sc-if>
+
+      <sc-if value="{{ sheetRelease }}">
+        <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);animation:tq-fade .25s"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:51;width:460px;background:var(--s2);border:1px solid var(--l2);border-radius:var(--r);padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;box-shadow:0 40px 100px -20px rgba(0,0,0,.8);animation:tq-modal .32s cubic-bezier(.2,.8,.2,1) both">
+          <span style="font:600 24px/1.2 var(--f)">Release these seats?</span>
+          <span style="font:400 15px/1.5 var(--f);color:var(--mu)">{{ releaseT }} To buy again you join the back of the line.</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0"><span style="font:500 13px/1 var(--f);color:var(--mu)">Time to pay</span><span style="font:600 17px/1 var(--fm);color:var(--ac)">{{ timer }}</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button onClick="{{ doRelease }}" style="height:52px;border:1.5px solid var(--st);border-radius:var(--rb);background:transparent;color:var(--st);font:500 15px/1 var(--f);cursor:pointer">Release seats</button>
+            <button onClick="{{ closeSheet }}" style="height:52px;border:0;border-radius:var(--rb);background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer">Keep my seats</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sheetSignout }}">
+        <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);animation:tq-fade .25s"></div>
+        <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:51;width:400px;background:var(--s2);border:1px solid var(--l2);border-radius:var(--r);padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;box-shadow:0 40px 100px -20px rgba(0,0,0,.8);animation:tq-modal .32s cubic-bezier(.2,.8,.2,1) both">
+          <span style="font:600 24px/1.2 var(--f)">Sign out?</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button onClick="{{ closeSheet }}" style="height:50px;border:1px solid var(--l2);border-radius:var(--rb);background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Cancel</button>
+            <button onClick="{{ closeSheet }}" style="height:50px;border:1.5px solid var(--st);border-radius:var(--rb);background:transparent;color:var(--st);font:500 15px/1 var(--f);cursor:pointer">Sign out</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;speed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;1&quot;,&quot;10&quot;,&quot;30&quot;,&quot;100&quot;],&quot;default&quot;:&quot;10&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+class Component extends DCLogic {
+  state = this.init();
+  tiers0() { return [{ name: 'VIP', price: 6500, left: 16, total: 500 }, { name: 'Zone A', price: 3800, left: 350, total: 2000 }, { name: 'Zone B', price: 1900, left: 2020, total: 5000 }]; }
+  bodyslam() { return { id: 'o0', name: 'Bruno Mars', full: 'Bruno Mars', venue: 'Thunder Dome', time: '20:00', day: '02', mon: 'AUG', long: 'Sunday 2 August, 20:00', past: true, tier: 'Zone A', qty: 1, ids: ['TKT-3B17-01'], cancelled: false }; }
+  bpOrder(qty = 2, tier = 'VIP') { const ids = []; for (let i = 1; i <= qty; i++) ids.push('TKT-9F42-0' + i); return { id: 'o1', name: 'The 1975', full: 'The 1975 Bangkok', venue: 'Impact Arena', time: '19:00', day: '14', mon: 'NOV', long: 'Saturday 14 November, 19:00', past: false, tier, qty, ids, cancelled: false }; }
+  events() {
+    return [
+      { img: 'assets/the-1975-card.png', name: 'THE 1975 BANGKOK', short: 'THE 1975', venue: 'Impact Arena', date: '14 Nov 2026', sale: '10:00', saleDay: 'Thursday 1 October', from: 1900 },
+      { img: 'assets/bruno-mars.png', name: 'Bruno Mars', short: 'BRUNO MARS', venue: 'Thunder Dome', date: '22 Nov 2026', sale: '10:00', saleDay: 'Thursday 8 October', from: 1200, opens: 'Opens in 4 days' },
+      { img: 'assets/alan-walker.png', name: 'Alan Walker', short: 'ALAN WALKER', venue: 'UOB Live', date: '5 Dec 2026', sale: '10:00', saleDay: 'Thursday 15 October', from: 2400, opens: 'Opens in 11 days' },
+      { img: 'assets/marshmello.png', name: 'Marshmello', short: 'MARSHMELLO', venue: 'Moonstar Studio', date: '18 Dec 2026', sale: '10:00', saleDay: 'Thursday 22 October', from: 1500, opens: 'Opens in 18 days' },
+    ];
+  }
+  init() {
+    return { screen: 'events', evIdx: 0, ev: 'a', opensIn: 872, eventsEmpty: false, sheet: '',
+      pos: 4182, moved: 6823, qv: '', welcome: false, flash: false, joining: false, joinWorking: false, upd: 0,
+      tiers: this.tiers0(), sel: 0, qty: 1, banner: '', holding: false, allSold: false,
+      holdLeft: 600, hFrom: 16, hTo: 14, promo: false, down: '', allDown: false, method: '',
+      declined: false, payWorking: false, slow: false, ct: 0, viaCard: false,
+      orders: [this.bodyslam()], oIdx: 0, tIdx: 0, tv: '', preset: '01a' };
+  }
+  carRef = React.createRef();
+  frameRef = React.createRef();
+  toggleFull() {
+    const el = this.frameRef.current; if (!el) return;
+    if (this.state.full) {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      el.classList.remove('tq-full'); this.setState({ full: false }); return;
+    }
+    const fallback = () => { el.classList.add('tq-full'); this.setState({ full: true }); };
+    if (el.requestFullscreen) el.requestFullscreen().then(() => this.setState({ full: true })).catch(fallback); else fallback();
+  }
+  _tkDir = 1;
+  stepTicket(d) {
+    const s = this.state; if (s.screen !== 'ticket') return;
+    const ord = s.orders[s.oIdx] || s.orders[0]; if (!ord) return;
+    const n = Math.max(0, Math.min(ord.ids.length - 1, s.tIdx + d)); if (n === s.tIdx) return;
+    this._tkDir = d; this.setState({ tIdx: n });
+  }
+  onFsKey = e => { if (e.key === 'ArrowLeft') this.stepTicket(-1); if (e.key === 'ArrowRight') this.stepTicket(1); if (e.key === 'Escape' && this.state.full && !document.fullscreenElement) this.toggleFull(); };
+  onFsChange = () => { if (!document.fullscreenElement && this.state.full && !this.frameRef.current?.classList.contains('tq-full')) this.setState({ full: false }); };
+  toSlide(i) { const n = this.events().length, k = Math.max(0, Math.min(n - 1, i)), el = this.carRef.current; if (el) el.scrollTo({ left: k * 362, behavior: 'smooth' }); this.setState({ slide: k }); }
+  cardErrors() { const k = this.state.card || {}; const n = (k.num || '').replace(/\s/g, ''), e = (k.exp || '').replace(/\D/g, ''), m = Number(e.slice(0, 2));
+    return { num: n.length < 15 ? 'Enter the full card number.' : '', exp: e.length < 4 || m < 1 || m > 12 ? 'Enter a valid expiry date.' : '', cvc: (k.cvc || '').length < 3 ? 'Enter the 3-digit code.' : '', name: !(k.name || '').trim() ? 'Enter the name on the card.' : '' }; }
+  cardForm() { const k = this.state.card || { num: '', exp: '', cvc: '', name: '' }, tried = this.state.cardTried, er = this.cardErrors(), o = {};
+    const fmt = { num: v => v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})(?=.)/g, '$1 '), exp: v => { const d = v.replace(/\D/g, '').slice(0, 4); return d.length > 2 ? d.slice(0, 2) + ' / ' + d.slice(2) : d; }, cvc: v => v.replace(/\D/g, '').slice(0, 4), name: v => v.slice(0, 40) };
+    ['num', 'exp', 'cvc', 'name'].forEach(f => { o[f] = k[f] || ''; o['e_' + f] = tried ? er[f] : ''; o['b_' + f] = tried && er[f] ? 'var(--st)' : 'var(--l2)';
+      o['on_' + f] = ev => { const v = fmt[f](ev.target.value); this.setState(p => ({ card: { ...(p.card || { num: '', exp: '', cvc: '', name: '' }), [f]: v } })); }; });
+    return o; }
+  componentDidMount() { window.addEventListener('keydown', this.onFsKey); document.addEventListener('fullscreenchange', this.onFsChange); this.last = performance.now(); this.iv = setInterval(() => this.tick(), 200); }
+  componentWillUnmount() { window.removeEventListener('keydown', this.onFsKey); document.removeEventListener('fullscreenchange', this.onFsChange); clearInterval(this.iv); this.clearT(); }
+  clearT() { (this.tos || []).forEach(clearTimeout); this.tos = []; }
+  later(fn, ms) { this.tos = this.tos || []; this.tos.push(setTimeout(fn, ms)); }
+  speed() { return Number(this.props.speed ?? 10) || 1; }
+  tick() {
+    const now = performance.now(), rdt = (now - this.last) / 1000; this.last = now;
+    const dt = rdt * this.speed(), s = this.state, u = {};
+    if (s.screen === 'event' && s.evIdx === 0 && s.ev === 'a') { const o = s.opensIn - dt; if (o <= 0) { u.ev = 'b'; u.opensIn = 0; } else u.opensIn = o; }
+    if (s.screen === 'queue' && !s.flash) {
+      if (s.qv !== 'd' && !s.joining) {
+        const step = 12 * dt, p = Math.max(1, s.pos - step);
+        u.moved = s.moved + (s.pos - p); u.pos = p;
+        if (p <= 1) { u.flash = true; this.later(() => this.setState({ flash: false, screen: 'select', tiers: this.tiers0(), qty: 1, sel: 0, banner: '', allSold: false }), 1500); }
+      }
+      u.upd = (s.upd + rdt) > 4 ? 0 : s.upd + rdt;
+    }
+    if (['held', 'checkout', 'promptpay', 'card', 'confirming'].includes(s.screen)) {
+      const h = s.holdLeft - dt;
+      if (h <= 0) { u.holdLeft = 0; u.sheet = ''; u.screen = s.screen === 'confirming' ? 'expired' : 'holdout'; u.tiers = this.restore(s); }
+      else u.holdLeft = h;
+    }
+    if (s.screen === 'confirming' && u.screen !== 'expired') { u.ct = s.ct + rdt; if (u.ct >= (s.slow ? 10 : 1.2)) Object.assign(u, this.confirmState(s)); }
+    this.setState(u);
+  }
+  restore(s) { return s.tiers.map((t, i) => i === s.sel ? { ...t, left: t.left + s.qty } : t); }
+  confirmState(s) {
+    const t = s.tiers[s.sel]; const o = this.bpOrder(s.qty, t.name);
+    return { screen: 'confirmed', orders: [o, ...s.orders.filter(x => x.id !== 'o1')], oIdx: 0, tIdx: 0, payWorking: false };
+  }
+  go(screen, extra = {}) { this.setState({ screen, sheet: '', ...extra }); }
+  total(s) { const t = s.tiers[s.sel]; const sub = t.price * s.qty; const disc = s.promo ? Math.round(sub * 0.1) : 0; return { sub, disc, total: sub - disc }; }
+  joinQueue(back) {
+    this.clearT();
+    const base = back ? { pos: 7316, moved: 0 } : {};
+    this.setState({ joinWorking: true });
+    this.later(() => { this.setState({ joinWorking: false, screen: 'queue', joining: true, qv: '', welcome: false, flash: false, ...base }); this.later(() => this.setState({ joining: false }), 800); }, back ? 0 : 500);
+  }
+  preset(id) {
+    this.clearT();
+    const b = this.init(); const held = { qty: 2, sel: 0, tiers: [{ ...b.tiers[0], left: 14 }, b.tiers[1], b.tiers[2]], holdLeft: 600, hFrom: 16, hTo: 14 };
+    const m = {
+      '01a': {}, '01b': { eventsEmpty: true }, '02': { screen: 'tickets', orders: [this.bpOrder(), this.bodyslam()] }, '03': { screen: 'tickets', orders: [] },
+      '04': { screen: 'account' }, '04s': { screen: 'account', sheet: 'signout' },
+      '05a': { screen: 'event' }, '05b': { screen: 'event', ev: 'b' }, '05c': { screen: 'event', ev: 'c' }, '05d': { screen: 'event', ev: 'd' }, '05e': { screen: 'event', ev: 'e' }, '05f': { screen: 'event', ev: 'f' },
+      '06a': { screen: 'queue' }, '06b': { screen: 'queue', pos: 50, moved: 10955 }, '06c': { screen: 'queue', welcome: true }, '06d': { screen: 'queue', qv: 'd' }, '06e': { screen: 'queue', joining: true },
+      '07': { screen: 'passed' },
+      '08a': { screen: 'select' }, '08b': { screen: 'select', qty: 2, holding: true }, '08c': { screen: 'select', sel: 1, qty: 4 },
+      '08d': { screen: 'select', sel: 1, tiers: [{ ...b.tiers[0], left: 0 }, b.tiers[1], b.tiers[2]] },
+      '08e': { screen: 'select', banner: 'more', tiers: [{ ...b.tiers[0], left: 1 }, b.tiers[1], b.tiers[2]], qty: 1 },
+      '08f': { screen: 'select', banner: 'race', qty: 2, tiers: [{ ...b.tiers[0], left: 9 }, b.tiers[1], b.tiers[2]] },
+      '08g': { screen: 'select', allSold: true, tiers: b.tiers.map(t => ({ ...t, left: 0 })) },
+      '09a': { screen: 'held', ...held }, '09b': { screen: 'held', ...held, sheet: 'release' },
+      '10': { screen: 'released', qty: 2 }, '11': { screen: 'holdout', qty: 2 },
+      '12a': { screen: 'checkout', ...held, holdLeft: 548 }, '12b': { screen: 'checkout', ...held, holdLeft: 548, promo: true }, '12c': { screen: 'checkout', ...held, holdLeft: 548, down: 'card' }, '12d': { screen: 'checkout', ...held, holdLeft: 548, allDown: true },
+      '13a': { screen: 'promptpay', ...held, holdLeft: 512, method: 'pp' }, '13b': { screen: 'promptpay', ...held, holdLeft: 432, method: '', declined: true },
+      '14a': { screen: 'card', ...held, holdLeft: 512, method: 'card', viaCard: true }, '14b': { screen: 'card', ...held, holdLeft: 432, method: '', declined: true, viaCard: true },
+      '15a': { screen: 'confirming', ...held, holdLeft: 470 }, '15b': { screen: 'confirming', ...held, holdLeft: 470, slow: true, ct: 8.5 },
+      '16': { screen: 'confirmed', ...held, orders: [this.bpOrder(), this.bodyslam()] },
+      '17a': { screen: 'ticket', orders: [this.bpOrder(), this.bodyslam()] }, '17b': { screen: 'ticket', orders: [this.bpOrder(), this.bodyslam()], tv: 'b' }, '17c': { screen: 'ticket', orders: [this.bpOrder(), this.bodyslam()], oIdx: 1 },
+      '18': { screen: 'expired', qty: 2 },
+    }[id] || {};
+    this.setState({ ...b, ...m, preset: id });
+    if (m.holding) this.later(() => this.doHold(), 1200);
+    if (m.welcome) this.later(() => this.setState({ welcome: false }), 5000);
+    if (m.joining) this.later(() => this.setState({ joining: false }), 900);
+  }
+  doHold() {
+    const s = this.state, t = s.tiers[s.sel];
+    this.setState({ holding: false, screen: 'held', hFrom: t.left, hTo: t.left - s.qty, holdLeft: 600, banner: '', promo: false, method: '', declined: false,
+      tiers: s.tiers.map((x, i) => i === s.sel ? { ...x, left: x.left - s.qty } : x) });
+  }
+  presetList() {
+    return [['01a', '01a · Events'], ['01b', '01b · Events, none'], ['02', '02 · Tickets'], ['03', '03 · Tickets, empty'], ['04', '04 · Account'], ['04s', '04 · Sign out sheet'],
+      ['05a', '05a · Event, before sale'], ['05b', '05b · Event, on sale'], ['05c', '05c · Event, already in queue'], ['05d', '05d · Event, sold out'], ['05e', '05e · Event, sale closed'], ['05f', '05f · Event, cancelled'],
+      ['06a', '06a · Queue, waiting'], ['06b', '06b · Queue, almost your turn'], ['06c', '06c · Queue, welcome back'], ['06d', '06d · Queue, reconnecting'], ['06e', '06e · Queue, joining'],
+      ['07', '07 · Your turn passed'],
+      ['08a', '08a · Select'], ['08b', '08b · Select, holding'], ['08c', '08c · Select, at limit of 4'], ['08d', '08d · Select, tier sold out'], ['08e', '08e · Select, more than remain'], ['08f', '08f · Select, seats just went'], ['08g', '08g · Select, all sold out'],
+      ['09a', '09a · Seats held'], ['09b', '09b · Release sheet'], ['10', '10 · Seats released'], ['11', '11 · Hold ran out'],
+      ['12a', '12a · Checkout'], ['12b', '12b · Checkout, promotion'], ['12c', '12c · Checkout, one method down'], ['12d', '12d · Checkout, payment unavailable'],
+      ['13a', '13a · PromptPay'], ['13b', '13b · PromptPay, declined'], ['14a', '14a · Card provider'], ['14b', '14b · Card, declined'],
+      ['15a', '15a · Confirming'], ['15b', '15b · Confirming, bank slow'], ['16', '16 · Confirmed'],
+      ['17a', '17a · Ticket'], ['17b', '17b · Ticket, event cancelled'], ['17c', '17c · Ticket, past event'], ['18', '18 · Expired while paying']]
+      .map(([v, label]) => ({ v, label: 'SCR-' + label }));
+  }
+  qr(seed) {
+    this._qr = this._qr || {}; if (this._qr[seed]) return this._qr[seed];
+    let h = 2166136261; for (const ch of seed) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    const rnd = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1000) / 1000; };
+    const N = 25, out = [], dark = '#0B1220', light = 'transparent';
+    const fp = (r, c) => { for (const [or, oc] of [[0, 0], [0, 18], [18, 0]]) { const dr = r - or, dc = c - oc; if (dr >= -1 && dr <= 7 && dc >= -1 && dc <= 7) { if (dr < 0 || dr > 6 || dc < 0 || dc > 6) return 0; return (dr === 0 || dr === 6 || dc === 0 || dc === 6 || (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4)) ? 1 : 0; } } return -1; };
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) { const f = fp(r, c); out.push((f === -1 ? rnd() > 0.52 : f === 1) ? dark : light); }
+    return (this._qr[seed] = out);
+  }
+  renderVals() {
+    const st = this.state, look = this.props.look === 'b' ? 'b' : 'a';
+    const b = n => n === 0 ? 'Free' : '฿' + Math.round(n).toLocaleString('en-US');
+    const num = n => Math.round(n).toLocaleString('en-US');
+    const mmss = x => { const t = Math.max(0, Math.ceil(x)); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); };
+    const hms = x => { const t = Math.max(0, Math.ceil(x)); return [Math.floor(t / 3600), Math.floor(t / 60) % 60, t % 60].map(v => String(v).padStart(2, '0')).join(':'); };
+    const scr = st.screen, s = { [scr]: true }, EV = this.events(), tier = st.tiers[st.sel], words = ['', 'one', 'two', 'three', 'four'];
+    const tabbed = ['events', 'tickets', 'account'].includes(scr);
+    const set = (o) => () => this.setState(o);
+
+    // Events
+    const bpState = st.ev === 'd' ? 'SOLD OUT' : st.ev === 'e' ? 'SALE CLOSED' : st.ev === 'a' ? 'ON SALE TODAY' : 'ON SALE NOW';
+    const problem = st.ev === 'd' || st.ev === 'e';
+    const feat = { name: EV[0].name, meta: EV[0].venue + ' · ' + EV[0].date, pill: bpState, pillBg: problem ? 'var(--stw)' : 'var(--ac)', pillColor: problem ? 'var(--st)' : 'var(--aci)',
+      line: st.ev === 'a' ? 'Sale opens 10:00, from ' + b(EV[0].from) : problem ? 'From ' + b(EV[0].from) : 'On sale now, from ' + b(EV[0].from) };
+    const qn = (st.query || '').trim().toLowerCase(), searching = qn.length > 0;
+    const pool = EV.map((e, i) => ({ e, i })).filter(({ e }) => !searching || (e.name + ' ' + e.venue).toLowerCase().includes(qn));
+    const others = (searching ? pool : pool.slice(1)).map(({ e, i }, k) => ({ delay: (0.1 + k * 0.06) + 's', bg: 'url("' + e.img + '") 50% 40%/cover', name: i === 0 ? 'The 1975' : e.name, meta: e.venue + ' · ' + e.date.replace(' 2026', ''), price: b(e.from), priceColor: 'var(--tx)', border: k === 0 ? 'transparent' : 'var(--l1)', onTap: () => this.go('event', { evIdx: i }) }));
+    const slideIdx = Math.min(st.slide || 0, EV.length - 1);
+    const slides = EV.map((e, i) => {
+      const bp = i === 0, prob = bp && problem;
+      return { delay: (i * 0.06) + 's', bg: 'url("' + e.img + '") 50% 40%/cover', name: e.name, meta: e.venue + ' · ' + e.date, count: (i + 1) + ' / ' + EV.length,
+        pill: bp ? bpState : 'OPENS ' + e.saleDay.split(' ').slice(1).join(' ').toUpperCase().replace('OCTOBER', 'OCT'),
+        pillBg: prob ? 'var(--stw)' : bp ? 'var(--ac)' : 'var(--s3)', pillColor: prob ? 'var(--st)' : bp ? 'var(--aci)' : 'var(--tx)',
+        line: bp ? feat.line : 'Sale opens ' + e.sale + ', from ' + b(e.from),
+        scale: i === slideIdx ? 1 : 0.94, op: i === slideIdx ? 1 : 0.55,
+        onTap: () => { if (this._dragged) return; this.go('event', { evIdx: i }); } };
+    });
+    const slideDots = EV.map((_, i) => ({ w: i === slideIdx ? '20px' : '6px', bg: i === slideIdx ? 'var(--ac)' : 'var(--l2)', onTap: () => this.toSlide(i) }));
+
+    // Event
+    const E = EV[st.evIdx], isBp = st.evIdx === 0, ev = isBp ? st.ev : 'a';
+    const rows = (isBp ? st.tiers.map(t => ({ name: t.name, price: b(t.price) })) : [{ name: 'Standing', price: b(E.from) }]).map((r, i) => ({ ...r, delay: (0.25 + i * 0.06) + 's', border: i === 0 ? 'transparent' : 'var(--l1)' }));
+    const e = { a: ev === 'a', b: ev === 'b', c: ev === 'c', d: ev === 'd', e: ev === 'e', f: ev === 'f', closed: ['d', 'e', 'f'].includes(ev), joinable: ev === 'a' || ev === 'b',
+      joinDis: ev === 'a' || st.joinWorking, joinOp: ev === 'a' ? 0.4 : 1, hint: ev === 'a' ? 'The button turns on at ' + E.sale : 'Maximum 4 tickets per person' };
+
+    // Queue
+    const pos = Math.ceil(st.pos), almost = pos <= 50, recon = st.qv === 'd';
+    const q = { short: EV[0].short, meta: EV[0].venue + ' · ' + EV[0].date, pos: num(pos), ahead: pos - 1 === 1 ? '1 person is ahead of you' : num(pos - 1) + ' people are ahead of you',
+      pct: (st.moved / (st.moved + st.pos) * 100).toFixed(1) + '%', moved: 'Moved ' + num(st.moved) + ' places',
+      eta: almost ? 'less than a minute' : 'about ' + Math.max(1, Math.round(st.pos / 12 / 60)) + ' min',
+      cardT: recon ? 'Still holding your place.' : almost ? 'Almost your turn.' : 'Your place is saved.',
+      cardB: recon ? 'The server keeps it even if your connection drops.' : almost ? 'Get ready to choose your tickets.' : 'Keep this page open. When it is your turn you get 10 minutes to choose and pay.',
+      op: recon ? 0.4 : 1, dot: recon ? 'var(--mu)' : 'var(--ac)', dotHalo: recon ? 'transparent' : 'var(--acw)', live: recon ? 'Reconnecting…' : 'Updated just now',
+      welcome: st.welcome, joining: st.joining, ready: !st.joining, play: recon ? 'paused' : 'running', rip: recon ? 0 : 0.55 };
+
+    // Result screens
+    const R = {
+      passed: { ringGrey: true, title: 'Your turn has passed', size: '28px', titleC: 'var(--tx)', body: 'You were let in, but no seats were chosen in time, so the next person in line went ahead. Nothing was reserved and nothing was charged.', tryCard: true, cardT: 'You can try again.', cardB: 'Joining again puts you at the back of the line.' },
+      released: { check: true, title: 'Seats released', size: '28px', titleC: 'var(--tx)', body: `Your ${st.qty} ${tier.name} seats are back on sale. Nothing was charged.` },
+      holdout: { slash: true, title: 'Your 10 minutes ran out', size: '30px', titleC: 'var(--st)', body: `The ${st.qty} ${tier.name} seats went back on sale. You were not charged.`, tryCard: true, cardT: 'You can try again.', cardB: 'Joining again puts you at the back of the line.' },
+      expired: { slash: true, title: 'You have not been charged', size: '38px', titleC: 'var(--st)', body: `Your 10 minutes ran out before the payment finished, so the ${words[st.qty]} ${tier.name} seats went back on sale. No money left your account.`, tryCard: true, cardT: 'You can try again.', cardB: 'Joining the queue again puts you at the back.' },
+    }[scr];
+    const r = R ? { show: true, ...R } : { show: false };
+
+    // Select
+    const maxQ = Math.min(4, Math.max(1, tier.left));
+    const tierRows = st.tiers.map((t, i) => {
+      const out = t.left === 0, low = t.left / t.total <= 0.05, on = i === st.sel && !out && !st.allSold;
+      return { delay: (0.08 + i * 0.07) + 's', scale: on ? 'scale(1.015)' : 'none', name: t.name, price: b(t.price), left: out ? 'Sold out' : (low ? 'only ' + num(t.left) + ' left' : num(t.left) + ' left'), leftC: out || low ? 'var(--st)' : 'var(--mu)',
+        sel: on, bg: on ? 'var(--acw)' : 'var(--s1)', border: on ? 'var(--ac)' : 'var(--l1)', priceC: on ? 'var(--ac)' : 'var(--tx)', op: out ? 0.45 : 1, cursor: out ? 'default' : 'pointer',
+        onTap: () => { if (out) return; this.setState(p => ({ sel: i, qty: Math.min(p.qty, Math.min(4, t.left)) })); } };
+    });
+    const selOut = tier.left === 0;
+    const sl = { title: st.allSold ? 'Sold out' : 'You are in', sub: st.allSold ? 'Every ticket was sold while you were in line. Nothing was charged.' : 'Choose your tickets. Nothing is reserved yet.',
+      banner: !!st.banner, bannerT: st.banner === 'more' ? `Only ${num(tier.left)} ${tier.name} ticket${tier.left === 1 ? ' is' : 's are'} left.` : 'Those seats just went to someone else.',
+      bannerB: st.banner === 'more' ? 'Choose fewer tickets or another tier.' : 'The numbers below are up to date. Nothing was reserved.',
+      qty: st.qty, minusDis: st.qty <= 1, plusDis: st.qty >= maxQ, minusOp: st.qty <= 1 ? 0.35 : 1, plusOp: st.qty >= maxQ ? 0.35 : 1,
+      hint: st.qty >= 4 ? '4 is the most one person can buy.' : 'Maximum 4 per person', hintC: st.qty >= 4 ? 'var(--st)' : 'var(--mu)',
+      totL: st.qty + ' × ' + tier.name, totR: b(tier.price * st.qty), holding: st.holding, idle: !st.holding, holdDis: st.holding || selOut, holdOp: selOut ? 0.4 : 1,
+      allSold: st.allSold, notAllSold: !st.allSold, pe: st.holding ? 'none' : 'auto' };
+
+    // Timed purchase screens
+    const timed = ['held', 'checkout', 'promptpay', 'card', 'confirming'].includes(scr);
+    const { sub, disc, total } = this.total(st);
+    const sum = { tier: tier.name, qty: st.qty, each: b(tier.price), total: b(total), promos: st.promo ? [{ name: 'Early Bird −10%', amt: '−' + b(disc) }] : [] };
+    const methodsDef = [{ id: 'pp', tile: 'PP', name: 'PromptPay', line: 'Scan with your banking app' }, { id: 'card', tile: 'CARD', name: 'Credit or debit card', line: 'Visa, Mastercard' }];
+    const methods = methodsDef.map(m => { const dn = st.allDown || st.down === m.id, on = st.method === m.id && !dn;
+      return { ...m, delay: (0.2 + methodsDef.indexOf(m) * 0.07) + 's', line: dn ? 'Not available right now' : m.line, lineC: dn ? 'var(--st)' : 'var(--mu)', sel: on, bg: on ? 'var(--acw)' : 'var(--s1)', border: on ? 'var(--ac)' : 'var(--l1)', op: dn ? 0.45 : 1, cursor: dn ? 'default' : 'pointer', onTap: () => { if (!dn) this.setState({ method: m.id }); } }; });
+    const titles = { held: { title: 'Seats held', sub: 'Yours until the timer runs out.' }, checkout: { title: 'Pay ' + b(total), sub: `${st.qty} × ${tier.name} for The 1975, 14 Nov 2026` },
+      promptpay: { title: 'Pay ' + b(total), sub: 'PromptPay' }, card: { title: 'Pay ' + b(total), sub: 'Credit or debit card' } };
+    const showMethods = scr === 'checkout' || ((scr === 'promptpay' || scr === 'card') && st.declined);
+    const payFooter = scr === 'checkout' || ((scr === 'promptpay' || scr === 'card') && st.declined);
+    const payDis = !st.method || st.allDown || st.down === st.method;
+    const pay = () => { if (payDis) return; this.go(st.method === 'pp' ? 'promptpay' : 'card', { declined: false, payWorking: false, viaCard: st.method === 'card', card: { num: '', exp: '', cvc: '', name: '' }, cardTried: false, cardBusy: false }); };
+
+    // Ticket
+    const ord = st.orders[st.oIdx] || st.orders[0] || this.bpOrder(), ti = Math.min(st.tIdx, ord.ids.length - 1);
+    const cancelled = ord.cancelled || st.tv === 'b', pastT = ord.past || st.tv === 'c';
+    const tk = { short: ord.name.toUpperCase(), sub: `TICKET ${ti + 1} OF ${ord.ids.length} · ${ord.tier.toUpperCase()}`, id: ord.ids[ti], holder: 'Kenji', event: ord.full, venue: ord.venue, date: ord.long, tier: ord.tier,
+      cancelled, past: pastT && !cancelled, qrOp: cancelled ? 0.18 : 1, dim: pastT && !cancelled ? 0.55 : 1, multi: ord.ids.length > 1,
+      cardT: cancelled ? 'This event was cancelled.' : 'Single use.', cardB: cancelled ? 'This ticket will not get you in.' : 'This code works once. Do not share it.',
+      bg: ord.id === 'o1' ? 'linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.35) 55%,rgba(0,0,0,.85) 100%), url(assets/the-1975.png) 50% 40%/cover, var(--s1)' : 'radial-gradient(120% 80% at 0% 0%,var(--acw),transparent 60%),radial-gradient(100% 80% at 100% 100%,rgba(120,140,255,.12),transparent 60%),var(--s1)', cardBg: cancelled ? 'var(--stw)' : 'var(--s1)', cardC: cancelled ? 'var(--st)' : 'var(--tx)' };
+    const dots = ord.ids.map((_, i) => ({ bg: i === ti ? 'var(--ac)' : 'var(--l2)', w: i === ti ? '22px' : '7px', onTap: () => this.setState({ tIdx: i }) }));
+
+    // Tickets list
+    const card = (o, i, k) => ({ delay: (0.08 + k * 0.08) + 's', day: o.day, mon: o.mon, name: o.name, meta: o.venue + ' · ' + o.time, pill: o.cancelled ? 'CANCELLED' : o.qty + ' · ' + o.tier, pillColor: o.cancelled ? 'var(--st)' : 'var(--ac)', onTap: () => this.go('ticket', { oIdx: i, tIdx: 0, tv: '' }) });
+    const upcoming = [], past = [];
+    st.orders.forEach((o, i) => { const L = o.past ? past : upcoming; L.push(card(o, i, L.length)); });
+
+    return {
+      frameRef: this.frameRef, isFull: !!st.full, acctML: st.full ? '0' : 'auto', toggleFull: () => this.toggleFull(),
+      timerC: st.holdLeft < 60 ? 'var(--st)' : 'var(--ac)', timerAnim: st.holdLeft < 60 ? 'tq-pulse 1s ease-in-out infinite' : 'none',
+      tkNav: { prevDis: ti <= 0, nextDis: ti >= ord.ids.length - 1, prevOp: ti <= 0 ? 0.3 : 1, nextOp: ti >= ord.ids.length - 1 ? 0.3 : 1, label: `Ticket ${ti + 1} of ${ord.ids.length}` },
+      tkPrev: () => this.stepTicket(-1), tkNext: () => this.stepTicket(1),
+      tkQrEl: React.createElement('div', { key: 'qr' + tk.id + this._tkDir, style: { display: 'grid', gridTemplateColumns: 'repeat(25,1fr)', aspectRatio: '1', opacity: tk.qrOp, animation: (this._tkDir < 0 ? 'tq-slideR' : 'tq-slideL') + ' .4s cubic-bezier(.2,.8,.2,1) both' } }, this.qr(tk.id).map((c, i) => React.createElement('div', { key: i, style: { background: c } }))),
+      tkIdEl: React.createElement('span', { key: 'id' + tk.id, style: { display: 'inline-block', animation: 'tq-in .35s cubic-bezier(.2,.8,.2,1) both' } }, tk.id),
+      tabEvU: scr === 'events' ? 'var(--ac)' : 'transparent', tabTkU: scr === 'tickets' ? 'var(--ac)' : 'transparent',
+      featBg: 'url("assets/the-1975.png") 60% 40%/cover',
+      isA: look === 'a', isB: look === 'b', s, tabbed, preset: st.preset, presets: this.presetList(),
+      onJump: ev2 => this.preset(ev2.target.value), reset: () => this.preset('01a'),
+      tabEvC: scr === 'events' ? 'var(--ac)' : 'var(--mu)', tabTkC: scr === 'tickets' ? 'var(--ac)' : 'var(--mu)', tabAcC: scr === 'account' ? 'var(--ac)' : 'var(--mu)',
+      goEvents: () => this.go('events', { evIdx: 0 }), goTickets: () => this.go('tickets', { tv: '' }), goAccount: () => this.go('account'),
+      eventsEmpty: st.eventsEmpty, eventsAny: !st.eventsEmpty, feat, others, slides, slideDots, carRef: this.carRef,
+      query: st.query || '', hasQuery: searching, searching, browsing: !searching, hasList: others.length > 0, noResults: searching && others.length === 0,
+      noResultsT: 'No events match “' + (st.query || '').trim() + '”', resultLabel: others.length === 1 ? '1 RESULT' : others.length + ' RESULTS',
+      searchBorder: searching ? 'var(--ac)' : 'var(--l1)',
+      onQuery: e2 => this.setState({ query: e2.target.value }), clearQuery: () => this.setState({ query: '' }),
+      onCarScroll: e2 => { const i = Math.round(e2.currentTarget.scrollLeft / 362); if (i !== this.state.slide) this.setState({ slide: i }); },
+      carPD: e2 => { if (e2.pointerType !== 'mouse') return; const el = this.carRef.current; if (!el) return; this._drag = { x: e2.clientX, left: el.scrollLeft }; this._dragged = false; el.style.scrollSnapType = 'none'; el.style.cursor = 'grabbing'; },
+      carPM: e2 => { const d = this._drag, el = this.carRef.current; if (!d || !el) return; const dx = e2.clientX - d.x; if (Math.abs(dx) > 5) this._dragged = true; el.scrollLeft = d.left - dx; },
+      carPU: e2 => { const d = this._drag, el = this.carRef.current; if (!d || !el) return; this._drag = null; const dx = e2.clientX - d.x; const cur = Math.round(d.left / 362); const ni = Math.abs(dx) > 40 ? cur + (dx < 0 ? 1 : -1) : cur; el.style.cursor = 'grab'; this.toSlide(ni); setTimeout(() => { el.style.scrollSnapType = 'x mandatory'; this._dragged = false; }, 450); }, openFeat: () => this.go('event', { evIdx: 0 }),
+      ev: { bg: 'url("' + E.img + '") 50% 40%/cover', name: E.name, meta: (E.venue + ' · ' + E.date).toUpperCase(), sale: E.sale, saleDay: E.saleDay, rows }, e,
+      opensText: isBp ? 'Opens in ' + hms(st.opensIn) : E.opens, posText: 'Position ' + num(pos),
+      joinWorking: st.joinWorking, joinIdle: !st.joinWorking, join: () => this.joinQueue(false),
+      backToPlace: () => { this.go('queue', { welcome: true, qv: '' }); this.later(() => this.setState({ welcome: false }), 5000); },
+      q, flash: st.flash, r, joinAgain: () => this.joinQueue(true), backToEvent: () => this.go('event', { evIdx: 0, ev: 'b', tiers: this.tiers0() }),
+      tierRows, sl, qtyEl: React.createElement('span', { key: 'q' + st.qty, style: { animation: 'tq-in .25s cubic-bezier(.2,.8,.2,1) both', lineHeight: '26px' } }, st.qty), totEl: React.createElement('span', { key: 't' + sl.totR, style: { display: 'inline-block', animation: 'tq-in .3s cubic-bezier(.2,.8,.2,1) both' } }, sl.totR), minus: () => this.setState(p => ({ qty: Math.max(1, p.qty - 1) })), plus: () => this.setState(p => ({ qty: Math.min(maxQ, p.qty + 1) })),
+      hold: () => { if (sl.holdDis) return; this.setState({ holding: true }); this.later(() => this.doHold(), 1200); },
+      timed, titled: !!titles[scr], tt: titles[scr] || { title: '', sub: '' }, timer: mmss(st.holdLeft), timerPct: (st.holdLeft / 600 * 100).toFixed(2) + '%',
+      showSummary: scr === 'held' || scr === 'checkout', sum, droppedT: `${tier.name} just dropped from ${num(st.hFrom)} to ${num(st.hTo)}.`,
+      bannerDown: scr === 'checkout' && st.allDown, bannerDeclined: (scr === 'promptpay' || scr === 'card') && st.declined,
+      showMethods, methods, showQr: scr === 'promptpay' && !st.declined, qrPay: this.qr('pay' + total),
+      showCardPanel: scr === 'card' && !st.declined, amountT: b(total), cf: this.cardForm(), cardBusy: !!st.cardBusy, cardIdle: !st.cardBusy,
+      fillTest: () => this.setState({ card: { num: '4242 4242 4242 4242', exp: '12 / 28', cvc: '123', name: 'Kenji' }, cardTried: false }),
+      cardPay: () => { if (st.cardBusy) return; const v = this.cardErrors(); if (Object.values(v).some(Boolean)) { this.setState({ cardTried: true }); return; }
+        this.setState({ cardBusy: true }); const dec = (st.card || {}).num.replace(/\s/g, '').endsWith('0002');
+        this.later(() => { if (dec) this.setState({ cardBusy: false, declined: true, method: '' }); else this.go('confirming', { ct: 0, slow: false, cardBusy: false }); }, 900); },
+      doNotClose: scr === 'confirming' || (scr === 'promptpay' && !st.declined),
+      slowT: st.slow && st.ct > 8 ? 'The bank is taking longer than usual. We are still checking. You will not be charged twice.' : 'Waiting for the bank. This usually takes a few seconds.',
+      hasFooter: scr !== 'confirming', noFooter: scr === 'confirming',
+      toCheckout: () => this.go('checkout', { method: '' }), openRelease: () => this.setState({ sheet: 'release' }),
+      payFooter, payDis, payOp: payDis ? 0.4 : 1, pay, payLabel: 'Pay ' + b(total), payHint: st.allDown ? 'Payment is not available right now' : (!st.method ? 'Choose how to pay' : ' '),
+      ppFooter: scr === 'promptpay' && !st.declined, payWorking: st.payWorking, payIdle: !st.payWorking,
+      paid: () => { if (st.payWorking) return; this.setState({ payWorking: true }); this.later(() => this.go('confirming', { ct: 0, slow: false, payWorking: false }), 700); },
+      otherWay: () => this.go('checkout', { method: '' }),
+      sheetRelease: st.sheet === 'release', sheetSignout: st.sheet === 'signout', closeSheet: () => this.setState({ sheet: '' }),
+      releaseT: `The ${st.qty} ${tier.name} seats go back on sale straight away.`,
+      doRelease: () => this.go('released', { tiers: this.restore(st) }), openSignout: () => this.setState({ sheet: 'signout' }),
+      paidT: `Paid ${b(total)} by ${st.viaCard ? 'card' : 'PromptPay'}.`, countT: st.qty === 1 ? 'One ticket.' : `${words[st.qty][0].toUpperCase() + words[st.qty].slice(1)} tickets, one for each seat.`,
+      stubs: (st.orders.find(o => o.id === 'o1') || this.bpOrder(st.qty, tier.name)).ids.map((id, i, a) => ({ delay: (0.45 + i * 0.12) + 's', head: `Ticket ${i + 1} of ${a.length}`, id, tier: tier.name, event: 'The 1975 Bangkok', venue: 'Impact Arena', dt: '14 Nov 2026, 19:00', qr: this.qr(id) })),
+      openTicket1: () => this.go('ticket', { oIdx: Math.max(0, st.orders.findIndex(o => o.id === 'o1')), tIdx: 0, tv: '' }),
+      tk, tkQr: this.qr(tk.id), dots,
+      onPD: ev2 => { this._px = ev2.clientX; }, onPU: ev2 => { const d = ev2.clientX - (this._px ?? ev2.clientX); if (Math.abs(d) > 40) this.setState({ tIdx: Math.max(0, Math.min(ord.ids.length - 1, ti + (d < 0 ? 1 : -1))) }); },
+      ticketsAny: st.orders.length > 0, ticketsEmpty: st.orders.length === 0, hasUp: upcoming.length > 0, hasPast: past.length > 0, upcoming, past,
+      tkCount: upcoming.length === 0 ? 'No upcoming events' : upcoming.length + ' upcoming',
+    };
+  }
+}
+</script>
+</body>
+</html>

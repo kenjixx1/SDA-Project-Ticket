@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E7E7E7;font-family:system-ui,sans-serif}a{color:#2b3a55}a:hover{color:#0B1220}@keyframes oc-spin{to{transform:rotate(360deg)}}@keyframes oc-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}input::placeholder{color:#5c5c62}</style>
+</helmet>
+<section id="t2" style="padding:40px 48px 48px;display:flex;flex-direction:column;gap:22px">
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:900px">
+    <div style="display:flex;align-items:center;gap:10px"><a href="#t2" style="font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#0B1220;color:#fff;border-radius:4px;text-decoration:none">2</a><span style="font:600 15px/1.2 system-ui,sans-serif;color:#0B1220">Organizer console: create an event (SCR-30 to SCR-34)</span></div>
+    <p style="margin:0;font:400 13px/1.55 system-ui,sans-serif;color:#4a5568;text-wrap:pretty">Desktop, 1440 × 900, in look 1a (lime on black). Fully clickable: My events → Details → Tiers → Review → Publish → Event overview. Validation is live, so typing a past sale time or a tier with 0 seats shows the refusal in place. Use the menu to jump to any variant. Demo clock is fixed at 15 Sep 2026, 09:00 so the story dates are in the future.</p>
+  </div>
+  <div id="2a" style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:12px;font:400 12px/1.3 system-ui,sans-serif;color:#4a5568">
+      <a href="#2a" style="font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(11,18,32,.1);color:#0B1220;border-radius:5px;text-decoration:none">2a</a>
+      <span>Jump to</span>
+      <select value="{{ variant }}" onChange="{{ onVariant }}" style="font:500 12px system-ui,sans-serif;padding:5px 8px;border-radius:6px;border:1px solid #c4c7cc;background:#fff;color:#0B1220">
+        <option value="30a">SCR-30a · My events</option>
+        <option value="30b">SCR-30b · No events</option>
+        <option value="31a">SCR-31a · Details</option>
+        <option value="31b">SCR-31b · Sale time in the past</option>
+        <option value="32a">SCR-32a · Tiers</option>
+        <option value="32b">SCR-32b · Invalid tier</option>
+        <option value="33a">SCR-33a · Review, ready</option>
+        <option value="33b">SCR-33b · Review, no tiers</option>
+        <option value="34a">SCR-34a · Overview, draft</option>
+        <option value="34b">SCR-34b · Overview, published</option>
+      </select>
+    </div>
+    <div style="--bg:#000000;--s1:#111112;--s2:#1A1A1C;--s3:#252527;--l1:rgba(255,255,255,.08);--l2:rgba(255,255,255,.18);--tx:#F2F2F2;--mu:#8F8F94;--ac:#C5F25A;--aci:#000000;--acw:rgba(197,242,90,.09);--st:#FF8B7B;--stw:rgba(255,139,123,.11);--f:'Instrument Sans',system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,monospace;width:1440px;height:900px;flex:none;background:var(--bg);color:var(--tx);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.25);font-family:var(--f);position:relative">
+      <sc-if value="{{ pkOpen }}"><div onClick="{{ closePk }}" style="position:absolute;inset:0;z-index:5"></div></sc-if>
+
+      <div style="flex:none;height:64px;padding:0 32px;display:flex;align-items:center;gap:36px;border-bottom:1px solid var(--l1)">
+        <div style="display:flex;align-items:center;gap:10px"><span style="width:10px;height:10px;border-radius:50%;background:var(--ac)"></span><span style="font:600 15px/1 var(--f)">Ticket &amp; Queue · Organizer</span></div>
+        <span onClick="{{ goList }}" style="font:500 14px/1 var(--f);color:var(--tx);cursor:pointer;padding:6px 0;border-bottom:2px solid var(--ac)">Events</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px"><span style="width:32px;height:32px;border-radius:50%;background:var(--ac);color:var(--aci);display:flex;align-items:center;justify-content:center;font:700 14px/1 var(--f)">C</span><span style="font:500 14px/1 var(--f)">Chai</span></div>
+      </div>
+
+      <div style="flex:1;min-height:0;overflow:auto">
+        <div style="max-width:1200px;margin:0 auto;padding:44px 40px 60px;box-sizing:border-box;display:flex;flex-direction:column;gap:28px">
+
+          <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 40px/1 var(--f);letter-spacing:-0.02em">My events</span><span style="font:400 15px/1 var(--f);color:var(--mu)">{{ listSub }}</span></div>
+              <sc-if value="{{ hasEvents }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goCreate }}" style-active="transform:scale(0.97)" style="height:48px;padding:0 22px;border:0;border-radius:16px;background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer">Create event</button></sc-if>
+            </div>
+            <sc-if value="{{ hasEvents }}" hint-placeholder-val="{{ true }}">
+              <div style="border:1px solid var(--l1);border-radius:22px;overflow:hidden;background:var(--s1)">
+                <div style="display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.3fr) minmax(0,1.4fr) minmax(0,1.4fr) 130px 140px;gap:20px;padding:16px 26px;border-bottom:1px solid var(--l1);font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)">
+                  <span>EVENT</span><span>VENUE</span><span>EVENT DATE</span><span>SALE OPENS</span><span>STATE</span><span style="text-align:right">SOLD</span>
+                </div>
+                <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+                  <div onClick="{{ r.open }}" style-hover="background:var(--s2)" style="display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,1.3fr) minmax(0,1.4fr) minmax(0,1.4fr) 130px 140px;gap:20px;align-items:center;padding:20px 26px;border-top:1px solid var(--l1);cursor:pointer;transition:background .15s">
+                    <span style="font:600 16px/1.3 var(--f);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</span>
+                    <span style="font:400 14px/1.3 var(--f);color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.venue }}</span>
+                    <span style="font:400 13px/1.3 var(--fm);font-variant-numeric:tabular-nums">{{ r.ev }}</span>
+                    <span style="font:400 13px/1.3 var(--fm);font-variant-numeric:tabular-nums;color:var(--mu)">{{ r.sale }}</span>
+                    <div style="display:flex"><span style="font:600 10.5px/1 var(--fm);letter-spacing:.08em;padding:6px 9px;border-radius:999px;background:{{ r.chipBg }};color:{{ r.chipC }};box-shadow:inset 0 0 0 1px {{ r.chipBd }}">{{ r.stateL }}</span></div>
+                    <span style="font:500 13px/1.3 var(--fm);font-variant-numeric:tabular-nums;text-align:right">{{ r.sold }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noEvents }}">
+              <div style="border:1px dashed var(--l2);border-radius:22px;padding:90px 20px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+                <span style="width:64px;height:64px;border-radius:50%;border:1.5px dashed var(--l2);margin-bottom:10px"></span>
+                <span style="font:600 22px/1.2 var(--f)">No events yet</span>
+                <span style="font:400 15px/1.5 var(--f);color:var(--mu)">Create your first event to start selling.</span>
+                <button onClick="{{ goCreate }}" style-active="transform:scale(0.97)" style="margin-top:14px;height:48px;padding:0 22px;border:0;border-radius:16px;background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer">Create event</button>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <sc-if value="{{ isWizard }}">
+            <div style="display:flex;align-items:center;gap:14px">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 12px/1 var(--fm);background:{{ s.dotBg }};color:{{ s.dotC }};box-shadow:inset 0 0 0 1px {{ s.dotBd }}">{{ s.n }}</span><span style="font:500 14px/1 var(--f);color:{{ s.labelC }}">{{ s.label }}</span></div>
+                  <sc-if value="{{ s.notLast }}"><span style="width:48px;height:1px;background:var(--l2)"></span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isDetails }}">
+            <span style="font:600 40px/1 var(--f);letter-spacing:-0.02em">{{ detailsTitle }}</span>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:40px;align-items:start">
+              <div style="background:var(--s1);border:1px solid var(--l1);border-radius:22px;padding:32px;display:flex;flex-direction:column;gap:26px">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;justify-content:space-between"><label style="font:500 14px/1 var(--f)">Event name</label><span style="font:400 12px/1 var(--fm);color:var(--mu)">{{ fld.name.count }}</span></div>
+                  <input value="{{ fld.name.v }}" onChange="{{ fld.name.on }}" onBlur="{{ fld.name.blur }}" maxLength="40" placeholder="The 1975 Bangkok" style-focus="border-color:var(--ac)" style="height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid {{ fld.name.bd }};color:var(--tx);font:500 16px/1 var(--f);outline:none;color-scheme:dark">
+                  <span style="font:500 13px/1.3 var(--f);color:var(--st);min-height:17px">{{ fld.name.err }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;justify-content:space-between"><label style="font:500 14px/1 var(--f)">Venue</label><span style="font:400 12px/1 var(--fm);color:var(--mu)">{{ fld.venue.count }}</span></div>
+                  <input value="{{ fld.venue.v }}" onChange="{{ fld.venue.on }}" onBlur="{{ fld.venue.blur }}" maxLength="30" placeholder="Impact Arena" style-focus="border-color:var(--ac)" style="height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid {{ fld.venue.bd }};color:var(--tx);font:500 16px/1 var(--f);outline:none;color-scheme:dark">
+                  <span style="font:500 13px/1.3 var(--f);color:var(--st);min-height:17px">{{ fld.venue.err }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label style="font:500 14px/1 var(--f)">Event date and time</label>
+                  <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px">
+                    <div style="position:relative">
+                      <button onClick="{{ pk.evDate.toggle }}" style="width:100%;height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid {{ pk.evDate.bd }};color:{{ pk.evDate.c }};font:500 15px/1 var(--fm);display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left"><span>{{ pk.evDate.label }}</span><span style="width:7px;height:7px;border-right:1.5px solid var(--mu);border-bottom:1.5px solid var(--mu);transform:rotate(45deg) translateY(-2px)"></span></button>
+                      <sc-if value="{{ pk.evDate.open }}">
+                        <div style="position:absolute;top:58px;left:0;z-index:10;width:320px;padding:18px;border-radius:18px;background:var(--s2);border:1px solid var(--l2);box-shadow:0 24px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:12px;animation:oc-in .18s ease-out both">
+                          <div style="display:flex;align-items:center;justify-content:space-between"><span onClick="{{ cal.prev }}" style-hover="background:var(--s3)" style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:500 16px/1 var(--f);color:{{ cal.prevC }}">‹</span><span style="font:600 15px/1 var(--f)">{{ cal.title }}</span><span onClick="{{ cal.next }}" style-hover="background:var(--s3)" style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:500 16px/1 var(--f)">›</span></div>
+                          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font:500 11px/1 var(--fm);color:var(--mu);text-align:center"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+                          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+                            <sc-for list="{{ cal.days }}" as="d" hint-placeholder-count="35">
+                              <span onClick="{{ d.on }}" style-hover="{{ d.hover }}" style="height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--fm);cursor:{{ d.cur }};background:{{ d.bg }};color:{{ d.c }};box-shadow:inset 0 0 0 1px {{ d.bd }}">{{ d.n }}</span>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <div style="position:relative">
+                      <button onClick="{{ pk.evTime.toggle }}" style="width:100%;height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid {{ pk.evTime.bd }};color:{{ pk.evTime.c }};font:500 15px/1 var(--fm);display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left"><span>{{ pk.evTime.label }}</span><span style="width:7px;height:7px;border-right:1.5px solid var(--mu);border-bottom:1.5px solid var(--mu);transform:rotate(45deg) translateY(-2px)"></span></button>
+                      <sc-if value="{{ pk.evTime.open }}">
+                        <div style="position:absolute;top:58px;right:0;z-index:10;padding:14px;border-radius:18px;background:var(--s2);border:1px solid var(--l2);box-shadow:0 24px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:12px;animation:oc-in .18s ease-out both">
+                          <div style="display:flex;gap:6px">
+                            <sc-for list="{{ tp.cols }}" as="col" hint-placeholder-count="2">
+                              <div style="display:flex;flex-direction:column;gap:8px;width:64px"><span style="font:500 10.5px/1 var(--fm);letter-spacing:.1em;color:var(--mu);text-align:center">{{ col.h }}</span>
+                                <div data-tcol="1" style="height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none">
+                                  <sc-for list="{{ col.items }}" as="it" hint-placeholder-count="6"><span data-on="{{ it.sel }}" onClick="{{ it.on }}" style-hover="{{ it.hover }}" style="flex:none;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--fm);cursor:pointer;background:{{ it.bg }};color:{{ it.c }}">{{ it.v }}</span></sc-for>
+                                </div>
+                              </div>
+                            </sc-for>
+                          </div>
+                          <button onClick="{{ closePk }}" style="height:38px;border:0;border-radius:12px;background:var(--ac);color:var(--aci);font:600 13px/1 var(--f);cursor:pointer">Done</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                  <span style="font:500 13px/1.3 var(--f);color:var(--st);min-height:17px">{{ fld.ev.err }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;justify-content:space-between"><label style="font:500 14px/1 var(--f)">Sale opens</label><span style="font:400 12px/1 var(--fm);color:var(--mu)">to the second</span></div>
+                  <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px">
+                    <div style="position:relative">
+                      <button onClick="{{ pk.saleDate.toggle }}" style="width:100%;height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid {{ pk.saleDate.bd }};color:{{ pk.saleDate.c }};font:500 15px/1 var(--fm);display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left"><span>{{ pk.saleDate.label }}</span><span style="width:7px;height:7px;border-right:1.5px solid var(--mu);border-bottom:1.5px solid var(--mu);transform:rotate(45deg) translateY(-2px)"></span></button>
+                      <sc-if value="{{ pk.saleDate.open }}">
+                        <div style="position:absolute;bottom:58px;left:0;z-index:10;width:320px;padding:18px;border-radius:18px;background:var(--s2);border:1px solid var(--l2);box-shadow:0 24px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:12px;animation:oc-in .18s ease-out both">
+                          <div style="display:flex;align-items:center;justify-content:space-between"><span onClick="{{ cal.prev }}" style-hover="background:var(--s3)" style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:500 16px/1 var(--f);color:{{ cal.prevC }}">‹</span><span style="font:600 15px/1 var(--f)">{{ cal.title }}</span><span onClick="{{ cal.next }}" style-hover="background:var(--s3)" style="width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:500 16px/1 var(--f)">›</span></div>
+                          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font:500 11px/1 var(--fm);color:var(--mu);text-align:center"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+                          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+                            <sc-for list="{{ cal.days }}" as="d" hint-placeholder-count="35">
+                              <span onClick="{{ d.on }}" style-hover="{{ d.hover }}" style="height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:500 13px/1 var(--fm);cursor:{{ d.cur }};background:{{ d.bg }};color:{{ d.c }};box-shadow:inset 0 0 0 1px {{ d.bd }}">{{ d.n }}</span>
+                            </sc-for>
+                          </div>
+                          <span style="font:400 12px/1.4 var(--f);color:var(--mu)">Days before today are unavailable.</span>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <div style="position:relative">
+                      <button onClick="{{ pk.saleTime.toggle }}" style="width:100%;height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid {{ pk.saleTime.bd }};color:{{ pk.saleTime.c }};font:500 15px/1 var(--fm);display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left"><span>{{ pk.saleTime.label }}</span><span style="width:7px;height:7px;border-right:1.5px solid var(--mu);border-bottom:1.5px solid var(--mu);transform:rotate(45deg) translateY(-2px)"></span></button>
+                      <sc-if value="{{ pk.saleTime.open }}">
+                        <div style="position:absolute;bottom:58px;right:0;z-index:10;padding:14px;border-radius:18px;background:var(--s2);border:1px solid var(--l2);box-shadow:0 24px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:12px;animation:oc-in .18s ease-out both">
+                          <div style="display:flex;gap:6px">
+                            <sc-for list="{{ tp.cols }}" as="col" hint-placeholder-count="3">
+                              <div style="display:flex;flex-direction:column;gap:8px;width:64px"><span style="font:500 10.5px/1 var(--fm);letter-spacing:.1em;color:var(--mu);text-align:center">{{ col.h }}</span>
+                                <div data-tcol="1" style="height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none">
+                                  <sc-for list="{{ col.items }}" as="it" hint-placeholder-count="6"><span data-on="{{ it.sel }}" onClick="{{ it.on }}" style-hover="{{ it.hover }}" style="flex:none;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:500 14px/1 var(--fm);cursor:pointer;background:{{ it.bg }};color:{{ it.c }}">{{ it.v }}</span></sc-for>
+                                </div>
+                              </div>
+                            </sc-for>
+                          </div>
+                          <button onClick="{{ closePk }}" style="height:38px;border:0;border-radius:12px;background:var(--ac);color:var(--aci);font:600 13px/1 var(--f);cursor:pointer">Done</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                  <span style="font:500 13px/1.3 var(--f);color:var(--st);min-height:17px">{{ fld.sale.err }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label style="font:500 14px/1 var(--f)">Admission rate</label>
+                  <div style="display:flex;align-items:center;gap:12px"><input type="number" min="1" value="{{ fld.rate.v }}" onChange="{{ fld.rate.on }}" onBlur="{{ fld.rate.blur }}" style-focus="border-color:var(--ac)" style="width:120px;height:50px;padding:0 16px;border-radius:14px;background:var(--bg);border:1px solid {{ fld.rate.bd }};color:var(--tx);font:500 16px/1 var(--fm);outline:none;color-scheme:dark;box-sizing:border-box"><span style="font:400 15px/1 var(--f);color:var(--mu)">per second</span></div>
+                  <span style="font:500 13px/1.3 var(--f);color:var(--st);min-height:17px">{{ fld.rate.err }}</span>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:14px;padding-top:6px">
+                <span style="font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)">ADMISSION RATE</span>
+                <span style="font:400 14px/1.55 var(--f);color:var(--mu);text-wrap:pretty">How many people the queue lets in each second. Work it out from your seats and the 10-minute hold: 7,500 seats ÷ 600 seconds of hold ≈ 12 per second. Faster than this and people get in only to find every seat already held.</span>
+                <span style="font:400 14px/1.55 var(--f);color:var(--mu);text-wrap:pretty">You can change it later, even while the sale is on.</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-top:22px;border-top:1px solid var(--l1)">
+              <button onClick="{{ goList }}" style-hover="background:var(--s2)" style="height:50px;padding:0 22px;border:1px solid var(--l2);border-radius:16px;background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Cancel</button>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+                <button onClick="{{ saveDetails }}" disabled="{{ d.dis }}" style-active="transform:scale(0.97)" style="height:50px;padding:0 24px;border:0;border-radius:16px;background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer;opacity:{{ d.op }}">Save and add tiers</button>
+                <span style="font:400 13px/1.3 var(--f);color:var(--mu)">{{ d.hint }}</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isTiers }}">
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 40px/1.05 var(--f);letter-spacing:-0.02em">{{ tiersTitle }}</span><span style="font:400 15px/1.4 var(--f);color:var(--mu)">Each tier is a pool of seats at one price. Up to 8 tiers.</span></div>
+            <div style="background:var(--s1);border:1px solid var(--l1);border-radius:22px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) 90px;gap:16px;padding:16px 26px;border-bottom:1px solid var(--l1);font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)">
+                <span>NAME</span><span style="text-align:right">PRICE (฿)</span><span style="text-align:right">SEATS</span><span></span>
+              </div>
+              <sc-for list="{{ tierRows }}" as="t" hint-placeholder-count="3">
+                <div style="display:flex;flex-direction:column;gap:8px;padding:14px 26px;border-top:1px solid var(--l1)">
+                  <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) 90px;gap:16px;align-items:center">
+                    <input value="{{ t.name }}" onChange="{{ t.onName }}" onBlur="{{ t.blurName }}" maxLength="20" placeholder="Tier name" style-focus="border-color:var(--ac)" style="height:46px;padding:0 14px;border-radius:12px;background:var(--bg);border:1px solid {{ t.bName }};color:var(--tx);font:500 15px/1 var(--f);outline:none;min-width:0">
+                    <input value="{{ t.price }}" onChange="{{ t.onPrice }}" onBlur="{{ t.blurPrice }}" inputMode="numeric" placeholder="0" style-focus="border-color:var(--ac)" style="height:46px;padding:0 14px;border-radius:12px;background:var(--bg);border:1px solid {{ t.bPrice }};color:var(--tx);font:500 15px/1 var(--fm);text-align:right;outline:none;min-width:0;font-variant-numeric:tabular-nums">
+                    <input value="{{ t.seats }}" onChange="{{ t.onSeats }}" onBlur="{{ t.blurSeats }}" inputMode="numeric" placeholder="0" style-focus="border-color:var(--ac)" style="height:46px;padding:0 14px;border-radius:12px;background:var(--bg);border:1px solid {{ t.bSeats }};color:var(--tx);font:500 15px/1 var(--fm);text-align:right;outline:none;min-width:0;font-variant-numeric:tabular-nums">
+                    <span onClick="{{ t.onRemove }}" style-hover="color:var(--st)" style="font:500 13px/1 var(--f);color:var(--mu);cursor:pointer;text-align:right">Remove</span>
+                  </div>
+                  <sc-if value="{{ t.hasMsg }}"><span style="font:500 13px/1.3 var(--f);color:var(--st)">{{ t.msg }}</span></sc-if>
+                </div>
+              </sc-for>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 26px;border-top:1px solid var(--l1)">
+                <button onClick="{{ addRow }}" disabled="{{ tz.addDis }}" style-hover="background:var(--s2)" style="height:40px;padding:0 16px;border:1px solid var(--l2);border-radius:12px;background:transparent;color:var(--tx);font:500 14px/1 var(--f);cursor:pointer;opacity:{{ tz.addOp }}">+ Add tier</button>
+                <span style="font:500 14px/1 var(--fm);font-variant-numeric:tabular-nums;color:{{ tz.totalC }}">{{ tz.total }}</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-top:22px;border-top:1px solid var(--l1)">
+              <button onClick="{{ goDetails }}" style-hover="background:var(--s2)" style="height:50px;padding:0 22px;border:1px solid var(--l2);border-radius:16px;background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Back</button>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+                <button onClick="{{ goReview }}" disabled="{{ tz.dis }}" style-active="transform:scale(0.97)" style="height:50px;padding:0 28px;border:0;border-radius:16px;background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer;opacity:{{ tz.op }}">Review</button>
+                <span style="font:400 13px/1.3 var(--f);color:var(--mu)">{{ tz.hint }}</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isReview }}">
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:600 40px/1.05 var(--f);letter-spacing:-0.02em">Review and publish</span><span style="font:400 15px/1.4 var(--f);color:var(--mu)">Check everything once. Customers see the event as soon as you publish.</span></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:24px;align-items:start">
+              <div style="background:var(--s1);border:1px solid var(--l1);border-radius:22px;padding:28px;display:flex;flex-direction:column">
+                <span style="font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu);margin-bottom:18px">EVENT</span>
+                <span style="font:700 26px/1.15 var(--f);letter-spacing:-0.01em;text-transform:uppercase;margin-bottom:22px;text-wrap:balance">{{ rv.name }}</span>
+                <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid var(--l1)"><span style="font:400 14px/1.3 var(--f);color:var(--mu)">Venue</span><span style="font:500 14px/1.3 var(--f);text-align:right">{{ rv.venue }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid var(--l1)"><span style="font:400 14px/1.3 var(--f);color:var(--mu)">Event date</span><span style="font:500 14px/1.3 var(--fm);text-align:right">{{ rv.ev }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid var(--l1)"><span style="font:400 14px/1.3 var(--f);color:var(--mu)">Sale opens</span><span style="font:500 14px/1.3 var(--fm);text-align:right;color:var(--ac)">{{ rv.sale }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:16px;padding:13px 0 0;border-top:1px solid var(--l1)"><span style="font:400 14px/1.3 var(--f);color:var(--mu)">Admission rate</span><span style="font:500 14px/1.3 var(--fm);text-align:right">{{ rv.rate }}</span></div>
+              </div>
+              <div style="background:var(--s1);border:1px solid var(--l1);border-radius:22px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:18px 26px;border-bottom:1px solid var(--l1);font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)"><span>TIER</span><span style="text-align:right">PRICE</span><span style="text-align:right">SEATS</span></div>
+                <sc-for list="{{ rv.tiers }}" as="t" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:16px 26px;border-top:1px solid var(--l1)"><span style="font:600 15px/1.3 var(--f)">{{ t.name }}</span><span style="font:500 14px/1.3 var(--fm);text-align:right;font-variant-numeric:tabular-nums">{{ t.price }}</span><span style="font:500 14px/1.3 var(--fm);text-align:right;font-variant-numeric:tabular-nums">{{ t.seats }}</span></div>
+                </sc-for>
+                <sc-if value="{{ rv.none }}"><div style="padding:30px 26px;font:400 14px/1.5 var(--f);color:var(--st)">No tiers yet.</div></sc-if>
+                <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:18px 26px;border-top:1px solid var(--l2);background:var(--s2)"><span style="font:600 15px/1.3 var(--f)">All</span><span></span><span style="font:600 14px/1.3 var(--fm);text-align:right;font-variant-numeric:tabular-nums">{{ rv.total }}</span></div>
+              </div>
+            </div>
+            <span style="font:400 14px/1.5 var(--f);color:var(--mu)">After publishing, customers see this event. Prices are frozen once the sale opens.</span>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;padding-top:22px;border-top:1px solid var(--l1)">
+              <button onClick="{{ goTiers }}" style-hover="background:var(--s2)" style="height:50px;padding:0 22px;border:1px solid var(--l2);border-radius:16px;background:transparent;color:var(--tx);font:500 15px/1 var(--f);cursor:pointer">Back</button>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+                <button onClick="{{ publish }}" disabled="{{ rv.dis }}" style-active="transform:scale(0.97)" style="height:50px;min-width:150px;padding:0 28px;border:0;border-radius:16px;background:var(--ac);color:var(--aci);font:600 15px/1 var(--f);cursor:pointer;opacity:{{ rv.op }};display:flex;align-items:center;justify-content:center;gap:10px">
+                  <sc-if value="{{ publishing }}"><span style="width:15px;height:15px;border-radius:50%;border:2px solid currentColor;border-top-color:transparent;animation:oc-spin .8s linear infinite"></span>Publishing…</sc-if>
+                  <sc-if value="{{ notPublishing }}" hint-placeholder-val="{{ true }}">Publish</sc-if>
+                </button>
+                <span style="font:400 13px/1.3 var(--f);color:{{ rv.hintC }}">{{ rv.hint }}</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isOverview }}">
+            <sc-if value="{{ ov.banner }}">
+              <div style="border-radius:16px;background:var(--acw);padding:16px 20px;display:flex;gap:8px;align-items:baseline;animation:oc-in .4s cubic-bezier(.2,.8,.2,1) both"><span style="font:600 15px/1.3 var(--f);color:var(--ac)">Published.</span><span style="font:400 15px/1.3 var(--f)">{{ ov.bannerT }}</span></div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:16px"><span style="font:600 40px/1.05 var(--f);letter-spacing:-0.02em">{{ ov.name }}</span><span style="font:600 11px/1 var(--fm);letter-spacing:.08em;padding:7px 10px;border-radius:999px;background:{{ ov.chipBg }};color:{{ ov.chipC }};box-shadow:inset 0 0 0 1px {{ ov.chipBd }}">{{ ov.stateL }}</span></div>
+              <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap"><span style="font:400 14px/1.3 var(--fm);color:var(--mu)">{{ ov.sub }}</span><span onClick="{{ editDetails }}" style="font:500 14px/1 var(--f);color:var(--ac);cursor:pointer">Edit details</span></div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:12px">
+              <sc-if value="{{ ov.isDraft }}"><button onClick="{{ continueSetup }}" style-active="transform:scale(0.97)" style="height:46px;padding:0 20px;border:0;border-radius:14px;background:var(--ac);color:var(--aci);font:600 14px/1 var(--f);cursor:pointer">Continue setup</button></sc-if>
+              <sc-if value="{{ ov.isSched }}"><div style="display:flex;flex-direction:column;gap:8px"><button disabled="{{ true }}" style="height:46px;padding:0 20px;border:0;border-radius:14px;background:var(--ac);color:var(--aci);font:600 14px/1 var(--f);opacity:.5">Live dashboard</button><span style="font:400 13px/1.3 var(--f);color:var(--mu)">Opens when the sale starts</span></div></sc-if>
+              <sc-if value="{{ ov.isOnSale }}"><button style-active="transform:scale(0.97)" style="height:46px;padding:0 20px;border:0;border-radius:14px;background:var(--ac);color:var(--aci);font:600 14px/1 var(--f);cursor:pointer">Live dashboard</button><button style-hover="background:var(--stw)" style="height:46px;padding:0 20px;border:1px solid var(--st);border-radius:14px;background:transparent;color:var(--st);font:600 14px/1 var(--f);cursor:pointer">Close the sale</button></sc-if>
+            </div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start">
+              <div style="background:var(--s1);border:1px solid var(--l1);border-radius:22px;overflow:hidden">
+                <div style="display:grid;grid-template-columns:minmax(0,1.6fr) repeat(5,minmax(0,1fr)) 60px;gap:16px;padding:18px 26px;border-bottom:1px solid var(--l1);font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)"><span>TIER</span><span style="text-align:right">PRICE</span><span style="text-align:right">TOTAL</span><span style="text-align:right">HELD</span><span style="text-align:right">SOLD</span><span style="text-align:right">REMAINING</span><span></span></div>
+                <sc-for list="{{ ov.tiers }}" as="t" hint-placeholder-count="3">
+                  <div style="display:grid;grid-template-columns:minmax(0,1.6fr) repeat(5,minmax(0,1fr)) 60px;gap:16px;align-items:center;padding:17px 26px;border-top:1px solid var(--l1);font:500 14px/1.3 var(--fm);font-variant-numeric:tabular-nums">
+                    <span style="font:600 15px/1.3 var(--f)">{{ t.name }}</span><span style="text-align:right">{{ t.price }}</span><span style="text-align:right">{{ t.total }}</span><span style="text-align:right;color:var(--ac)">{{ t.held }}</span><span style="text-align:right">{{ t.sold }}</span><span style="text-align:right">{{ t.rem }}</span><span onClick="{{ continueSetup }}" style="font:500 13px/1 var(--f);color:var(--ac);text-align:right;cursor:pointer">Edit</span>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ ov.noTiers }}"><div style="padding:24px 26px;border-top:1px solid var(--l1);font:400 14px/1.5 var(--f);color:var(--mu)">No tiers yet. Add one to publish.</div></sc-if>
+                <div style="padding:16px 26px;border-top:1px solid var(--l1)"><button onClick="{{ continueSetup }}" style-hover="background:var(--s2)" style="height:40px;padding:0 16px;border:1px solid var(--l2);border-radius:12px;background:transparent;color:var(--tx);font:500 14px/1 var(--f);cursor:pointer">+ Add tier</button></div>
+              </div>
+              <div style="background:var(--s1);border:1px solid var(--l1);border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px">
+                <span style="font:500 11px/1 var(--fm);letter-spacing:.1em;color:var(--mu)">QUEUE</span>
+                <span style="font:400 14px/1 var(--f);color:var(--mu)">Admission rate</span>
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:600 30px/1 var(--fm);font-variant-numeric:tabular-nums">{{ ov.rate }}<span style="font:400 14px/1 var(--f);color:var(--mu)"> per second</span></span><span style="font:500 14px/1 var(--f);color:var(--ac);cursor:pointer">Change</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const NOW = new Date('2026-09-15T09:00:00');
+const BLANK_F = { name: '', venue: '', evDate: '', evTime: '', saleDate: '', saleTime: '', rate: '12' };
+const STORY_F = { name: 'The 1975 Bangkok', venue: 'Impact Arena', evDate: '2026-11-14', evTime: '19:00', saleDate: '2026-10-01', saleTime: '10:00:00', rate: '12' };
+const STORY_T = [['VIP', '6500', '500'], ['Zone A', '3800', '2000'], ['Zone B', '1900', '5000']];
+let uid = 1;
+const row = (n = '', p = '', s = '', t = {}) => ({ id: uid++, name: n, price: p, seats: s, t });
+const storyRows = () => STORY_T.map(a => row(...a));
+const SEED = () => [
+  { id: 'mm', name: 'Marshmello Bangkok', venue: 'Moonstar Studio', ev: '2026-12-18T20:00', sale: '2026-10-20T10:00:00', state: 'DRAFT', rate: 8, tiers: [] },
+  { id: 'aw', name: 'Alan Walker Bangkok', venue: 'UOB Live', ev: '2026-12-05T20:00', sale: '2026-09-28T10:00:00', state: 'SCHEDULED', rate: 10, tiers: [{ name: 'Zone A', price: 3600, seats: 1200 }, { name: 'Zone B', price: 2400, seats: 2800 }] },
+  { id: 'bm', name: 'Bruno Mars Bangkok', venue: 'Thunder Dome', ev: '2026-11-22T20:00', sale: '2026-09-10T10:00:00', state: 'ON_SALE', rate: 12, tiers: [{ name: 'Gold', price: 5800, seats: 800, held: 20, sold: 640 }, { name: 'Silver', price: 2900, seats: 2400, held: 44, sold: 1910 }, { name: 'Standing', price: 1200, seats: 3000, held: 60, sold: 2260 }] },
+];
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const pad = n => String(n).padStart(2, '0');
+const fmt = s => { const d = s ? new Date(s) : null; if (!d || isNaN(d)) return '—'; return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}${d.getSeconds() ? ':' + pad(d.getSeconds()) : ''}`; };
+const num = n => Number(n).toLocaleString('en-US');
+const isInt = v => /^\d+$/.test(String(v).trim());
+const CHIP = {
+  DRAFT: { l: 'DRAFT', bg: 'var(--s3)', c: 'var(--mu)', bd: 'var(--l2)' },
+  SCHEDULED: { l: 'SCHEDULED', bg: 'transparent', c: 'var(--ac)', bd: 'var(--ac)' },
+  ON_SALE: { l: 'ON SALE', bg: 'var(--ac)', c: 'var(--aci)', bd: 'var(--ac)' },
+};
+
+class Component extends DCLogic {
+  state = { variant: '30a', screen: 'list', events: SEED(), f: { ...BLANK_F }, touched: {}, tiers: [], editId: null, current: null, banner: false, publishing: false, forceTiers: false };
+
+  apply(v) {
+    const base = { pk: null, variant: v, events: SEED(), touched: {}, banner: false, publishing: false, editId: null, current: null, forceTiers: false };
+    const m = {
+      '30a': { screen: 'list' },
+      '30b': { screen: 'list', events: [] },
+      '31a': { screen: 'details', f: { ...BLANK_F }, tiers: [] },
+      '31b': { screen: 'details', f: { ...STORY_F, saleDate: '2026-09-14', saleTime: '10:00:00' }, tiers: [], touched: { sale: 1 } },
+      '32a': { screen: 'tiers', f: { ...STORY_F }, tiers: storyRows() },
+      '32b': { screen: 'tiers', f: { ...STORY_F }, tiers: [row('VIP', '6500', '500'), row('Zone A', '3800', '0', { seats: 1 }), row('Zone B', '1900', '5000')] },
+      '33a': { screen: 'review', f: { ...STORY_F }, tiers: storyRows() },
+      '33b': { screen: 'review', f: { ...STORY_F }, tiers: [] },
+      '34a': { screen: 'overview', current: 'mm' },
+      '34b': null,
+    };
+    if (v === '34b') {
+      const ev = this.toEvent({ ...STORY_F }, storyRows(), 'new', 'SCHEDULED');
+      this.setState({ ...base, screen: 'overview', events: [ev, ...SEED()], current: 'new', banner: true });
+      return;
+    }
+    this.setState({ ...base, ...m[v] });
+  }
+
+  toEvent(f, tiers, id, state) {
+    return { id, name: f.name.trim(), venue: f.venue.trim(), ev: `${f.evDate}T${f.evTime}`, sale: `${f.saleDate}T${f.saleTime}`, state, rate: Number(f.rate), tiers: tiers.map(t => ({ name: t.name.trim(), price: Number(t.price), seats: Number(t.seats) })) };
+  }
+  fromEvent(e) {
+    const [evDate, evTime] = e.ev.split('T'); const [saleDate, saleTime] = e.sale.split('T');
+    return { f: { name: e.name, venue: e.venue, evDate, evTime, saleDate, saleTime, rate: String(e.rate) }, tiers: e.tiers.map(t => row(t.name, String(t.price), String(t.seats))) };
+  }
+
+  detailErrors() {
+    const { f } = this.state, e = {};
+    if (!f.name.trim()) e.name = 'Give the event a name.';
+    if (!f.venue.trim()) e.venue = 'Add the venue.';
+    const sale = f.saleDate && f.saleTime ? new Date(`${f.saleDate}T${f.saleTime}`) : null;
+    const ev = f.evDate && f.evTime ? new Date(`${f.evDate}T${f.evTime}`) : null;
+    if (!sale) e.sale = 'Pick the date and time the sale opens.';
+    else if (sale <= NOW) e.sale = `That time has already passed. Pick a time after ${fmt(NOW)}.`;
+    if (!ev) e.ev = 'Pick the date and time of the event.';
+    else if (sale && ev <= sale) e.ev = 'The event has to be after the sale opens.';
+    if (!isInt(f.rate) || Number(f.rate) < 1) e.rate = 'Let in at least 1 person per second.';
+    return e;
+  }
+  tierErrors() {
+    const { tiers } = this.state;
+    return tiers.map(t => {
+      const e = {};
+      const nm = t.name.trim().toLowerCase();
+      if (!nm) e.name = 'Give this tier a name.';
+      else if (tiers.some(o => o !== t && o.name.trim().toLowerCase() === nm)) e.name = 'Two tiers cannot share a name.';
+      if (!isInt(t.price)) e.price = 'Price must be a whole number of baht.';
+      if (!isInt(t.seats) || Number(t.seats) < 1) e.seats = 'A tier needs at least 1 seat.';
+      return e;
+    });
+  }
+
+  componentDidUpdate(_, prev) {
+    if (this.state.pk && this.state.pk !== prev.pk && this.state.pk.endsWith('Time')) {
+      requestAnimationFrame(() => document.querySelectorAll('[data-tcol]').forEach(c => { const s = c.querySelector('[data-on="1"]'); if (s) c.scrollTop = s.offsetTop - c.offsetTop - 92; }));
+    }
+  }
+  setF(k, v) { this.setState(s => ({ f: { ...s.f, [k]: v } })); }
+  touch(k) { this.setState(s => ({ touched: { ...s.touched, [k]: 1 } })); }
+  setRow(id, k, v, touch) { this.setState(s => ({ tiers: s.tiers.map(t => t.id === id ? (touch ? { ...t, t: { ...t.t, [k]: 1 } } : { ...t, [k]: v }) : t) })); }
+
+  renderVals() {
+    const S = this.state, sc = S.screen;
+    const go = (screen, extra = {}) => () => this.setState({ screen, ...extra });
+    const dErr = this.detailErrors(), dBad = Object.keys(dErr).length > 0;
+    const tErr = this.tierErrors(), tBad = tErr.some(e => Object.keys(e).length);
+    const show = k => S.touched[k] ? dErr[k] || '' : '';
+    const bd = k => show(k) ? 'var(--st)' : 'var(--l2)';
+    const fieldText = (k, max) => ({ v: S.f[k], on: e => this.setF(k, e.target.value), blur: () => this.touch(k), count: `${S.f[k].length}/${max}`, err: show(k), bd: bd(k) });
+    const dt = (k, grp) => ({ v: S.f[k], on: e => { this.setF(k, e.target.value); this.touch(grp); } });
+    const fld = {
+      name: fieldText('name', 40), venue: fieldText('venue', 30),
+      evDate: dt('evDate', 'ev'), evTime: dt('evTime', 'ev'), saleDate: dt('saleDate', 'sale'), saleTime: dt('saleTime', 'sale'),
+      ev: { err: show('ev'), bd: bd('ev') }, sale: { err: show('sale'), bd: bd('sale') },
+      rate: { v: S.f.rate, on: e => { this.setF('rate', e.target.value); this.touch('rate'); }, blur: () => this.touch('rate'), err: show('rate'), bd: bd('rate') },
+    };
+
+    const rows = S.events.map(e => {
+      const c = CHIP[e.state], tot = e.tiers.reduce((a, t) => a + t.seats, 0), sold = e.tiers.reduce((a, t) => a + (t.sold || 0), 0);
+      return { name: e.name, venue: e.venue, ev: fmt(e.ev), sale: fmt(e.sale), stateL: c.l, chipBg: c.bg, chipC: c.c, chipBd: c.bd, sold: tot ? `${num(sold)} / ${num(tot)}` : '—', open: go('overview', { current: e.id, banner: false }) };
+    });
+
+    const idx = { details: 0, tiers: 1, review: 2 }[sc] ?? -1;
+    const steps = ['Details', 'Tiers', 'Review'].map((label, i) => {
+      const done = i < idx, cur = i === idx;
+      return { n: done ? '✓' : String(i + 1), label, notLast: i < 2, dotBg: done ? 'var(--ac)' : 'transparent', dotC: done ? 'var(--aci)' : cur ? 'var(--ac)' : 'var(--mu)', dotBd: done || cur ? 'var(--ac)' : 'var(--l2)', labelC: cur ? 'var(--tx)' : 'var(--mu)' };
+    });
+
+    const tierRows = S.tiers.map((t, i) => {
+      const e = tErr[i] || {}, vis = k => (t.t[k] || S.forceTiers) && e[k];
+      const msg = [vis('name'), vis('price'), vis('seats')].filter(Boolean).join(' ');
+      return {
+        name: t.name, price: t.price, seats: t.seats, msg, hasMsg: !!msg,
+        bName: vis('name') ? 'var(--st)' : 'var(--l2)', bPrice: vis('price') ? 'var(--st)' : 'var(--l2)', bSeats: vis('seats') ? 'var(--st)' : 'var(--l2)',
+        onName: ev => this.setRow(t.id, 'name', ev.target.value), onPrice: ev => this.setRow(t.id, 'price', ev.target.value.replace(/[^\d]/g, '')), onSeats: ev => { this.setRow(t.id, 'seats', ev.target.value.replace(/[^\d]/g, '')); this.setRow(t.id, 'seats', 0, true); },
+        blurName: () => this.setRow(t.id, 'name', 0, true), blurPrice: () => this.setRow(t.id, 'price', 0, true), blurSeats: () => this.setRow(t.id, 'seats', 0, true),
+        onRemove: () => this.setState(s => ({ tiers: s.tiers.filter(o => o.id !== t.id) })),
+      };
+    });
+    const total = S.tiers.reduce((a, t) => a + (isInt(t.seats) ? Number(t.seats) : 0), 0);
+    const none = S.tiers.length === 0;
+    const tz = {
+      addDis: S.tiers.length >= 8, addOp: S.tiers.length >= 8 ? 0.4 : 1,
+      total: `${num(total)} seats in all`, totalC: total ? 'var(--tx)' : 'var(--mu)',
+      dis: none || tBad, op: none || tBad ? 0.4 : 1,
+      hint: none ? 'Add at least one tier' : tBad ? 'Fix the tier marked in red' : S.tiers.length >= 8 ? '8 of 8 tiers' : '',
+    };
+
+    const rv = {
+      name: S.f.name || 'Untitled event', venue: S.f.venue || '—', ev: fmt(`${S.f.evDate}T${S.f.evTime}`), sale: fmt(`${S.f.saleDate}T${S.f.saleTime}`), rate: `${S.f.rate} per second`,
+      tiers: S.tiers.map(t => ({ name: t.name, price: `฿${num(t.price || 0)}`, seats: num(t.seats || 0) })),
+      none, total: num(total), dis: none || tBad || dBad || S.publishing, op: none || tBad || dBad ? 0.4 : 1,
+      hint: none ? 'Add at least one tier before publishing.' : dBad ? 'Some event details need fixing.' : 'Publishing cannot be undone.', hintC: none || dBad ? 'var(--st)' : 'var(--mu)',
+    };
+
+    const ce = S.events.find(e => e.id === S.current) || S.events[0];
+    let ov = {};
+    if (ce) {
+      const c = CHIP[ce.state];
+      ov = {
+        name: ce.name, stateL: c.l, chipBg: c.bg, chipC: c.c, chipBd: c.bd, rate: ce.rate,
+        sub: `${ce.venue} · ${fmt(ce.ev)} · Sale opens ${fmt(ce.sale)}`,
+        isDraft: ce.state === 'DRAFT', isSched: ce.state === 'SCHEDULED', isOnSale: ce.state === 'ON_SALE',
+        banner: S.banner, bannerT: `The sale opens ${fmt(ce.sale)}. Customers can see the event now.`,
+        noTiers: ce.tiers.length === 0,
+        tiers: ce.tiers.map(t => ({ name: t.name, price: `฿${num(t.price)}`, total: num(t.seats), held: num(t.held || 0), sold: num(t.sold || 0), rem: num(t.seats - (t.held || 0) - (t.sold || 0)) })),
+      };
+    }
+    const loadCurrent = screen => () => { if (!ce) return; const { f, tiers } = this.fromEvent(ce); this.setState({ screen, f, tiers, editId: ce.id, touched: {}, banner: false, forceTiers: false }); };
+
+    const MONL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const today0 = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate());
+    const grpOf = { evDate: 'ev', evTime: 'ev', saleDate: 'sale', saleTime: 'sale' };
+    const pk = {};
+    ['evDate', 'evTime', 'saleDate', 'saleTime'].forEach(k => {
+      const v = S.f[k], isD = k.endsWith('Date');
+      let label = isD ? 'Pick a date' : (k === 'saleTime' ? '--:--:--' : '--:--');
+      if (v && isD) { const d = new Date(v + 'T00:00'); label = `${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`; }
+      else if (v) label = v;
+      const open = S.pk === k;
+      pk[k] = { label, open, c: v ? 'var(--tx)' : 'var(--mu)', bd: open ? 'var(--ac)' : fld[grpOf[k]].bd,
+        toggle: () => { if (open) return this.setState({ pk: null }); const d = v && isD ? new Date(v + 'T00:00') : NOW; this.setState({ pk: k, view: { y: d.getFullYear(), m: d.getMonth() } }); } };
+    });
+    let cal = { days: [] };
+    if (S.pk && S.pk.endsWith('Date') && S.view) {
+      const { y, m } = S.view, k = S.pk, first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate();
+      const days = [];
+      for (let i = 0; i < lead; i++) days.push({ n: '', on: null, bg: 'transparent', c: 'transparent', bd: 'transparent', cur: 'default', hover: '' });
+      for (let i = 1; i <= n; i++) {
+        const d = new Date(y, m, i), iso = `${y}-${pad(m + 1)}-${pad(i)}`, past = d < today0, sel = S.f[k] === iso, isToday = +d === +today0;
+        days.push({ n: String(i), cur: past ? 'not-allowed' : 'pointer', hover: past || sel ? '' : 'background:var(--s3)',
+          bg: sel ? 'var(--ac)' : 'transparent', c: sel ? 'var(--aci)' : past ? 'rgba(143,143,148,.35)' : 'var(--tx)', bd: isToday && !sel ? 'var(--l2)' : 'transparent',
+          on: past ? null : () => { this.setF(k, iso); this.touch(grpOf[k]); this.setState({ pk: null }); } });
+      }
+      const atMin = y === NOW.getFullYear() && m === NOW.getMonth();
+      const shift = dm => () => { const d = new Date(y, m + dm, 1); this.setState({ view: { y: d.getFullYear(), m: d.getMonth() } }); };
+      cal = { title: `${MONL[m]} ${y}`, days, prev: atMin ? null : shift(-1), prevC: atMin ? 'rgba(143,143,148,.35)' : 'var(--tx)', next: shift(1) };
+    }
+    let tp = { cols: [] };
+    if (S.pk && S.pk.endsWith('Time')) {
+      const k = S.pk, secs = k === 'saleTime';
+      const parts = (S.f[k] || (secs ? '10:00:00' : '19:00')).split(':').map(Number);
+      while (parts.length < (secs ? 3 : 2)) parts.push(0);
+      const col = (h, max, i) => ({ h, items: Array.from({ length: max }, (_, v) => {
+        const sel = parts[i] === v && !!S.f[k];
+        return { v: pad(v), sel: sel ? '1' : '0', bg: sel ? 'var(--ac)' : 'transparent', c: sel ? 'var(--aci)' : 'var(--tx)', hover: sel ? '' : 'background:var(--s3)',
+          on: () => { const p = [...parts]; p[i] = v; this.setF(k, p.map(pad).join(':')); this.touch(grpOf[k]); } };
+      }) });
+      tp = { cols: [col('HH', 24, 0), col('MM', 60, 1), ...(secs ? [col('SS', 60, 2)] : [])] };
+    }
+
+    return {
+      pk, cal, tp, pkOpen: !!S.pk, closePk: () => this.setState({ pk: null }),
+      variant: S.variant, onVariant: e => this.apply(e.target.value),
+      isList: sc === 'list', isDetails: sc === 'details', isTiers: sc === 'tiers', isReview: sc === 'review', isOverview: sc === 'overview', isWizard: idx >= 0,
+      hasEvents: S.events.length > 0, noEvents: S.events.length === 0, listSub: `${S.events.length} ${S.events.length === 1 ? 'event' : 'events'}`, rows, steps,
+      detailsTitle: S.editId ? 'Edit event' : 'Create event', tiersTitle: `Tiers · ${S.f.name || 'New event'}`,
+      fld, d: { dis: dBad, op: dBad ? 0.4 : 1, hint: dBad ? 'Fill in every field to continue' : 'Saves a draft. Nobody can see it yet.' },
+      tierRows, tz, rv, ov,
+      publishing: S.publishing, notPublishing: !S.publishing,
+      goList: go('list', { banner: false }), goDetails: go('details'), goTiers: go('tiers'), goReview: () => { if (!tBad && !none) this.setState({ screen: 'review' }); else this.setState({ forceTiers: true }); },
+      goCreate: () => this.setState({ screen: 'details', f: { ...BLANK_F }, tiers: [], touched: {}, editId: null, banner: false }),
+      editDetails: loadCurrent('details'), continueSetup: loadCurrent('tiers'),
+      addRow: () => this.setState(s => s.tiers.length >= 8 ? null : { tiers: [...s.tiers, row()] }),
+      saveDetails: () => {
+        if (dBad) return;
+        const id = S.editId || 'e' + uid++;
+        const prev = S.events.find(e => e.id === id);
+        const ev = { ...this.toEvent(S.f, prev ? S.tiers : [], id, prev ? prev.state : 'DRAFT') };
+        this.setState(s => ({ editId: id, events: prev ? s.events.map(e => e.id === id ? ev : e) : [ev, ...s.events], screen: 'tiers', tiers: s.tiers.length ? s.tiers : [row()] }));
+      },
+      publish: () => {
+        if (rv.dis) return;
+        this.setState({ publishing: true });
+        setTimeout(() => {
+          this.setState(s => {
+            const id = s.editId || 'e' + uid++;
+            const ev = this.toEvent(s.f, s.tiers, id, 'SCHEDULED');
+            const exists = s.events.some(e => e.id === id);
+            return { publishing: false, events: exists ? s.events.map(e => e.id === id ? ev : e) : [ev, ...s.events], current: id, editId: null, screen: 'overview', banner: true };
+          });
+        }, 900);
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

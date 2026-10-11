@@ -1,0 +1,30 @@
+/* Organizer shared parts. Look 1a tokens come from app.css. */
+.topnav.org{height:64px;padding:0 32px;gap:36px}
+.topnav.org .brand{font-size:15px}
+.topnav.org .who b{width:32px;height:32px}
+.org-page{max-width:1120px;margin:0 auto;padding:44px 40px 80px;display:flex;flex-direction:column;gap:26px}
+
+.chip{display:inline-block;font:600 11px/1 var(--fm);letter-spacing:.1em;padding:5px 9px;border-radius:999px;border:1px solid var(--l2);color:var(--mu);white-space:nowrap}
+.chip.scheduled,.chip.closing{border-color:var(--ac);color:var(--ac)}
+.chip.on_sale{background:var(--ac);border-color:var(--ac);color:var(--aci)}
+.chip.cancelled{border-color:var(--st);color:var(--st)}
+
+.tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);overflow:hidden}
+.tbl th{font:600 11px/1 var(--fm);letter-spacing:.12em;color:var(--mu);text-align:left;padding:16px 20px;text-transform:uppercase}
+.tbl td{height:64px;padding:0 20px;border-top:1px solid var(--l1);font-size:15px}
+.tbl .num{text-align:right;font-family:var(--fm);font-variant-numeric:tabular-nums}
+
+.field{display:flex;flex-direction:column;gap:8px}
+.field .fl{display:flex;justify-content:space-between;align-items:baseline}
+.field .fl b{font:500 15px/1.2 var(--f)}
+.field .fl i{font:400 12px/1 var(--fm);color:var(--mu);font-style:normal}
+.field .fi{position:relative;display:flex;align-items:center}
+.field input{width:100%;height:52px;background:var(--bg);color:var(--tx);border:1px solid var(--l2);border-radius:14px;padding:0 16px;font:400 16px var(--f);color-scheme:dark}
+.field input:focus{outline:2px solid var(--ac);outline-offset:2px}
+.field input:disabled{opacity:.5}
+.field .fi em{position:absolute;right:16px;font:400 13px var(--fm);color:var(--mu);font-style:normal}
+.field.bad input{border-color:var(--st)}
+.field .err{font:500 13px/1.3 var(--f);color:var(--st)}
+
+.btn.sm{height:46px;width:auto;padding:0 22px}
+input[type=date],input[type=time]{color-scheme:dark}

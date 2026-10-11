@@ -1,6 +1,7 @@
 // The ONLY file that talks to Java. Every answer is {serverNow, clockRate, data} or {serverNow, clockRate, error}.
 const params = new URLSearchParams(location.search);
-export const customer = (params.get('as') || 'kenji').toLowerCase().replace(/[^a-z0-9-]/g, '') || 'kenji';
+const fallback = location.pathname.endsWith('organizer.html') ? 'chai' : 'kenji';
+export const customer = (params.get('as') || fallback).toLowerCase().replace(/[^a-z0-9-]/g, '') || fallback;
 export const devMode = params.has('dev');
 
 let lastServer = 0;
@@ -13,15 +14,16 @@ export const serverNow = () => (lastContact ? lastServer + (Date.now() - lastCon
 export const contactAge = () => (lastContact ? Date.now() - lastContact : 0);
 
 export class ApiError extends Error {
-  constructor(status, code, message, remaining) {
+  constructor(status, code, message, remaining, field) {
     super(message);
     this.status = status;
     this.code = code;
     this.remaining = remaining;
+    this.field = field ?? null;
   }
 }
 
-async function call(method, path, body) {
+export async function call(method, path, body) {
   let res;
   try {
     res = await fetch(path, {
@@ -45,7 +47,7 @@ async function call(method, path, body) {
   }
   if (!res.ok) {
     const e = (json && json.error) || {};
-    throw new ApiError(res.status, e.code || 'HTTP_' + res.status, e.message || 'Request failed', e.remaining ?? null);
+    throw new ApiError(res.status, e.code || 'HTTP_' + res.status, e.message || 'Request failed', e.remaining ?? null, e.field ?? null);
   }
   return json.data;
 }

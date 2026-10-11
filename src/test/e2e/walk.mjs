@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Screenshot walk. Drives the fake through the web API, then photographs one screen per shot
-// into target/shots/<name>.png at 390 x 844. Compare each with diagrams/app-flow/screens/<name>.jpg.
+// into target/shots-web/<name>.png at 1440 x 900. Compare each with design/Ticket App Web.dc.html.
 //
 //   node src/test/e2e/walk.mjs              every shot
 //   node src/test/e2e/walk.mjs 06a 06b      only these shots
@@ -13,7 +13,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 
 const BASE = process.env.BASE || 'http://localhost:7070';
 const T = 'the-1975';
-mkdirSync('target/shots', { recursive: true });
+mkdirSync('target/shots-web', { recursive: true });
 
 async function call(as, method, path, body) {
   const res = await fetch(BASE + path, {
@@ -35,8 +35,8 @@ const dev = {
 /** Pauses the fake clock first, so nothing moves between the setup and the picture. */
 async function shoot(name, as, hash, wait = 1500) {
   await call('kenji', 'POST', '/dev/speed', { times: 0 });
-  execFileSync('npx', ['-y', 'playwright@1.64.0', 'screenshot', '--viewport-size=390,844', `--wait-for-timeout=${wait}`,
-    `${BASE}/?as=${as}#${hash}`, `target/shots/${name}.png`], { stdio: 'inherit' });
+  execFileSync('npx', ['-y', 'playwright@1.64.0', 'screenshot', '--viewport-size=1440,900', `--wait-for-timeout=${wait}`,
+    `${BASE}/?as=${as}#${hash}`, `target/shots-web/${name}.png`], { stdio: 'inherit' });
 }
 
 const fresh = () => dev.reset();
@@ -146,7 +146,7 @@ const prep = {
     const tokens = [];
     for (const c of who) tokens.push(await join(c));
     await dev.advance(350);
-    writeFileSync('target/shots/prep.json', JSON.stringify({ who, tokens }));
+    writeFileSync('target/shots-web/prep.json', JSON.stringify({ who, tokens }));
     return `/select/${T}/${tokens[0]}`;
   },
   '09': async () => { await open(); const h = await held('kenji'); return `/hold/${h.reservationId}`; },
@@ -154,7 +154,7 @@ const prep = {
 };
 const then = {
   '08e': async () => {
-    const { who, tokens } = JSON.parse(readFileSync('target/shots/prep.json', 'utf8'));
+    const { who, tokens } = JSON.parse(readFileSync('target/shots-web/prep.json', 'utf8'));
     for (let i = 1; i <= 3; i++) await call(who[i], 'POST', '/api/holds', { token: tokens[i], tierId: 'vip', quantity: 4 });
     await call(who[4], 'POST', '/api/holds', { token: tokens[4], tierId: 'vip', quantity: 2 });
     console.log('VIP now has 2 left. Tap "Hold these seats" with 3 VIP chosen.');

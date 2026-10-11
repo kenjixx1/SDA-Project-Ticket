@@ -1,5 +1,5 @@
 // Shared parts C-01 to C-09, formatters and the html helper. No screen logic here.
-import { serverNow, contactAge } from './api.js';
+import { serverNow, contactAge, customer } from './api.js';
 
 // ----- html: a tagged template that escapes every value unless it is raw -----
 class Raw {
@@ -146,13 +146,17 @@ export function stub(o, t) {
 export const slimHeader = (title, meta, artwork) => html`<div class="slim">
   ${artwork ? html`<img src="${artwork}" alt="">` : html`<div class="ph"></div>`}<div><b>${title}</b><span>${meta}</span></div></div>`;
 
-const TABS = [
-  ['events', 'Events', 'M4 6h16M4 12h16M4 18h10'],
-  ['tickets', 'Tickets', 'M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z'],
-  ['account', 'Account', 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 20a8 8 0 0 1 16 0'],
-];
-export const tabBar = (active) => html`<nav class="tabbar" aria-label="Main">${TABS.map(([id, label, d]) => html`<a href="#/${id}" class="${id === active ? 'on' : ''}">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>${label}</a>`)}</nav>`;
+const NAME = customer.charAt(0).toUpperCase() + customer.slice(1);
+const tabOf = (path) => (/^\/(tickets|ticket\/|confirmed\/)/.test(path) ? 'tickets' : /^\/account/.test(path) ? 'account' : 'events');
+/** The customer top bar drawn above every screen. */
+export const topNav = (path = '') => {
+  const on = tabOf(path);
+  return html`<header class="topnav"><a class="brand" href="#/events"><i></i>Ticket &amp; Queue</a>
+    <nav aria-label="Main"><a href="#/events" class="${on === 'events' ? 'on' : ''}">Events</a><a href="#/tickets" class="${on === 'tickets' ? 'on' : ''}">Tickets</a></nav>
+    <a class="who ${on === 'account' ? 'on' : ''}" href="#/account"><b>${NAME.charAt(0)}</b>${NAME}</a></header>`;
+};
+/** No tab bar on desktop. Kept so screens that still call it keep working. */
+export const tabBar = () => html``;
 
 /** tone: 'stop' (coral), 'calm' (grey), 'go' (lime). card: [title, text]. primary/secondary: button() options. */
 export function statusScreen({ tone, icon, title, text, card, primary, secondary }) {
