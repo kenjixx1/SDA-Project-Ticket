@@ -1,7 +1,7 @@
 // SCR-08 Select tickets. Variants: a default, b holding, c at the limit of 4, d tier sold out,
 // e more than remain, f seats just went, g everything sold out.
 import { api } from '../api.js';
-import { html, raw, baht, num, button, banner } from '../parts.js';
+import { html, raw, baht, num, button } from '../parts.js';
 
 const LIMIT = 4;
 const low = (t) => t.remaining > 0 && t.remaining <= t.total * 0.05; // OQ-04: 5% or less
@@ -22,20 +22,12 @@ function tierRow(t, i, st) {
   const out = t.remaining === 0;
   const sel = i === st.sel;
   const left = out ? 'Sold out' : low(t) ? `only ${num(t.remaining)} left` : `${num(t.remaining)} left`;
-  return html`<button class="pick ${sel ? 'sel' : ''}" data-action="pick" data-i="${i}" ${out || st.working ? raw('disabled') : ''}>
-    <span class="name">${t.name}</span><span class="price">${baht(t.price)}</span>
+  return html`<button class="tierrow ${sel ? 'sel' : ''}" data-action="pick" data-i="${i}" ${out || st.working ? raw('disabled') : ''}>
+    <span class="radio">${sel ? html`<span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12.5 10 17 19 7"></polyline></svg></span>` : ''}</span>
+    <span class="name">${t.name}</span>
     <span class="left ${out ? 'out' : low(t) ? 'low' : ''}">${left}</span>
-    ${sel ? html`<span class="check" aria-label="Selected">✓</span>` : html`<span></span>`}
+    <span class="price">${baht(t.price)}</span>
   </button>`;
-}
-
-function soldOutView(st) {
-  return html`<section class="screen">
-    <div><h1 class="title sm">Sold out</h1><p class="sub">Every ticket was sold while you were in line. Nothing was charged.</p></div>
-    <hr class="hair">
-    ${st.tiers.map((t, i) => tierRow(t, i, st))}
-  </section>
-  <div class="foot">${button({ label: 'Back to events', action: 'go', quiet: true, data: { to: '#/events' } })}</div>`;
 }
 
 /** Moves away when this place in line can no longer hold seats. Returns true when it moved. */
@@ -70,31 +62,38 @@ export const screens = [
       },
     },
     view(st) {
-      if (st.sel < 0) return soldOutView(st);
-      const tier = st.tiers[st.sel];
-      const atLimit = st.qty >= LIMIT;
+      const allSold = st.sel < 0;
+      const tier = allSold ? null : st.tiers[st.sel];
+      const atLimit = !allSold && st.qty >= LIMIT;
       const busy = st.working ? raw('disabled') : '';
-      return html`<section class="screen">
-        <div><h1 class="title sm">You are in</h1><p class="sub">Choose your tickets. Nothing is reserved yet.</p></div>
-        <hr class="hair">
-        ${st.banner ? banner(st.banner[0], st.banner[1]) : ''}
-        ${st.tiers.map((t, i) => tierRow(t, i, st))}
-        <div class="card">
-          <div class="qty"><b>How many</b>
-            <div class="stepper">
-              <button data-action="minus" aria-label="One fewer" ${st.qty <= 1 ? raw('disabled') : busy}>−</button>
-              <span class="n">${st.qty}</span>
-              <button data-action="plus" aria-label="One more" ${st.qty >= maxFor(tier) ? raw('disabled') : busy}>+</button>
-            </div>
+      const off = st.working ? ' off' : '';
+      return html`<section class="screen sel">
+        <div class="selleft">
+          <div class="selhead">
+            <h1>${allSold ? 'Sold out' : 'You are in'}</h1>
+            <p>${allSold ? 'Every ticket was sold while you were in line. Nothing was charged.' : 'Choose your tickets. Nothing is reserved yet.'}</p>
           </div>
-          <p class="hint ${atLimit ? 'stop' : ''}" style="text-align:left">${atLimit ? '4 is the most one person can buy.' : 'Maximum 4 per person'}</p>
+          ${st.banner ? html`<div class="alert" role="status"><b>${st.banner[0]}</b><p>${st.banner[1]}</p></div>` : ''}
+          <div class="tierrows${off}">${st.tiers.map((t, i) => tierRow(t, i, st))}</div>
         </div>
-      </section>
-      <div class="foot">
-        <div class="total"><span class="what">${st.qty} × ${tier.name}</span><span class="sum">${baht(tier.price * st.qty)}</span></div>
-        ${button({ label: 'Hold these seats', action: 'hold', working: st.working ? 'Holding…' : '' })}
-        <p class="hint">Holding takes them out of the sale for 10 minutes</p>
-      </div>`;
+        <div class="selcard">
+          ${allSold
+            ? button({ label: 'Back to events', action: 'go', quiet: true, data: { to: '#/events' } })
+            : html`<div class="qtyblock${off}">
+                <div class="steprow"><b>How many</b>
+                  <div class="step">
+                    <button data-action="minus" aria-label="One fewer" ${st.qty <= 1 ? raw('disabled') : busy}>−</button>
+                    <span class="n">${st.qty}</span>
+                    <button data-action="plus" aria-label="One more" ${st.qty >= maxFor(tier) ? raw('disabled') : busy}>+</button>
+                  </div>
+                </div>
+                <p class="shint ${atLimit ? 'stop' : ''}">${atLimit ? '4 is the most one person can buy.' : 'Maximum 4 per person'}</p>
+              </div>
+              <div class="totrow"><span class="what">${st.qty} × ${tier.name}</span><span class="sum">${baht(tier.price * st.qty)}</span></div>
+              ${button({ label: 'Hold these seats', action: 'hold', working: st.working ? 'Holding…' : '' })}
+              <p class="holdhint">Holding takes them out of the sale for 10 minutes</p>`}
+        </div>
+      </section>`;
     },
     actions: {
       pick(ctx, data) {

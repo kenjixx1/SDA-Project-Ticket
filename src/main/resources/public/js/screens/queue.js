@@ -1,6 +1,6 @@
 // SCR-06 Queue (a waiting, b almost your turn, c welcome back, d reconnecting, e joining) and SCR-07 Your turn passed.
 import { api, contactAge } from '../api.js';
-import { html, num, dateShort, banner, liveIndicator, slimHeader, statusScreen } from '../parts.js';
+import { html, num, dateShort, liveIndicator, statusScreen } from '../parts.js';
 
 /** Joins the back of the line again. Used by SCR-07, 10, 11 and 18. */
 export async function joinAgain(ctx, eventId) {
@@ -36,8 +36,10 @@ export const screens = [
     id: 'queue',
     pattern: /^\/queue\/([^/]+)\/([^/]+?)(\/back)?$/,
     ownOffline: true,
-    loading: () => html`<section class="screen">
-      <div class="qhero"><div class="skel" style="width:220px;height:104px"></div><p class="sub">Getting your place in line…</p></div>
+    loading: () => html`<section class="screen q">
+      <div class="qcol"><div class="qmid"><div class="qjoin">
+        <span class="qblock"></span><p>Getting your place in line…</p>
+      </div></div></div>
     </section>`,
     async enter(ctx, eventId, token, back) {
       ctx.state.ev = await api.event(eventId);
@@ -59,20 +61,31 @@ export const screens = [
         : almost
           ? ['Almost your turn.', 'Get ready to choose your tickets.']
           : ['Your place is saved.', 'Keep this page open. When it is your turn you get 10 minutes to choose and pay.'];
-      return html`<section class="screen">
-        ${slimHeader(ev.shortName, `${ev.venue} · ${dateShort(ev.eventDateTime)}`, ev.artwork)}
-        ${st.welcome ? banner('Welcome back.', 'Your place was kept.', true) : ''}
-        <div class="qhero ${stale ? 'dim' : ''}">
-          <span class="label">Your position</span>
-          <span class="pos">${num(q.position)}</span>
-          <span class="sub ahead">${ahead === 1 ? '1 person is ahead of you' : `${num(ahead)} people are ahead of you`}</span>
+      return html`<section class="screen q">
+        <div class="qcol">
+          <div class="qhead">
+            <span class="qtile"></span>
+            <div class="qid"><b>${ev.shortName}</b><span>${ev.venue} · ${dateShort(ev.eventDateTime)}</span></div>
+            ${liveIndicator()}
+          </div>
+          ${st.welcome ? html`<div class="welcome" role="status"><b>Welcome back.</b><span>Your place was kept.</span></div>` : ''}
+          <div class="qmid">
+            ${st.joining ? html`<div class="qjoin"><span class="qblock"></span><p>Getting your place in line…</p></div>` : html`
+              <div class="qhero ${stale ? 'dim' : ''}">
+                <span class="halo"></span><span class="ring"></span>
+                <span class="label">Your position</span>
+                <span class="pos">${num(q.position)}</span>
+                <span class="sub">${ahead === 1 ? '1 person is ahead of you' : `${num(ahead)} people are ahead of you`}</span>
+              </div>
+              <div class="qprog ${stale ? 'dim' : ''}">
+                <div class="qbar"><i style="width:${pct}%"><span class="shim"></span></i></div>
+                <div class="qmeta"><span>Moved ${num(q.moved)} places</span><span class="eta">${estimate(q)}</span></div>
+              </div>`}
+            <div class="card"><b>${card[0]}</b><p>${card[1]}</p></div>
+          </div>
         </div>
-        <div class="qbar"><i style="width:${pct}%"></i></div>
-        <div class="qmeta"><span>Moved ${num(q.moved)} places</span><span class="eta">${estimate(q)}</span></div>
-        <div class="card"><b>${card[0]}</b><p>${card[1]}</p></div>
-      </section>
-      <div class="foot bare">${liveIndicator()}</div>
-      ${st.flash ? html`<div class="flash" role="status">It is your turn</div>` : ''}`;
+        ${st.flash ? html`<div class="flash" role="status">It is your turn</div>` : ''}
+      </section>`;
     },
   },
   {

@@ -17,10 +17,10 @@ function saleBlock(ev, v) {
       <p class="sub">${dateLong(ev.saleOpensAt)}</p>
       <span class="opens" data-countdown="${ev.saleOpensAt}" data-fmt="hms">Opens in <span data-cd-text>${hms(ev.saleOpensAt - serverNow())}</span></span>`;
   }
-  if (v === 'b') return html`<span class="on"><span class="dot"></span>ON SALE NOW</span>`;
+  if (v === 'b') return html`<span class="on"><span class="pulse"></span>ON SALE NOW</span>`;
   if (v === 'c') {
     return html`<span class="label go">You are in the queue</span>
-      <span class="big pos">${ev.myPosition ? `Position ${num(ev.myPosition)}` : 'It is your turn'}</span>`;
+      <span class="pos">${ev.myPosition ? `Position ${num(ev.myPosition)}` : 'It is your turn'}</span>`;
   }
   if (v === 'd') return html`<span class="stop">SOLD OUT</span><p class="sub">Every ticket has been sold.</p>`;
   if (v === 'e') return html`<span class="stop">SALE CLOSED</span><p class="sub">The organizer has closed this sale.</p>`;
@@ -57,16 +57,27 @@ export const screens = [
     view(st) {
       const ev = st.ev;
       const v = variant(ev);
-      return html`<section class="screen">
-        <div class="poster"><img src="${ev.artwork}" alt=""><div class="shade"></div>
-          <div class="txt"><h1>${ev.name}</h1><span class="where">${ev.venue.toUpperCase()} · ${dateShort(ev.eventDateTime).toUpperCase()}</span></div>
+      return html`<section class="screen ev">
+        <button class="allink" data-action="go" data-to="#/events">‹ All events</button>
+        <div class="split">
+          <div class="evleft">
+            <div class="hero">
+              <div class="hero-bg">${ev.artwork ? html`<img src="${ev.artwork}" alt="">` : html`<span class="noimg">${ev.name}</span>`}</div>
+              <div class="hero-shade"></div>
+              <div class="hero-txt"><h1>${ev.name}</h1><span class="where">${ev.venue} · ${dateShort(ev.eventDateTime)}</span></div>
+            </div>
+            <div class="tiers">
+              <span class="sect">Tiers</span>
+              <div class="tierlist">${ev.tiers.map((t) => html`<div><span>${t.name}</span><span>${baht(t.price)}</span></div>`)}</div>
+            </div>
+          </div>
+          <div class="evright">
+            <div class="sale">${saleBlock(ev, v)}</div>
+            ${footer(ev, v, st)}
+            <div class="note"><b>Everyone waits in the same line.</b><span>Joining early does not help.</span></div>
+          </div>
         </div>
-        <button class="back" data-action="go" data-to="#/events" aria-label="Back to events">←</button>
-        <div class="sale">${saleBlock(ev, v)}</div>
-        <div class="prices">${ev.tiers.map((t) => html`<div><span>${t.name}</span><span>${baht(t.price)}</span></div>`)}</div>
-        <div class="card"><b>Everyone waits in the same line.</b><p>Joining early does not help.</p></div>
-      </section>
-      <div class="foot">${footer(ev, v, st)}</div>`;
+      </section>`;
     },
     actions: {
       async join(ctx, data, eventId) {
