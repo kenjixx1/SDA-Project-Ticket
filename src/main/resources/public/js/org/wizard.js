@@ -1,7 +1,7 @@
 // SCR-31 Create event · 1 Details — the same form edits the details when the organizer comes back from Tiers.
 import { org } from './api.js';
 import { ApiError, serverNow } from '../api.js';
-import { html, button } from '../parts.js';
+import { html, button, num } from '../parts.js';
 import { field, toEpoch, dateInput, timeInput, dateTime } from './parts.js';
 
 const BLANK = { name: '', venue: '', evDate: '', evTime: '', saleDate: '', saleTime: '', rate: '12' };
@@ -309,12 +309,245 @@ function paint(ctx) {
 document.addEventListener('input', (e) => {
   const ctx = live && live.alive() ? live : null;
   const el = e.target;
-  const group = ctx && el.name ? GROUP[el.name] : null;
-  if (!group || !el.closest('#app')) return;
+  if (!ctx || !el.closest('#app')) return;
+  if (el.dataset.k) return void tierInput(ctx, el); // SCR-32's tier rows
+  const group = el.name ? GROUP[el.name] : null;
+  if (!group) return;
   ctx.state.form[el.name] = el.value;
   touch(ctx.state, group);
   paint(ctx);
 });
+
+// A tier box left empty is only a problem once the organizer has been in it (design line 425).
+document.addEventListener('focusout', (e) => {
+  const ctx = live && live.alive() ? live : null;
+  if (!ctx || !e.target.closest('#app') || !e.target.dataset.k) return;
+  seeTier(ctx, e.target);
+});
+
+// ----- SCR-32 Tiers: the rows Chai types, checked as he types (design lines 203–233) -----
+
+const MAX_TIERS = 8;
+const KEYS = ['name', 'price', 'seats'];
+// The server calls the seats box `total`; the same box under its other name (docs/09 §9.4).
+const TOT = { name: 'name', price: 'price', total: 'seats' };
+const PUB_HINT = 'An event needs at least one tier before it can be published.';
+
+const blankRow = () => ({ name: '', price: '', seats: '', t: {} });
+
+/** The same rules, in the same words, as the server: a row needs a name, a whole price and at least 1 seat. */
+function rowErrs(r) {
+  const e = {};
+  if (!r.name.trim()) e.name = 'Name is required.';
+  if (!/^\d+$/.test(r.price.trim())) e.price = 'Price cannot be below ฿0.';
+  if (!/^\d+$/.test(r.seats.trim()) || Number(r.seats) < 1) e.seats = 'Seats must be more than 0.';
+  return e;
+}
+
+/** A tier's own name, or "Tier 2" when it has none — the way the server names a nameless row. */
+const tierLabel = (name, i) => name.trim() || `Tier ${i + 1}`;
+
+/** The message for one box: the server's refusal first, else what this row says now. Empty when it is fine. */
+function cellMsg(st, i, k) {
+  const r = st.rows[i];
+  if (!r) return '';
+  if (st.failed && st.failed.i === i && st.failed.k === k) return st.failed.message;
+  const e = rowErrs(r)[k];
+  return e && r.t[k] ? `${tierLabel(r.name, i)} · ${e}` : '';
+}
+
+/** The one coral line under a row (design line 217). */
+const rowMsg = (st, i) => KEYS.map((k) => cellMsg(st, i, k)).filter(Boolean).join(' ');
+const rowsBad = (rows) => rows.some((r) => Object.keys(rowErrs(r)).length > 0);
+const seatsOf = (rows) => rows.reduce((a, r) => a + (/^\d+$/.test(r.seats.trim()) ? Number(r.seats) : 0), 0);
+
+/** The line under Review (design line 229). */
+function tiersHint(st) {
+  if (st.failed && st.failed.i < 0) return st.failed.message;
+  if (!st.rows.length) return 'Add at least one tier.';
+  if (rowsBad(st.rows)) return 'Fix the tier marked in red';
+  return st.rows.length >= MAX_TIERS ? '8 of 8 tiers' : '';
+}
+
+/** One tier row: the name, the price, the seats, and Remove (design lines 211-215). */
+const cells = (st, r, i) => html`<div class="wiz-tg">
+  <input class="wiz-ti${cellMsg(st, i, 'name') ? ' bad' : ''}" data-i="${i}" data-k="name" value="${r.name}" maxlength="20" placeholder="Tier name">
+  <input class="wiz-ti mono${cellMsg(st, i, 'price') ? ' bad' : ''}" data-i="${i}" data-k="price" value="${r.price}" inputmode="numeric" placeholder="0">
+  <input class="wiz-ti mono${cellMsg(st, i, 'seats') ? ' bad' : ''}" data-i="${i}" data-k="seats" value="${r.seats}" inputmode="numeric" placeholder="0">
+  <span class="wiz-rm" data-action="rmRow" data-i="${i}">Remove</span>
+</div>`;
+
+function tiersView(st) {
+  const rows = st.rows.length ? st.rows : [blankRow()];
+  const total = seatsOf(st.rows);
+  return html`<section class="org-page ev-page wiz-tiers">
+    ${steps(1)}
+    <div class="wiz-head"><h1 class="title">Tiers · ${st.e.name}</h1>
+      <span class="sub">Each tier is a pool of seats at one price. Up to 8 tiers.</span></div>
+    <div class="wiz-tbl">
+      <div class="wiz-th"><span>NAME</span><span class="r">PRICE (฿)</span><span class="r">SEATS</span><span></span></div>
+      ${rows.map((r, i) => html`<div class="wiz-tr" data-i="${i}">${cells(st, r, i)}
+        <span class="wiz-msg" data-msg="${i}">${rowMsg(st, i)}</span></div>`)}
+      <div class="wiz-tfoot">
+        <button class="wiz-add" data-action="addRow" ${st.rows.length >= MAX_TIERS ? raw('disabled') : ''}>+ Add tier</button>
+        <span class="wiz-total${total ? '' : ' zero'}" data-total>${num(total)} seats in all</span>
+      </div>
+    </div>
+    <div class="wiz-foot">
+      ${button({ label: 'Back', action: 'go', quiet: true, data: { to: `#/event/${st.e.eventId}/details` } })}
+      <div class="wiz-save">
+        ${button({ label: 'Review', action: 'review', disabled: !st.rows.length || rowsBad(st.rows), working: st.working ? 'Saving' : '' })}
+        <span class="wiz-note${st.failed && st.failed.i < 0 ? ' stop' : ''}" data-hint>${tiersHint(st)}</span>
+      </div>
+    </div>
+  </section>`;
+}
+
+/** Opens the tiers screen on the event: its rows as they stand, and the checks quiet until a box is typed in. */
+function beginTiers(ctx, e) {
+  ctx.state.e = e;
+  ctx.state.rows = e.tiers.map((t) => ({ name: t.name, price: String(t.price), seats: String(t.total), t: {} }));
+  ctx.state.failed = null;
+  ctx.state.working = false;
+  live = ctx;
+}
+
+/** A box that has been typed in or left behind is seen, so its message may show (design line 425). */
+function seeTier(ctx, el) {
+  const st = ctx.state;
+  const i = Number(el.dataset.i);
+  if (!st.rows[i]) return; // the one empty row is only a row once it holds something
+  st.rows[i].t[el.dataset.k] = 1;
+  if (st.failed && st.failed.i === i) st.failed = null;
+  paintTiers(ctx);
+}
+
+/** One keystroke in a tier row: whole baht and whole seats, so only digits stay in those two. */
+function tierInput(ctx, el) {
+  const st = ctx.state;
+  const i = Number(el.dataset.i);
+  const k = el.dataset.k;
+  if (k === 'price' || k === 'seats') el.value = el.value.replace(/[^\d]/g, '');
+  if (!st.rows[i]) st.rows[i] = blankRow();
+  st.rows[i][k] = el.value;
+  seeTier(ctx, el);
+}
+
+/** Redraws the borders, the row lines, the total and the buttons in place, so typing keeps the caret. */
+function paintTiers(ctx) {
+  const root = document.getElementById('app');
+  const st = ctx.state;
+  const rows = st.rows.length ? st.rows : [null];
+  for (let i = 0; i < rows.length; i++) {
+    const tr = root.querySelector(`.wiz-tr[data-i="${i}"]`);
+    if (!tr) continue;
+    for (const k of KEYS) {
+      const box = tr.querySelector(`.wiz-ti[data-k="${k}"]`);
+      if (box) box.classList.toggle('bad', !!cellMsg(st, i, k));
+    }
+    tr.querySelector('.wiz-msg').textContent = rowMsg(st, i);
+  }
+  const total = seatsOf(st.rows);
+  const line = root.querySelector('[data-total]');
+  if (line) {
+    line.textContent = `${num(total)} seats in all`;
+    line.classList.toggle('zero', !total);
+  }
+  const add = root.querySelector('.wiz-add');
+  if (add) add.disabled = st.rows.length >= MAX_TIERS;
+  const next = root.querySelector('.wiz-save .btn');
+  if (next) next.disabled = !st.rows.length || rowsBad(st.rows) || st.working;
+  const hint = root.querySelector('[data-hint]');
+  if (hint) {
+    hint.textContent = tiersHint(st);
+    hint.classList.toggle('stop', !!(st.failed && st.failed.i < 0));
+  }
+}
+
+/** + Add tier (design line 221). */
+const addRow = (ctx) => { if (ctx.state.rows.length < MAX_TIERS) ctx.state.rows.push(blankRow()); };
+
+/** Remove takes the row out and the table is redrawn; the rows below shift up (design line 215). */
+const rmRow = (ctx, d) => { ctx.state.rows.splice(Number(d.i), 1); ctx.state.failed = null; };
+
+/** Review saves every row at once (O-05), then shows the summary. A refusal names the row it came from. */
+async function review(ctx) {
+  const st = ctx.state;
+  if (!st.rows.length || rowsBad(st.rows)) return;
+  st.failed = null;
+  st.working = true;
+  ctx.render();
+  try {
+    await org.replaceTiers(st.e.eventId, st.rows.map((r) => ({ name: r.name.trim(), price: Number(r.price), total: Number(r.seats) })));
+    ctx.go(`#/event/${st.e.eventId}/review`);
+  } catch (e) {
+    st.working = false;
+    if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
+    const m = /^tiers\[(\d+)\]\.(\w+)$/.exec(e.field || '');
+    const k = m && TOT[m[2]];
+    st.failed = k ? { i: Number(m[1]), k, message: e.message } : { i: -1, k: null, message: e.message };
+  }
+}
+
+// ----- SCR-33 Review and publish: the whole event once more, then Publish (design lines 234–266) -----
+
+const sumRow = (k, v, cls = '') =>
+  html`<div class="row"><span class="k">${k}</span><span class="v ${cls}">${v}</span></div>`;
+
+function reviewView(st) {
+  const e = st.e;
+  const none = e.tiers.length === 0;
+  const total = e.tiers.reduce((a, t) => a + t.total, 0);
+  const hint = st.failed || (none ? PUB_HINT : 'Publishing cannot be undone.');
+  return html`<section class="org-page ev-page wiz-review">
+    ${steps(2)}
+    <div class="wiz-head"><h1 class="title">Review and publish</h1>
+      <span class="sub">Check everything once. Customers see the event as soon as you publish.</span></div>
+    <div class="wiz-rv">
+      <div class="wiz-sum">
+        <span class="label">EVENT</span>
+        <b class="nm">${e.name}</b>
+        ${sumRow('Venue', e.venue)}
+        ${sumRow('Event date', dateTime(e.eventDateTime), 'mono')}
+        ${sumRow('Sale opens', dateTime(e.saleOpensAt), 'mono now')}
+        ${sumRow('Admission rate', `${e.admitPerSecond} per second`, 'mono')}
+      </div>
+      <div class="wiz-tbl">
+        <div class="wiz-th rv"><span>TIER</span><span class="r">PRICE</span><span class="r">SEATS</span></div>
+        ${e.tiers.map((t) => html`<div class="wiz-vr"><span class="tn">${t.name}</span><span class="mono">${'฿' + num(t.price)}</span><span class="mono">${num(t.total)}</span></div>`)}
+        ${none ? html`<div class="wiz-none">No tiers yet.</div>` : ''}
+        <div class="wiz-all"><span class="tn">All</span><span></span><span class="mono">${num(total)}</span></div>
+      </div>
+    </div>
+    <span class="wiz-line">After publishing, customers see this event. Prices are frozen once the sale opens.</span>
+    <div class="wiz-foot">
+      ${button({ label: 'Back', action: 'go', quiet: true, data: { to: `#/event/${e.eventId}/tiers` } })}
+      <div class="wiz-save">
+        ${button({ label: 'Publish', action: 'publish', disabled: none, working: st.working ? 'Publishing' : '' })}
+        <span class="wiz-note${st.failed || none ? ' stop' : ''}" data-hint>${hint}</span>
+      </div>
+    </div>
+  </section>`;
+}
+
+/** Publish (O-08) turns the draft into a scheduled event and opens the published screen. */
+async function publish(ctx) {
+  const st = ctx.state;
+  st.failed = null;
+  st.working = true;
+  ctx.render();
+  try {
+    await org.publish(st.e.eventId);
+    ctx.go(`#/event/${st.e.eventId}/published`);
+  } catch (e) {
+    st.working = false;
+    if (!(e instanceof ApiError) || (e.status !== 400 && e.status !== 409)) throw e;
+    st.failed = e.message;
+  }
+}
+
+const tierActions = { addRow, rmRow, review };
+const reviewActions = { publish };
 
 export const screens = [
   {
@@ -336,5 +569,30 @@ export const screens = [
     },
     view: detailsView,
     actions,
+  },
+  {
+    id: 'tiers',
+    pattern: /^\/event\/([^/]+)\/tiers$/,
+    // Tiers belong to a draft. An event that has moved on belongs to its own screen (SCR-34).
+    async enter(ctx, eventId) {
+      const e = await org.event(eventId);
+      if (e.state !== 'DRAFT') return void ctx.go(`#/event/${e.eventId}`, { replace: true });
+      beginTiers(ctx, e);
+    },
+    view: tiersView,
+    actions: tierActions,
+  },
+  {
+    id: 'review',
+    pattern: /^\/event\/([^/]+)\/review$/,
+    async enter(ctx, eventId) {
+      const e = await org.event(eventId);
+      if (e.state !== 'DRAFT') return void ctx.go(`#/event/${e.eventId}`, { replace: true });
+      ctx.state.e = e;
+      ctx.state.failed = null;
+      ctx.state.working = false;
+    },
+    view: reviewView,
+    actions: reviewActions,
   },
 ];
