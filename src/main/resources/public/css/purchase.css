@@ -3,7 +3,7 @@
    and the release dialog (494-505). */
 
 /* SCR-09 / SCR-12: the "Timed" block, one column for content and one for the clock */
-.screen.timed{max-width:1100px;padding:40px 40px 70px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start}
+.screen.timed{max-width:1180px;padding:40px 40px 70px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:32px;align-items:start}
 .screen.timed .col{display:flex;flex-direction:column;gap:16px}
 .screen.timed .head{display:flex;flex-direction:column;gap:8px;padding-bottom:10px}
 .screen.timed .title{font:600 40px/1.05 var(--f);letter-spacing:-.02em}
@@ -37,12 +37,12 @@
 
 /* C-03 order summary, and the ticket detail rows */
 .rows{background:var(--s1);border:1px solid var(--l1);border-radius:var(--r);padding:6px 24px}
-.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:15px 0;border-bottom:1px solid var(--l1)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;border-bottom:1px solid var(--l1)}
 .row:last-child{border-bottom:0}
 .row .k{color:var(--mu)}
 .row .v{font:500 15px/1 var(--fm);text-align:right}
 .row .v.txt{font:600 15px/1 var(--f)}
-.row.sum{padding:18px 0 14px}
+.row.sum{padding:14px 0 12px}
 .row.sum .k{color:var(--tx);font-weight:600;font-size:16px}
 .row.sum .v{font:600 30px/1 var(--f);letter-spacing:-.02em}
 /* The promotion lines are lime (line 341). parts.js orderSummary draws them after the first
