@@ -9,6 +9,7 @@ import eventflow.web.dto.Views.OrderView;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -255,5 +256,17 @@ class FakeBookingTest {
         OrderView o = gw.orders("kenji").get(0);
         assertEquals("CANCELLED", o.eventState());
         assertEquals("CANCELLED", o.tickets().get(0).state());
+    }
+
+    @Test
+    void leavingAHoldTheEventPageLeadsBackToIt() {
+        String token = admit("kenji").get(0);
+        HoldView h = gw.hold("kenji", token, "vip", 2);
+
+        assertEquals(token, gw.getEvent("kenji", "the-1975").myToken());
+        assertEquals(h.reservationId(), gw.queueStatus("kenji", token).reservationId());
+
+        gw.release("kenji", h.reservationId());
+        assertNull(gw.getEvent("kenji", "the-1975").myToken());
     }
 }

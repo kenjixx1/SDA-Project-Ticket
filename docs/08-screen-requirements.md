@@ -442,6 +442,7 @@ shows a sheet: `[S] Sign out?` with `[S] Sign out` (magenta) and `[S] Cancel`.
 | **a · before sale** (ext 1a) | `SCHEDULED` | `[S] SALE OPENS`, `[D]` **10:00** very large, `[D]` *Thursday 1 October*. Under it `[D-live]` `Opens in 00:14:32`, counting down. | `[S] Join the queue`, **disabled** | `[S] The button turns on at 10:00` |
 | **b · on sale** | `ON_SALE`, no token yet | `[S] ON SALE NOW`, live dot | `[S] Join the queue`, ready | `[D] Maximum 4 tickets per person` |
 | **c · already in queue** (ext 2a) | `ON_SALE`, Kenji has a waiting token | `[S] YOU ARE IN THE QUEUE`, `[D]` *Position 4,182* | `[S] Back to my place` → SCR-06c | — |
+| **c · seats still held** | `ON_SALE`, Kenji left his held seats inside the 10 minutes (browser back, closed tab) | Same as **c**, without a position | `[S] Back to my place` → SCR-06c, which forwards at once to the held seats | Until the hold is paid, expires or is given back; then **a** again |
 | **d · sold out** (ext 1b) | every tier at 0 | `[S] SOLD OUT` in magenta. `[S] Every ticket has been sold.` | none | — |
 | **e · sale closed** (ext 1c) | `CLOSED`, or closing | `[S] SALE CLOSED` in magenta. `[S] The organizer has closed this sale.` | none | — |
 | **f · cancelled** | `CANCELLED` | `[S] EVENT CANCELLED` in magenta. | none | — |

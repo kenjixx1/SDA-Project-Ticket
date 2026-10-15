@@ -134,4 +134,16 @@ class CoreBookingTest {
     void m13MeIsKenji() {
         assertEquals("Kenji", gw.me("kenji").name());
     }
+
+    @Test
+    void leavingAHoldTheEventPageLeadsBackToIt() {
+        String token = admitted("kenji");
+        HoldView h = gw.hold("kenji", token, vip(), 2);
+
+        assertEquals(token, gw.getEvent("kenji", "the-1975").myToken());  // "Back to my place"
+        assertEquals(h.reservationId(), gw.queueStatus("kenji", token).reservationId());  // the queue screen forwards
+
+        gw.release("kenji", h.reservationId());
+        assertNull(gw.getEvent("kenji", "the-1975").myToken());  // hold over: "Join the queue" again
+    }
 }

@@ -79,6 +79,9 @@ public final class CoreBookingGateway implements BookingGateway {
             engine.tick();
             RealEngine.EventInfo e = engine.customerEvent(eventId);
             QueueToken mine = activeToken(customerId, eventId);
+            if (mine == null) {
+                mine = tokenWithLiveHold(customerId, eventId);
+            }
             Integer position = mine != null && mine.state() == QueueTokenState.WAITING
                     ? position(mine.tokenId()) : null;
             return new EventDetail(e.id, e.name, e.shortName, e.venue, e.dateTime, e.saleOpensAt,
@@ -355,6 +358,16 @@ public final class CoreBookingGateway implements BookingGateway {
 
     private long fromPrice(RealEngine.EventInfo e) {
         return engine.coreTiers(e).stream().mapToLong(t -> t.price().baht()).min().orElse(0);
+    }
+
+    /** Kenji left his held seats; the event page offers "Back to my place" until the hold ends. */
+    private QueueToken tokenWithLiveHold(String customerId, String eventId) {
+        return engine.holds.values().stream()
+                .filter(h -> h.customerId.equals(customerId) && h.eventId.equals(eventId))
+                .map(h -> engine.flow.store().find(h.reservationId).orElseThrow())
+                .filter(r -> r.state() == ReservationState.HELD)
+                .map(r -> engine.flow.queue().token(r.tokenId()))
+                .findFirst().orElse(null);
     }
 
     private QueueToken activeToken(String customerId, String eventId) {

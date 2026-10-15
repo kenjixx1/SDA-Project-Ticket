@@ -529,11 +529,22 @@ public class FakeBookingGateway implements BookingGateway, DevControls {
         sweep();
         Event e = customerEvent(eventId);
         Token mine = activeToken(customerId, eventId);
+        if (mine == null) {
+            mine = tokenWithLiveHold(customerId, eventId);
+        }
         return new EventDetail(e.id, e.name, e.shortName, e.venue, e.dateTime, e.saleOpensAt, state(e),
                 e.artwork, e.soldOut(),
                 e.tiers.stream().map(t -> new TierPrice(t.id, t.name, t.price)).toList(),
                 mine == null ? null : mine.id,
                 mine == null || !mine.state.equals("WAITING") ? null : position(mine));
+    }
+
+    /** Kenji left his held seats; the event page offers "Back to my place" until the hold ends. */
+    private Token tokenWithLiveHold(String customerId, String eventId) {
+        return reservations.values().stream()
+                .filter(r -> r.customerId.equals(customerId) && r.eventId.equals(eventId) && r.state.equals("HELD"))
+                .map(r -> tokens.get(r.tokenId))
+                .findFirst().orElse(null);
     }
 
     private Token activeToken(String customerId, String eventId) {
