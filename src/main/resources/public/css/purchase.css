@@ -190,6 +190,8 @@
 .qr svg{display:block}
 .qrwrap{position:relative;align-self:center}
 .qrwrap.void .qr{opacity:.35}
+.qrwrap.used .qr{opacity:.18;filter:grayscale(1)}
+.stamp.used{color:#FF3B30;border-color:#FF3B30;background:transparent}
 .cut{position:absolute;left:8px;right:8px;top:50%;height:2px;background:var(--st)}
 .cut.a{transform:rotate(-45deg)}
 .cut.b{transform:rotate(45deg)}

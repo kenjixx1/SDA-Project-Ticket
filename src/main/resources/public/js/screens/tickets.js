@@ -68,9 +68,10 @@ export const screens = [
           <div class="tkcard">
             ${o.event.artwork ? html`<img src="${o.event.artwork}" alt="">` : ''}
             <span class="sheen"></span>
-            <div class="qrwrap ${cancelled ? 'void' : ''}"><div class="qr">${qr(t.payload, 264)}</div>
+            <div class="qrwrap ${cancelled ? 'void' : past ? 'used' : ''}"><div class="qr">${qr(t.payload, 264)}</div>
               ${cancelled ? html`<span class="cut a"></span><span class="cut b"></span>
-                <span class="stamp">CANCELLED</span>` : ''}</div>
+                <span class="stamp">CANCELLED</span>` : ''}
+              ${past ? html`<span class="stamp used">USED</span>` : ''}</div>
             <span class="tkid">${t.ticketId}</span>
             ${multi ? html`<div class="tknav">
               <button class="prev" data-action="go" data-to="#/ticket/${o.orderId}/${n - 1}" title="Previous ticket (←)" aria-label="Previous ticket" ${n <= 1 ? raw('disabled') : ''}>
@@ -94,7 +95,9 @@ export const screens = [
             </div>
             <div class="card ${cancelled ? 'stop' : ''}">${cancelled
               ? html`<b>This event was cancelled.</b><p>This ticket will not get you in.</p>`
-              : html`<b>Single use.</b><p>This code works once. Do not share it.</p>`}</div>
+              : past
+                ? html`<b>Used.</b><p>This event has happened. The code no longer gets anyone in.</p>`
+                : html`<b>Single use.</b><p>This code works once. Do not share it.</p>`}</div>
           </div>
         </div>
       </section>`;

@@ -739,7 +739,7 @@ Do not add a "brighten screen" button or an "add to wallet" button.
 |---|---|---|
 | **a · valid** | `VALID`, event in the future | as above |
 | **b · event cancelled** (ext 3a) | `CANCELLED` | QR greyed and crossed. Magenta stamp `[S] CANCELLED` across it. Card becomes `[S]` **This event was cancelled.** `This ticket will not get you in.` |
-| **c · past event** | event date has passed | Whole screen dimmed. Small grey label `[S] PAST EVENT`. QR still shown. |
+| **c · past event** | event date has passed | Whole screen dimmed. Small grey label `[S] PAST EVENT`. QR faded to grey, with a red outlined stamp `[S] USED` across it, no fill. Card becomes `[S]` **Used.** `This event has happened. The code no longer gets anyone in.` |
 
 ---
 
