@@ -404,6 +404,7 @@ down rather than hidden.
 | ASM-09 | The customer is named by a request header, `X-Customer`, for the demo. There is no sign-in. | A real sign-in would set the same customer id. The web API does not change. |
 | ASM-10 | The 4-ticket limit is **per order** (ASM-02). After holding or buying, a customer may join the back of the line again and buy another order. | A per-person limit would need the queue to check earlier orders before issuing a new token. |
 | ASM-11 | Customers buy from a desktop browser (1440 × 900 design frame, usable from 1024 px wide). There is no phone layout. Decided 11 Oct 2026. | A phone layout would need its own screens; the web API would not change. |
+| ASM-12 | **Early Bird** takes **10%** off seats held within the **first 30 minutes** after the sale opens, timed by the server clock. The brief names promotions but gives no rule. | One plug-in class changes; the core does not (NFR-08). |
 
 ---
 

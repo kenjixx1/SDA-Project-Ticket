@@ -11,7 +11,7 @@ import eventflow.contract.Money;
 import eventflow.core.inventory.TicketTier;
 import eventflow.core.queue.QueueTokenState;
 
-// Test data: BLACKPINK at Impact Arena, as in the docs.
+// Test data: The 1975 Bangkok at Impact Arena, as in the docs.
 final class Fixtures {
 
     private Fixtures() {
@@ -23,7 +23,7 @@ final class Fixtures {
     }
 
     static Event blackpink(EventFlow app) {
-        return app.events().createEvent("BLACKPINK — Bangkok", "Impact Arena",
+        return app.events().createEvent("The 1975 Bangkok", "Impact Arena",
                 LocalDate.of(2026, 11, 14), LocalDateTime.of(2026, 10, 1, 10, 0));
     }
 

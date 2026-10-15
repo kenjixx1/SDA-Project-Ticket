@@ -17,13 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CorePaymentTest {
 
     private FakeClock clock;
+    private RealEngine engine;
     private CoreBookingGateway gw;
 
     @BeforeEach
     void setUp() {
         AtomicLong real = new AtomicLong(0);
         clock = new FakeClock(FakeBookingGateway.START, real::get);
-        gw = new CoreBookingGateway(new RealEngine(clock));
+        engine = new RealEngine(clock);
+        gw = new CoreBookingGateway(engine);
     }
 
     private HoldView twoVip(String customer) {
@@ -39,8 +41,8 @@ class CorePaymentTest {
     void promptPayConfirmsTheOrderInCore() {
         HoldView h = twoVip("kenji");
         var start = gw.startPayment("kenji", h.reservationId(), "promptpay");
-        assertEquals(13_000, start.amount());
-        assertEquals("PROMPTPAY|" + start.paymentId() + "|13000", start.display());
+        assertEquals(11_700, start.amount());
+        assertEquals("PROMPTPAY|" + start.paymentId() + "|11700", start.display());
         assertEquals("PENDING", gw.paymentStatus("kenji", start.paymentId()).state());
 
         var paid = gw.answerPayment("kenji", start.paymentId(), true);
@@ -51,18 +53,20 @@ class CorePaymentTest {
         var orders = gw.orders("kenji");
         assertEquals(1, orders.size());
         assertEquals(paid.orderId(), orders.get(0).orderId());
-        assertEquals(13_000, orders.get(0).paidAmount());
+        assertEquals(11_700, orders.get(0).paidAmount());
         assertEquals("PromptPay", orders.get(0).providerLabel());
         assertEquals(2, orders.get(0).tickets().size());
         assertEquals("VALID", orders.get(0).tickets().get(0).state());
+        String qr = orders.get(0).tickets().get(0).payload();
+        assertTrue(engine.flow.tickets().verify(qr), "the ticket is signed by core");
     }
 
     @Test
-    void cardIsNotAvailableOnCore() {
+    void cardPaysThroughCore() {
         HoldView h = twoVip("kenji");
-        GatewayException e = assertThrows(GatewayException.class,
-                () -> gw.startPayment("kenji", h.reservationId(), "card"));
-        assertEquals("PROVIDER_UNAVAILABLE", e.code);
+        var start = gw.startPayment("kenji", h.reservationId(), "card");
+        assertEquals("CAPTURED", gw.answerPayment("kenji", start.paymentId(), true).state());
+        assertEquals("Credit or debit card", gw.orders("kenji").get(0).providerLabel());
     }
 
     @Test
@@ -93,12 +97,16 @@ class CorePaymentTest {
     }
 
     @Test
-    void releasingSeatsEarlyIsNotInCore() {
+    void releasingSeatsEarlyReturnsThemInCore() {
         HoldView h = twoVip("kenji");
-        GatewayException e = assertThrows(GatewayException.class, () -> gw.release("kenji", h.reservationId()));
-        assertEquals("NOT_IN_CORE", e.code);
-        assertEquals(409, e.status);
         assertEquals(404, assertThrows(GatewayException.class, () -> gw.release("mint", h.reservationId())).status);
+        HoldView released = gw.release("kenji", h.reservationId());
+        assertEquals("RELEASED", released.state());
+        long vipLeft = gw.availability("the-1975").stream().filter(t -> t.name().equals("VIP"))
+                .findFirst().orElseThrow().remaining();
+        assertEquals(500, vipLeft);
+        assertEquals("HOLD_NOT_ACTIVE",
+                assertThrows(GatewayException.class, () -> gw.release("kenji", h.reservationId())).code);
     }
 
     @Test

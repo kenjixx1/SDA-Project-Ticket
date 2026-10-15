@@ -2,6 +2,7 @@ package eventflow.core.queue;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -12,6 +13,7 @@ import java.util.function.Predicate;
 
 import eventflow.core.event.EventBus;
 import eventflow.core.event.HoldExpired;
+import eventflow.core.event.HoldReleased;
 
 public final class QueueService {
 
@@ -27,6 +29,7 @@ public final class QueueService {
     static final class Line {
         final Queue<QueueToken> waiting = new ConcurrentLinkedQueue<>();
         volatile boolean open;
+        volatile Instant openedAt;
         volatile int admissionRate = DEFAULT_ADMISSION_RATE;
         volatile long admittedThrough;
         long nextSequence = 1;
@@ -36,10 +39,18 @@ public final class QueueService {
         this.clock = clock;
         this.soldOut = soldOut;
         bus.subscribe(HoldExpired.class, this::onHoldExpired);
+        bus.subscribe(HoldReleased.class, e -> endToken(e.tokenId()));
     }
 
     public void openSale(String eventId) {
-        line(eventId).open = true;
+        Line line = line(eventId);
+        line.openedAt = clock.instant();
+        line.open = true;
+    }
+
+    // Server time when the sale opened, or null if it has not.
+    public Instant saleOpenedAt(String eventId) {
+        return line(eventId).openedAt;
     }
 
     public void setAdmissionRate(String eventId, int perSecond) {
@@ -128,7 +139,11 @@ public final class QueueService {
     }
 
     private void onHoldExpired(HoldExpired event) {
-        QueueToken token = tokens.get(event.tokenId());
+        endToken(event.tokenId());
+    }
+
+    private void endToken(String tokenId) {
+        QueueToken token = tokens.get(tokenId);
         if (token != null) {
             token.moveState(QueueTokenState.SPENT, QueueTokenState.EXPIRED);
         }

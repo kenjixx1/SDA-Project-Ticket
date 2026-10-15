@@ -17,6 +17,9 @@ public final class TestRunner {
             PaymentExpiryRaceTest.class,
             QueueTest.class,
             QueueLoadTest.class,
+            TicketTest.class,
+            PricingTest.class,
+            ReleaseTest.class,
             ArchitectureTest.class);
 
     public static void main(String[] args) throws Exception {

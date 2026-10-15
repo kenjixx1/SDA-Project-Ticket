@@ -11,7 +11,10 @@ import eventflow.core.event.DomainEvent;
 import eventflow.core.inventory.HoldResult;
 import eventflow.core.inventory.TicketTier;
 import eventflow.core.event.UserAdmitted;
+import eventflow.contract.Promotion;
 import eventflow.core.order.CheckoutResult;
+import eventflow.core.order.Reservation;
+import eventflow.ticket.DigitalTicket;
 import eventflow.core.queue.JoinResult;
 import eventflow.core.queue.QueueStatus;
 import eventflow.core.queue.QueueTokenState;
@@ -25,7 +28,7 @@ public final class EventFlowDemo {
         EventFlow app = new EventFlow(clock);
 
         title("Chai creates the event");
-        Event concert = app.events().createEvent("BLACKPINK — Bangkok", "Impact Arena",
+        Event concert = app.events().createEvent("The 1975 Bangkok", "Impact Arena",
                 LocalDate.of(2026, 11, 14), LocalDateTime.of(2026, 10, 1, 10, 0));
         TicketTier vip = app.events().addTier(concert.eventId(), "VIP", Money.baht(6_500), 500);
         app.events().addTier(concert.eventId(), "Zone A", Money.baht(3_800), 2_000);
@@ -65,16 +68,29 @@ public final class EventFlowDemo {
 
         title("Kenji holds 2 × VIP");
         HoldResult kenji = app.inventory().hold(kenjiToken, vip.tierId(), 2);
-        say("hold: " + kenji.outcome() + " · " + kenji.reservation()
-                + " · expires " + time(clock, kenji.reservation().expiresAt()));
+        Reservation held = kenji.reservation();
+        say("hold: " + kenji.outcome() + " · " + held + " · expires " + time(clock, held.expiresAt()));
+        say("price: 2 × " + held.unitPrice() + " = " + held.unitPrice().times(2));
+        for (Promotion p : held.promotions()) {
+            say("       " + p.name() + "  −" + p.amount() + "   (held within 30 min of the sale opening)");
+        }
+        say("total: " + held.totalAmount());
         say("VIP now: " + vip);
 
         say("the same token again: " + app.inventory().hold(kenjiToken, vip.tierId(), 2).outcome());
 
         title("Kenji pays with PromptPay");
-        CheckoutResult paid = app.checkout().checkout(kenji.reservation().reservationId(), "promptpay");
-        say("checkout: " + paid + " · total " + kenji.reservation().totalAmount());
+        CheckoutResult paid = app.checkout().checkout(held.reservationId(), "promptpay");
+        say("checkout: " + paid + " · paid " + held.totalAmount());
         say("VIP now: " + vip);
+
+        title("Kenji gets one ticket per seat");
+        for (DigitalTicket t : app.tickets().ticketsFor(held.reservationId())) {
+            say(t.ticketId() + " (" + t.n() + " of " + t.of() + ")  QR: " + t.qrText()
+                    + "  genuine: " + app.tickets().verify(t.qrText()));
+        }
+        String forged = app.tickets().ticketsFor(held.reservationId()).get(0).qrText().replace("T-1", "T-2");
+        say("someone edits the tier on a ticket → genuine: " + app.tickets().verify(forged));
 
         title("Fan #1 holds 2 × VIP and walks away");
         HoldResult walkAway = app.inventory().hold(firstFan, vip.tierId(), 2);

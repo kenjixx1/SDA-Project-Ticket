@@ -9,6 +9,7 @@ import eventflow.core.order.ReservationState;
 import eventflow.core.queue.JoinResult.Outcome;
 import eventflow.core.queue.QueueToken;
 import eventflow.core.queue.QueueTokenState;
+import eventflow.ticket.DigitalTicket;
 import eventflow.web.BookingGateway;
 import eventflow.web.GatewayException;
 import eventflow.web.dto.Views.EventDetail;
@@ -20,6 +21,7 @@ import eventflow.web.dto.Views.OrderView;
 import eventflow.web.dto.Views.PaymentMethod;
 import eventflow.web.dto.Views.PaymentStart;
 import eventflow.web.dto.Views.PaymentStatus;
+import eventflow.web.dto.Views.Promotion;
 import eventflow.web.dto.Views.QueueStatus;
 import eventflow.web.dto.Views.TicketView;
 import eventflow.web.dto.Views.TierAvailability;
@@ -200,9 +202,11 @@ public final class CoreBookingGateway implements BookingGateway {
                 .map(p -> new PaymentMethod(p.key(), p.tile(), p.label(), p.line(),
                         engine.flow.registry().paymentKeys().contains(p.key())))
                 .toList();
-        // Promotions are Slice 3 (PricingRule), so core charges the list price.
+        List<Promotion> promotions = r.promotions().stream()
+                .map(p -> new Promotion(p.name(), p.amount().baht()))
+                .toList();
         return new HoldView(r.reservationId(), r.tokenId(), r.state().name(), engine.ref(engine.event(h.eventId)),
-                tier.tierId(), tier.name(), r.quantity(), r.unitPrice().baht(), List.of(), r.totalAmount().baht(),
+                tier.tierId(), tier.name(), r.quantity(), r.unitPrice().baht(), promotions, r.totalAmount().baht(),
                 r.expiresAt().toEpochMilli(), h.before, h.after, methods, h.paymentId);
     }
 
@@ -214,8 +218,11 @@ public final class CoreBookingGateway implements BookingGateway {
     public HoldView release(String customerId, String reservationId) {                       // M-08
         synchronized (engine) {
             engine.tick();
-            ownedHold(customerId, reservationId);
-            throw RealEngine.notInCore("Giving seats back early");
+            RealEngine.HoldInfo h = ownedHold(customerId, reservationId);
+            if (!engine.flow.reservations().release(reservationId)) {
+                throw GatewayException.badRequest("HOLD_NOT_ACTIVE", "These seats are no longer held");
+            }
+            return view(h);
         }
     }
 
@@ -320,14 +327,15 @@ public final class CoreBookingGateway implements BookingGateway {
         return new PaymentStatus(p.id, p.reservationId, p.providerKey, p.state, p.answered, p.orderId);
     }
 
-    /** Core confirmed the order (OrderConfirmed). Tickets are Slice 3, so the gateway numbers them for now. */
+    /** Core confirmed the order (OrderConfirmed) and issued signed tickets (TicketIssued). */
     private RealEngine.OrderInfo order(RealEngine.HoldInfo h, RealEngine.PaymentInfo p) {
         Reservation r = engine.flow.store().find(h.reservationId).orElseThrow();
         TicketTier tier = engine.flow.inventory().tier(r.tierId());
         RealEngine.OrderInfo o = new RealEngine.OrderInfo("O-" + (++engine.orderSeq), h.customerId, h.eventId,
                 tier.tierId(), tier.name(), r.quantity(), p.amount, providerLabel(p.providerKey));
-        for (int n = 1; n <= r.quantity(); n++) {
-            o.ticketIds.add(String.format("TKT-%s-%02d", o.id, n));
+        for (DigitalTicket t : engine.flow.tickets().ticketsFor(h.reservationId)) {
+            o.ticketIds.add(t.ticketId());
+            o.ticketPayloads.add(t.qrText());
         }
         engine.orders.put(o.id, o);
         return o;
@@ -337,10 +345,7 @@ public final class CoreBookingGateway implements BookingGateway {
         RealEngine.EventInfo e = engine.event(o.eventId);
         List<TicketView> tickets = new ArrayList<>();
         for (int i = 0; i < o.ticketIds.size(); i++) {
-            String id = o.ticketIds.get(i);
-            // Not signed: signing tickets is Slice 3 (NFR-06).
-            String payload = "EVENTFLOW|" + id + "|" + o.eventId + "|" + o.tierId + "|" + o.customerId + "|UNSIGNED";
-            tickets.add(new TicketView(id, i + 1, o.ticketIds.size(), payload, "VALID"));
+            tickets.add(new TicketView(o.ticketIds.get(i), i + 1, o.ticketIds.size(), o.ticketPayloads.get(i), "VALID"));
         }
         return new OrderView(o.id, engine.ref(e), engine.state(e), o.tierId, o.tierName, o.quantity, o.paid,
                 o.providerLabel, now > e.dateTime, tickets);

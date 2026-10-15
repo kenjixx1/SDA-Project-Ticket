@@ -11,12 +11,14 @@ import eventflow.core.event.OrderConfirmed;
 import eventflow.core.event.PaymentCompleted;
 import eventflow.core.event.PaymentVoided;
 import eventflow.core.event.TicketHeld;
+import eventflow.core.event.TicketIssued;
 import eventflow.core.event.UserAdmitted;
 import eventflow.core.inventory.TicketTier;
 import eventflow.core.order.CheckoutResult;
 import eventflow.core.order.Reservation;
 import eventflow.core.order.ReservationState;
 import eventflow.core.registry.UnknownPaymentProviderException;
+import eventflow.plugin.payment.CardPlugin;
 import eventflow.plugin.payment.PromptPayPlugin;
 
 public final class CheckoutTest {
@@ -35,7 +37,7 @@ public final class CheckoutTest {
         Check.equal(2, vip.soldQuantity(), "sold");
         List<Class<?>> order = app.bus().history().stream()
                 .<Class<?>>map(DomainEvent::getClass).toList();
-        Check.equal(List.of(UserAdmitted.class, TicketHeld.class, PaymentCompleted.class, OrderConfirmed.class),
+        Check.equal(List.of(UserAdmitted.class, TicketHeld.class, PaymentCompleted.class, OrderConfirmed.class, TicketIssued.class),
                 order, "event order");
         Check.invariants(app, vip);
     }
@@ -107,6 +109,19 @@ public final class CheckoutTest {
         PromptPayPlugin promptPay = (PromptPayPlugin) app.registry().payment("promptpay");
         Check.equal(PromptPayPlugin.Status.CAPTURED, promptPay.status("PP-" + r.reservationId()),
                 "payment status");
+    }
+
+    @Test
+    public void payByCard_secondPlugInWorksTheSameWay() {
+        EventFlow app = new EventFlow(Fixtures.clock());
+        TicketTier vip = Fixtures.vip(app, 500);
+        String kenji = Fixtures.admit(app, vip, "kenji");
+        Reservation r = app.inventory().hold(kenji, vip.tierId(), 2).reservation();
+
+        Check.equal(CheckoutResult.CONFIRMED, app.checkout().checkout(r.reservationId(), "card"), "checkout");
+        CardPlugin card = (CardPlugin) app.registry().payment("card");
+        Check.equal(CardPlugin.Status.CAPTURED, card.status("CARD-" + r.reservationId()), "card payment");
+        Check.equal(2, vip.soldQuantity(), "sold");
     }
 
     @Test

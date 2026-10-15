@@ -23,7 +23,7 @@ public final class HoldRulesTest {
         Check.that(result.held(), "hold should succeed");
         Check.equal(2, vip.heldQuantity(), "held (drops at hold, not payment)");
         Check.equal(498, vip.remaining(), "remaining");
-        Check.equal(Money.baht(13_000), result.reservation().totalAmount(), "total");
+        Check.equal(Money.baht(11_700), result.reservation().totalAmount(), "total: ฿13,000 less Early Bird");
         Check.equal(ReservationState.HELD, result.reservation().state(), "state");
         Check.that(app.bus().history().stream().anyMatch(e -> e instanceof TicketHeld), "TicketHeld published");
     }

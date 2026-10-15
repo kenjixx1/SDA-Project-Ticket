@@ -49,7 +49,7 @@ the first two slices of the fourth.
 | 1 | Problem Description | `docs/01` | ✅ Written |
 | 2 | Requirements Model | `docs/02` – `docs/05` | ✅ Written |
 | 3 | Design | `docs/06` | ✅ Written |
-| 4 | Implementation | `src/` | 🟡 Slices 1–2 built and tested — see [`src/README.md`](src/README.md) |
+| 4 | Implementation | `src/` | 🟡 Slices 1–3 built and tested, dashboard not yet — see [`src/README.md`](src/README.md) |
 | 5 | Operation | — | ⬜ Not started |
 | 6 | Conclusion & Recommendation | — | ⬜ Not started |
 
@@ -112,7 +112,7 @@ The full list, with reasons, is in [`docs/03-prd.md`](docs/03-prd.md) §3.5.
 ├── docs/               the seven documents
 ├── diagrams/           use case · SSD · activity (built) + UI mockup prompt
 ├── design/             screen mockups and the clickable prototype
-├── src/                Java: booking engine + waiting room (Slices 1–2) and tests
+├── src/                Java: booking engine, waiting room, tickets, plug-ins (Slices 1–3) and tests
 ├── run.sh              ./run.sh test · ./run.sh demo
 ├── plans/              the plan this documentation set was approved from
 └── SDA Project.pdf     the original brief

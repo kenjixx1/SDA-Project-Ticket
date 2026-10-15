@@ -134,7 +134,7 @@ class CoreOrganizerTest {
         assertEquals(7500, d.all().total());
         assertEquals(2, d.all().sold());
         assertEquals(7498, d.all().remaining());
-        assertEquals(13_000, d.revenue());
+        assertEquals(11_700, d.revenue());  // Early Bird applied
         for (var t : d.tiers()) {
             assertEquals(t.total(), t.held() + t.sold() + t.remaining());
         }

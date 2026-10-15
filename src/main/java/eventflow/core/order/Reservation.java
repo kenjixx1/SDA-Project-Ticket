@@ -2,9 +2,11 @@ package eventflow.core.order;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import eventflow.contract.Money;
+import eventflow.contract.Promotion;
 
 public final class Reservation {
 
@@ -15,6 +17,7 @@ public final class Reservation {
     private final String tierId;
     private final int quantity;
     private final Money unitPrice;
+    private final List<Promotion> promotions;
     private final Money totalAmount;
     private final Instant heldAt;
     private final Instant expiresAt;
@@ -23,12 +26,18 @@ public final class Reservation {
 
     public Reservation(String reservationId, String tokenId, String tierId,
                        int quantity, Money unitPrice, Instant heldAt) {
+        this(reservationId, tokenId, tierId, quantity, unitPrice, List.of(), unitPrice.times(quantity), heldAt);
+    }
+
+    public Reservation(String reservationId, String tokenId, String tierId, int quantity, Money unitPrice,
+                       List<Promotion> promotions, Money totalAmount, Instant heldAt) {
         this.reservationId = reservationId;
         this.tokenId = tokenId;
         this.tierId = tierId;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.totalAmount = unitPrice.times(quantity);
+        this.promotions = List.copyOf(promotions);
+        this.totalAmount = totalAmount;
         this.heldAt = heldAt;
         this.expiresAt = heldAt.plus(HOLD_TIME);  // set by the server clock
     }
@@ -51,6 +60,7 @@ public final class Reservation {
     public String tierId()        { return tierId; }
     public int quantity()         { return quantity; }
     public Money unitPrice()      { return unitPrice; }
+    public List<Promotion> promotions() { return promotions; }
     public Money totalAmount()    { return totalAmount; }
     public Instant heldAt()       { return heldAt; }
     public Instant expiresAt()    { return expiresAt; }

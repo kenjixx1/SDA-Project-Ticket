@@ -171,13 +171,13 @@ from other machines. That test is not built yet.
 
 | On `ENGINE=core` | Calls |
 |---|---|
-| Answered by core | M-03 join · M-04 place in line · M-05 seats left · M-06 hold · O-06 add a tier · O-09 admission rate |
+| Answered by core | M-03 join · M-04 place in line · M-05 seats left · M-06 hold, with Early Bird · M-08 give seats back early · O-06 add a tier · O-09 admission rate |
 | Core, finished by the gateway | M-02 one event · M-07 my hold · M-09, M-10, M-11 pay in 3 steps over core's one-step checkout · O-02 create · O-03 one event · O-05 set tiers · O-08 publish |
-| Stand-in made by the gateway | M-01 events list · M-12 orders, with tickets marked `UNSIGNED` (signing is Slice 3) · M-13 who am I · O-01 my events · O-11 dashboard |
-| Refused, `409 NOT_IN_CORE` | M-08 give seats back early · O-04 and O-07 after publishing · O-10 close the sale |
+| Stand-in made by the gateway | M-01 events list · M-12 orders (the tickets inside are core's signed ones) · M-13 who am I · O-01 my events · O-11 dashboard |
+| Refused, `409 NOT_IN_CORE` | O-04 and O-07 after publishing · O-10 close the sale |
 
-- Card payment shows *Not available right now*: core has only the PromptPay plug-in.
-- No Early Bird discount: pricing rules are Slice 3.
+- **Slice 3 on core:** card payment (`card` plug-in), the *Early Bird −10%*
+  line and total, signed tickets (`TicketService`), and giving seats back early.
 - When core adds a missing piece, one gateway method switches from refusing
   to calling core.
 

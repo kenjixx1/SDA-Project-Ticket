@@ -1,6 +1,7 @@
 package eventflow.core.inventory;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,10 +9,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import eventflow.contract.Money;
+import eventflow.contract.PricingRequest;
 import eventflow.core.event.EventBus;
 import eventflow.core.event.HoldExpired;
+import eventflow.core.event.HoldReleased;
 import eventflow.core.event.OrderConfirmed;
 import eventflow.core.event.TicketHeld;
+import eventflow.core.order.PricingService;
 import eventflow.core.order.Reservation;
 import eventflow.core.order.ReservationStore;
 import eventflow.core.queue.ClaimResult;
@@ -28,16 +32,20 @@ public final class InventoryService {
     private final AtomicLong nextTier = new AtomicLong(1);
     private final ReservationStore store;
     private final QueueService queue;
+    private final PricingService pricing;
     private final EventBus bus;
     private final Clock clock;
 
-    public InventoryService(ReservationStore store, QueueService queue, EventBus bus, Clock clock) {
+    public InventoryService(ReservationStore store, QueueService queue, PricingService pricing,
+                            EventBus bus, Clock clock) {
         this.store = store;
         this.queue = queue;
+        this.pricing = pricing;
         this.bus = bus;
         this.clock = clock;
         bus.subscribe(HoldExpired.class, this::onHoldExpired);
         bus.subscribe(OrderConfirmed.class, this::onOrderConfirmed);
+        bus.subscribe(HoldReleased.class, this::onHoldReleased);
     }
 
     public TicketTier createTier(String eventId, String name, Money price, int totalQuantity) {
@@ -86,8 +94,11 @@ public final class InventoryService {
             if (claim == ClaimResult.ALREADY_USED) {
                 return HoldResult.refused(HoldResult.Outcome.TOKEN_ALREADY_USED);
             }
-            reservation = new Reservation("R-" + nextReservation.getAndIncrement(), tokenId,
-                    tierId, quantity, tier.price(), clock.instant());
+            Instant now = clock.instant();
+            PricingService.Price price = pricing.price(new PricingRequest(tier.eventId(), tierId, quantity,
+                    queue.token(tokenId).customerId(), tier.price(), now, queue.saleOpenedAt(tier.eventId())));
+            reservation = new Reservation("R-" + nextReservation.getAndIncrement(), tokenId, tierId,
+                    quantity, tier.price(), price.promotions(), price.total(), now);
             tier.hold(quantity);
             store.add(reservation);
         }
@@ -100,6 +111,12 @@ public final class InventoryService {
 
     private void onHoldExpired(HoldExpired event) {
         if (settled.add(event.reservationId())) {  // the same event twice is ignored
+            tier(event.tierId()).release(event.quantity());
+        }
+    }
+
+    private void onHoldReleased(HoldReleased event) {
+        if (settled.add(event.reservationId())) {
             tier(event.tierId()).release(event.quantity());
         }
     }

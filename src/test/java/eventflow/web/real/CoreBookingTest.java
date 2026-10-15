@@ -90,13 +90,15 @@ class CoreBookingTest {
         String token = admitted("kenji");
         HoldView h = gw.hold("kenji", token, vip(), 2);
         assertEquals("HELD", h.state());
-        assertEquals(13_000, h.totalAmount());
+        assertEquals(11_700, h.totalAmount());  // ฿13,000 less Early Bird
         assertEquals(500, h.remainingBefore());
         assertEquals(498, h.remainingAfter());
         assertEquals(gw.now() + 10 * 60_000L, h.expiresAt());
-        assertEquals(0, h.promotions().size());
+        assertEquals(1, h.promotions().size());
+        assertEquals("Early Bird −10%", h.promotions().get(0).name());
+        assertEquals(1_300, h.promotions().get(0).amount());
         assertTrue(h.paymentMethods().stream().anyMatch(m -> m.key().equals("promptpay") && m.available()));
-        assertTrue(h.paymentMethods().stream().anyMatch(m -> m.key().equals("card") && !m.available()));
+        assertTrue(h.paymentMethods().stream().anyMatch(m -> m.key().equals("card") && m.available()));
         assertEquals("SPENT", gw.queueStatus("kenji", token).state());
         assertEquals(h.reservationId(), gw.queueStatus("kenji", token).reservationId());
     }

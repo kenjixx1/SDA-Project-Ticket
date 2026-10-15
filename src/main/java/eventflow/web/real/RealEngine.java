@@ -112,6 +112,7 @@ public final class RealEngine implements DevControls {
         final int quantity;
         final long paid;
         final List<String> ticketIds = new ArrayList<>();
+        final List<String> ticketPayloads = new ArrayList<>();  // signed QR text from core
 
         OrderInfo(String id, String customerId, String eventId, String tierId, String tierName, int quantity,
                   long paid, String providerLabel) {

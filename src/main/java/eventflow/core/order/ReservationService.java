@@ -5,6 +5,7 @@ import java.time.Clock;
 import eventflow.contract.PaymentProvider;
 import eventflow.core.event.EventBus;
 import eventflow.core.event.HoldExpired;
+import eventflow.core.event.HoldReleased;
 import eventflow.core.event.OrderConfirmed;
 import eventflow.core.event.PaymentCompleted;
 import eventflow.core.event.PaymentVoided;
@@ -35,6 +36,18 @@ public final class ReservationService {
         }
         bus.publish(new HoldExpired(reservation.reservationId(), reservation.tokenId(),
                                     reservation.tierId(), reservation.quantity()));
+        return true;
+    }
+
+    // The user gives the seats back early. Returns false if the hold already ended.
+    public boolean release(String reservationId) {
+        Reservation reservation = store.find(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("No reservation " + reservationId));
+        if (!reservation.moveState(ReservationState.HELD, ReservationState.RELEASED)) {
+            return false;
+        }
+        bus.publish(new HoldReleased(reservation.reservationId(), reservation.tokenId(),
+                                     reservation.tierId(), reservation.quantity()));
         return true;
     }
 

@@ -20,6 +20,14 @@ public record Money(long baht) {
         return new Money(baht + other.baht);
     }
 
+    public Money minus(Money other) {
+        return new Money(baht - other.baht);
+    }
+
+    public Money percentOff(int percent) {
+        return new Money(Math.round(baht * (100 - percent) / 100.0));
+    }
+
     @Override
     public String toString() {
         return String.format("฿%,d", baht);

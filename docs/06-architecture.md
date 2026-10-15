@@ -132,6 +132,7 @@ the clock reaching a hold's `expiresAt`.
 | 4 | **`OrderConfirmed`** | `ReservationService` | `InventoryService` · `TicketService` · `SalesDashboardService` | Move 2 seats from held to sold · issue 2 tickets · add ฿13,000 revenue |
 | 5 | **`TicketIssued`** | `TicketService` | Kenji's session | Show the two tickets |
 | — | **`HoldExpired`** | `ReservationService`, when expiry wins | `InventoryService` · `SalesDashboardService` · Kenji's session | Return the 2 seats (FR-12) · held goes back down · show "You have not been charged" |
+| — | **`HoldReleased`** | `ReservationService`, when the user gives the seats back early | `InventoryService` · `QueueService` | Return the seats at once · end the token, so the user must rejoin |
 | — | **`PaymentVoided`** | `ReservationService`, when a payment arrived too late | `SalesDashboardService` · Kenji's session | Record it · tell Kenji the money is released |
 
 Slide 11.1 recommends that each processor **advertise what it has done**,
@@ -304,19 +305,24 @@ public interface PaymentProvider {
 /** Seam 2 — how a price is changed. One implementation per promotion. */
 public interface PricingRule {
     String  key();                                  // "early-bird"
+    String  name();                                 // "Early Bird −10%", shown on the receipt
     boolean appliesTo(PricingRequest request);
     Money   apply(Money currentTotal, PricingRequest request);
 }
 
 /** What a pricing rule may look at. Small on purpose. */
-public record PricingRequest(String eventId, String tierId,
-                             int quantity, String customerId) {}
+public record PricingRequest(String eventId, String tierId, int quantity, String customerId,
+                             Money unitPrice, Instant heldAt, Instant saleOpenedAt) {}
 ```
 
 | Seam | Plug-ins | Used by |
 |---|---|---|
-| `PaymentProvider` | `PromptPayPlugin`, `StripePlugin` | `CheckoutService` (UC-03) |
-| `PricingRule` | `EarlyBirdRule`, `StudentDiscountRule`, `FanClubPresaleRule` | `PricingService` (UC-03, FR-14) |
+| `PaymentProvider` | `PromptPayPlugin` (`promptpay`), `CardPlugin` (`card`) | `CheckoutService` (UC-03) |
+| `PricingRule` | `EarlyBirdRule` (`early-bird`); student and fan-club rules fit the same seam but are not built | `PricingService` (UC-03, FR-14) |
+
+The price is worked out **once, at hold time**, and kept on the reservation:
+tier price × quantity, then each rule that applies, in key order. A later rule
+change cannot alter a live hold.
 
 **These two are the only seams.** NFR-08 says so, and §2.4 explains why:
 Lecture 3.1 warns that supporting too many characteristics complicates the
@@ -432,20 +438,19 @@ eventflow
 │   ├── Money.java
 │   ├── PaymentProvider.java
 │   ├── PricingRule.java
-│   └── PricingRequest.java
+│   ├── PricingRequest.java
+│   └── Promotion.java                one applied rule and its amount, for the receipt
 │
 ├── plugin/                   ◄── PLUG-INS. Nothing in core/ may import this.
 │   ├── payment/
 │   │   ├── PromptPayPlugin.java      simulated (ASM-04)
-│   │   └── StripePlugin.java         simulated (ASM-04)
+│   │   └── CardPlugin.java           simulated card payment, like Stripe (ASM-04)
 │   └── pricing/
-│       ├── EarlyBirdRule.java
-│       ├── StudentDiscountRule.java
-│       └── FanClubPresaleRule.java
+│       └── EarlyBirdRule.java        −10% in the first 30 minutes of the sale (ASM-12)
 │
 ├── ticket/
 │   ├── DigitalTicket.java
-│   └── TicketService.java            listens to OrderConfirmed → TicketIssued (FR-20, FR-21)
+│   └── TicketService.java            listens to OrderConfirmed → TicketIssued; signs and verifies (FR-20, FR-21)
 │
 ├── admin/
 │   ├── EventService.java             UC-05, UC-06
@@ -461,11 +466,16 @@ eventflow
 src/main/resources/public/    ◄── THE SCREENS. Plain HTML, CSS and JavaScript (SCR-01 to SCR-18).
 ```
 
-**Built so far.** Slices 1 and 2 of `03-prd.md` §3.6: `core/event`,
-`core/queue`, `core/inventory`, `core/order` (without `PricingService`),
-`core/registry`, `contract/` (payment only), the simulated `PromptPayPlugin`,
-`admin/EventService` and `EventFlow`. `src/README.md` lists what is built and
-what the tests prove.
+**Built so far.** Slices 1, 2 and 3 of `03-prd.md` §3.6, except the
+organizer dashboard: `core/event`, `core/queue`, `core/inventory`,
+`core/order` (with `PricingService` and early release), `core/registry`,
+`contract/`, the simulated `PromptPayPlugin` and `CardPlugin`, `EarlyBirdRule`,
+`ticket/`, `admin/EventService` and `EventFlow`. `src/README.md` lists what is
+built and what the tests prove.
+
+**Tickets are signed, not just numbered.** Each ticket's details are signed
+with HMAC-SHA256 using a secret only the server holds. Change any detail and
+`TicketService.verify` fails. No network and no sign-in service are involved.
 
 **How the queue hands over to the hold.** `InventoryService` asks
 `QueueService.claimForHold` inside its atomic hold: the token must be

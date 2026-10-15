@@ -16,6 +16,7 @@ import eventflow.core.event.DomainEvent;
 import eventflow.core.event.OrderConfirmed;
 import eventflow.core.event.PaymentCompleted;
 import eventflow.core.event.TicketHeld;
+import eventflow.core.event.TicketIssued;
 import eventflow.core.event.UserAdmitted;
 import eventflow.core.inventory.HoldResult;
 import eventflow.core.inventory.TicketTier;
@@ -202,6 +203,6 @@ public final class QueueTest {
         List<Class<?>> order = app.bus().history().stream()
                 .<Class<?>>map(DomainEvent::getClass).toList();
         Check.equal(List.of(UserAdmitted.class, TicketHeld.class,
-                PaymentCompleted.class, OrderConfirmed.class), order, "event order");
+                PaymentCompleted.class, OrderConfirmed.class, TicketIssued.class), order, "event order");
     }
 }
