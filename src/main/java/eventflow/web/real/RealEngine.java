@@ -1,6 +1,8 @@
 package eventflow.web.real;
 
 import eventflow.EventFlow;
+import eventflow.admin.ChangeRefused;
+import eventflow.admin.EventState;
 import eventflow.contract.Money;
 import eventflow.core.event.UserAdmitted;
 import eventflow.core.inventory.TicketTier;
@@ -230,11 +232,34 @@ public final class RealEngine implements DevControls {
     }
 
     /** Core only knows "on sale or not". DRAFT and SCHEDULED come from the gateway's own records. */
+    /** What a customer sees: a closing sale already reads as closed (SCR-05e), as on the fake. */
     String state(EventInfo e) {
+        String s = orgState(e);
+        return s.equals("CLOSING") ? "CLOSED" : s;
+    }
+
+    /** The organizer's state. Core decides CLOSING and CLOSED; the demo clock decides when the sale opens. */
+    String orgState(EventInfo e) {
         if (e.draft()) {
             return "DRAFT";
         }
+        EventState core = flow.events().state(e.coreId);
+        if (core == EventState.CLOSING || core == EventState.CLOSED) {
+            return core.name();
+        }
         return clock.now() < e.saleOpensAt ? "SCHEDULED" : "ON_SALE";
+    }
+
+    /** Core refused an organizer change; give the pages the same error the fake gives. */
+    static GatewayException refusal(ChangeRefused r) {
+        return switch (r.reason()) {
+            case EVENT_LOCKED -> GatewayException.conflict("EVENT_LOCKED", null, r.getMessage(), null);
+            case SALE_TIME_LOCKED -> GatewayException.conflict("EVENT_LOCKED", "saleOpensAt", r.getMessage(), null);
+            case PRICE_FROZEN -> GatewayException.conflict("PRICE_FROZEN", "price", r.getMessage(), null);
+            case BELOW_HELD_SOLD ->
+                    GatewayException.conflict("BELOW_HELD_SOLD", "total", r.getMessage(), r.held() + r.sold());
+            case NOT_ON_SALE -> GatewayException.conflict("NOT_ON_SALE", null, r.getMessage(), null);
+        };
     }
 
     EventInfo event(String id) {

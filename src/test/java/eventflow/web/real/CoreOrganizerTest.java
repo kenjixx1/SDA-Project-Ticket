@@ -92,21 +92,58 @@ class CoreOrganizerTest {
     }
 
     @Test
-    void o04OnlyThePictureChangesAfterPublishing() {
+    void o04DetailsChangeAfterPublishingButNotTheSaleTimeOnceOn() {
         var same = org.updateDetails("chai", "the-1975", new EventDetails("The 1975 Bangkok", null, null, null, null, ""));
         assertNull(same.artwork());
+        assertEquals("UOB Live", org.updateDetails("chai", "the-1975",
+                new EventDetails(null, "UOB Live", null, null, null)).venue());
+        clock.advance(60_000);  // the sale is on
         GatewayException e = assertThrows(GatewayException.class, () -> org.updateDetails("chai", "the-1975",
-                new EventDetails(null, "UOB Live", null, null, null)));
-        assertEquals("NOT_IN_CORE", e.code);
+                new EventDetails(null, null, null, SALE, null)));
+        assertEquals("EVENT_LOCKED", e.code);
+        assertEquals("saleOpensAt", e.field);
     }
 
     @Test
-    void o07AndO10AreNotInCore() {
+    void o07PricesFreezeWhenTheSaleOpensAndSeatsNeverDropBelowHeldAndSold() {
         String vip = org.getEvent("chai", "the-1975").tiers().get(0).tierId();
-        assertEquals("NOT_IN_CORE", assertThrows(GatewayException.class,
+        assertEquals(7000, org.updateTier("chai", "the-1975", vip, new TierInput(null, 7000L, null))
+                .tiers().get(0).price());  // before the sale: allowed
+        clock.advance(60_000);  // the sale is on
+        assertEquals("PRICE_FROZEN", assertThrows(GatewayException.class,
+                () -> org.updateTier("chai", "the-1975", vip, new TierInput(null, 6500L, null))).code);
+        assertEquals(600, org.updateTier("chai", "the-1975", vip, new TierInput(null, null, 600))
+                .tiers().get(0).total());
+        String token = gw.joinQueue("kenji", "the-1975").token();
+        clock.advance(2_000);
+        gw.hold("kenji", token, vip, 2);
+        GatewayException low = assertThrows(GatewayException.class,
+                () -> org.updateTier("chai", "the-1975", vip, new TierInput(null, null, 1)));
+        assertEquals("BELOW_HELD_SOLD", low.code);
+        assertEquals(2, low.remaining);
+    }
+
+    @Test
+    void o10ClosingLetsLiveHoldsFinishThenLocksTheEvent() {
+        assertEquals("NOT_ON_SALE", assertThrows(GatewayException.class,
+                () -> org.closeSale("chai", "the-1975")).code);  // not open yet
+        clock.advance(60_000);
+        String token = gw.joinQueue("kenji", "the-1975").token();
+        clock.advance(2_000);
+        String vip = org.getEvent("chai", "the-1975").tiers().get(0).tierId();
+        var hold = gw.hold("kenji", token, vip, 2);
+
+        assertEquals("CLOSING", org.closeSale("chai", "the-1975").state());
+        assertEquals("NOT_ON_SALE", assertThrows(GatewayException.class,
+                () -> gw.joinQueue("mint", "the-1975")).code);  // nobody new gets in
+        var pay = gw.startPayment("kenji", hold.reservationId(), "promptpay");
+        assertEquals("CAPTURED", gw.answerPayment("kenji", pay.paymentId(), true).state());  // Kenji keeps his window
+
+        var d = org.dashboard("chai", "the-1975");
+        assertEquals("CLOSED", d.state());
+        assertTrue(d.closedAt() != null);
+        assertEquals("EVENT_LOCKED", assertThrows(GatewayException.class,
                 () -> org.updateTier("chai", "the-1975", vip, new TierInput(null, null, 600))).code);
-        assertEquals("NOT_IN_CORE", assertThrows(GatewayException.class,
-                () -> org.closeSale("chai", "the-1975")).code);
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.time.Clock;
 
 import eventflow.admin.EventService;
+import eventflow.admin.SalesDashboardService;
 import eventflow.core.event.EventBus;
 import eventflow.core.inventory.InventoryService;
 import eventflow.core.order.CheckoutService;
@@ -34,6 +35,7 @@ public final class EventFlow {
     private final HoldExpiryScheduler expiry;
     private final EventService events;
     private final TicketService tickets;
+    private final SalesDashboardService dashboard;
 
     public EventFlow(Clock clock) {
         registry.register(new PromptPayPlugin());  // add a new payment method here
@@ -47,7 +49,8 @@ public final class EventFlow {
         reservations = new ReservationService(store, bus, registry, clock);
         checkout = new CheckoutService(store, reservations, registry, bus, clock);
         expiry = new HoldExpiryScheduler(store, reservations);
-        events = new EventService(inventory, queue);
+        events = new EventService(inventory, queue, bus, clock);
+        dashboard = new SalesDashboardService(bus, inventory, queue, events);
         tickets = new TicketService(inventory, bus, clock, newSecret());
     }
 
@@ -63,6 +66,7 @@ public final class EventFlow {
     public PricingService pricing()         { return pricing; }
     public InventoryService inventory()     { return inventory; }
     public TicketService tickets()          { return tickets; }
+    public SalesDashboardService dashboard() { return dashboard; }
     public ReservationService reservations() { return reservations; }
     public CheckoutService checkout()       { return checkout; }
     public HoldExpiryScheduler expiry()     { return expiry; }

@@ -16,20 +16,20 @@ ticket-selling platform that survives a sudden traffic spike (40,000 people
 pressing "buy" in the same second) without ever selling the same seat twice.
 
 The course asks for six deliverables. This repository covers the first five;
-Deliverable 4 is built except the organizer dashboard.
+Deliverable 4 is built.
 
 | # | Deliverable | Where it lives | Status |
 |---|---|---|---|
 | 1 | Problem Description | `docs/01-problem-description.md` | Written |
 | 2 | Requirements Model | `docs/02` – `docs/05` | Written |
 | 3 | Design | `docs/06-architecture.md`, `docs/08-screen-requirements.md` | Written |
-| 4 | Implementation | `src/` | Slices 1–3 built — booking engine, waiting room, tickets, card and Early Bird plug-ins, with tests; all 29 screens on a fake engine, or on core with ENGINE=core. Dashboard not built |
+| 4 | Implementation | `src/` | Slices 1–3 built — booking engine, waiting room, tickets, card and Early Bird plug-ins, organizer rules and dashboard, with tests; all 29 screens on a fake engine, or on core with ENGINE=core |
 | 5 | Operation | `docs/10-operation.md` | Written |
 | 6 | Conclusion & Recommendation | not yet | Not started |
 
 **Code lives in `src/` only.** Slices 1 (booking engine), 2 (waiting room) and
-3 (tickets, card payment, Early Bird, early release) are built and tested. The
-organizer dashboard is not. Do not put code anywhere else.
+3 (tickets, card payment, Early Bird, early release, organizer rules and
+dashboard) are built and tested. Do not put code anywhere else.
 
 ---
 
@@ -169,7 +169,7 @@ add it to the list above and switch to its exact words.
 
 ## 8. Code
 
-Slices 1–3 of `docs/03-prd.md` §3.6 are built, except the organizer dashboard. Run `./run.sh test` before every
+Slices 1–3 of `docs/03-prd.md` §3.6 are built. Run `./run.sh test` before every
 commit that touches `src/`; all tests must pass.
 
 - **Language:** Java. The course uses Java in almost every lab.

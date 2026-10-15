@@ -6,6 +6,7 @@ public record JoinResult(Outcome outcome, QueueToken token) {
         JOINED,
         ALREADY_IN_QUEUE,
         SALE_NOT_OPEN,
+        SALE_CLOSED,
         SOLD_OUT
     }
 

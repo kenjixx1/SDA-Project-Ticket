@@ -49,7 +49,7 @@ the first two slices of the fourth.
 | 1 | Problem Description | `docs/01` | ✅ Written |
 | 2 | Requirements Model | `docs/02` – `docs/05` | ✅ Written |
 | 3 | Design | `docs/06` | ✅ Written |
-| 4 | Implementation | `src/` | 🟡 Slices 1–3 built and tested, dashboard not yet — see [`src/README.md`](src/README.md) |
+| 4 | Implementation | `src/` | ✅ Slices 1–3 built and tested, including the organizer dashboard — see [`src/README.md`](src/README.md) |
 | 5 | Operation | — | ⬜ Not started |
 | 6 | Conclusion & Recommendation | — | ⬜ Not started |
 

@@ -55,6 +55,11 @@ public final class InventoryService {
         return tier;
     }
 
+    // Organizer changes. Rules about when they are allowed live in EventService.
+    public void resizeTier(String tierId, int newTotal) { tier(tierId).resize(newTotal); }
+    public void renameTier(String tierId, String newName) { tier(tierId).rename(newName); }
+    public void repriceTier(String tierId, Money newPrice) { tier(tierId).reprice(newPrice); }
+
     public TicketTier tier(String tierId) {
         TicketTier tier = tiers.get(tierId);
         if (tier == null) {
@@ -88,6 +93,9 @@ public final class InventoryService {
                 return HoldResult.refused(HoldResult.Outcome.NOT_ENOUGH_SEATS);
             }
             ClaimResult claim = queue.claimForHold(tokenId, tier.eventId());
+            if (claim == ClaimResult.SALE_CLOSED) {
+                return HoldResult.refused(HoldResult.Outcome.SALE_CLOSED);
+            }
             if (claim == ClaimResult.NOT_ADMITTED) {
                 return HoldResult.refused(HoldResult.Outcome.NOT_ADMITTED);
             }

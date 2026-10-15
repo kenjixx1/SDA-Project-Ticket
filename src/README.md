@@ -10,7 +10,8 @@
 - **Slice 3 — tickets and more plug-ins:** signed digital tickets, a card
   payment plug-in, the Early Bird pricing rule, and giving seats back early.
 
-The organizer dashboard is not built yet.
+- **Organizer:** closing a sale, editing events and tiers under the UC-06
+  rules, and the live sales dashboard.
 
 **The presentation layer is built too** (`web/` and `resources/public/`). It
 runs on a fake booking engine unless started with `ENGINE=core`; see `docs/09-web-api.md`. Run it with
@@ -45,6 +46,8 @@ Run from the repository root. Compiled classes go to `out/` (git-ignored).
 | Simulated PromptPay and card payment | `plugin/payment/PromptPayPlugin`, `CardPlugin` | FR-15, ASM-04 |
 | Early Bird −10% | `plugin/pricing/EarlyBirdRule` | FR-14, ASM-12 |
 | One signed ticket per seat, and checking a ticket | `ticket/TicketService` | FR-20, FR-21, NFR-06 |
+| Organizer rules: frozen prices, never below held + sold, close the sale | `admin/EventService` | FR-26 … FR-29 |
+| Live dashboard: queue, tiers, revenue | `admin/SalesDashboardService` | FR-31 … FR-33 |
 | Create event and tiers, open the sale, set the admission rate | `admin/EventService` | FR-23 … FR-25, FR-30 |
 | Wiring (the only class that names a plug-in) | `EventFlow` | NFR-08 |
 
@@ -62,6 +65,7 @@ Run from the repository root. Compiled classes go to `out/` (git-ignored).
 | `TicketTest` | Two seats paid → two tickets with their own codes; no tickets before paying; an edited ticket fails the check (NFR-06); paying twice issues tickets once |
 | `PricingTest` | Early Bird −10% inside 30 minutes, full price after; a new promotion plugs in with no core change (NFR-08); PromptPay is asked for the discounted total |
 | `ReleaseTest` | Seats given back go on sale at once and end the token; a released hold cannot be paid; a paid order cannot be released |
+| `OrganizerTest` | Prices freeze once the sale is on; seats never drop below held + sold; closing lets nobody new in but live holds finish, then the event locks; the dashboard adds up and counts revenue after Early Bird |
 | `ArchitectureTest` | No class in `core/` imports `plugin/` (NFR-08) |
 
 The overselling test has been checked against a broken hold: with the lock
@@ -69,7 +73,6 @@ removed, 42 buyers got the last 10 seats and the test failed.
 
 ## Not built yet
 
-- `SalesDashboardService` (the organizer dashboard)
 - A real database. Everything is in memory (ASM-08).
 
 `QueueLoadTest` measures the code in one Java process, not over a network.

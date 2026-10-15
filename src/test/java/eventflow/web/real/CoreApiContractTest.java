@@ -44,12 +44,12 @@ class CoreApiContractTest {
     }
 
     @Test
-    void closingASaleIsA409NotInCore() {
+    void closingASaleBeforeItOpensIsA409NotOnSale() {
         JavalinTest.test(WebServer.create(new CoreBookingGateway(engine), new CoreOrganizerGateway(engine), engine),
                 (server, client) -> {
                     Response r = client.post("/api/org/events/the-1975/close", java.util.Map.of(), b -> b.header("X-Customer", "chai"));
                     assertEquals(409, r.code());
-                    assertEquals("NOT_IN_CORE", body(r).get("error").get("code").asText());
+                    assertEquals("NOT_ON_SALE", body(r).get("error").get("code").asText());
                 });
     }
 

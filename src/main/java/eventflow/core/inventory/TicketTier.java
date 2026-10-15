@@ -6,8 +6,8 @@ public final class TicketTier {
 
     private final String tierId;
     private final String eventId;
-    private final String name;
-    private final Money price;
+    private String name;
+    private Money price;
     private int totalQuantity;
     private int heldQuantity;
     private int soldQuantity;
@@ -27,6 +27,15 @@ public final class TicketTier {
     synchronized void hold(int quantity)    { heldQuantity += quantity; }
     synchronized void release(int quantity) { heldQuantity -= quantity; }
     synchronized void sell(int quantity)    { heldQuantity -= quantity; soldQuantity += quantity; }
+    synchronized void rename(String newName)   { name = newName; }
+    synchronized void reprice(Money newPrice)  { price = newPrice; }
+
+    synchronized void resize(int newTotal) {
+        if (newTotal < heldQuantity + soldQuantity) {
+            throw new BelowHeldSoldException(heldQuantity, soldQuantity);
+        }
+        totalQuantity = newTotal;
+    }
 
     public synchronized int remaining() {
         return totalQuantity - heldQuantity - soldQuantity;
@@ -34,8 +43,8 @@ public final class TicketTier {
 
     public String tierId()  { return tierId; }
     public String eventId() { return eventId; }
-    public String name()    { return name; }
-    public Money price()    { return price; }
+    public synchronized String name()  { return name; }
+    public synchronized Money price()  { return price; }
     public synchronized int totalQuantity() { return totalQuantity; }
     public synchronized int heldQuantity()  { return heldQuantity; }
     public synchronized int soldQuantity()  { return soldQuantity; }

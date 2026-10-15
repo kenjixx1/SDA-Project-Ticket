@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 import eventflow.core.event.EventBus;
 import eventflow.core.event.HoldExpired;
 import eventflow.core.event.HoldReleased;
+import eventflow.core.event.SaleClosed;
 
 public final class QueueService {
 
@@ -29,6 +30,7 @@ public final class QueueService {
     static final class Line {
         final Queue<QueueToken> waiting = new ConcurrentLinkedQueue<>();
         volatile boolean open;
+        volatile boolean closed;
         volatile Instant openedAt;
         volatile int admissionRate = DEFAULT_ADMISSION_RATE;
         volatile long admittedThrough;
@@ -40,6 +42,7 @@ public final class QueueService {
         this.soldOut = soldOut;
         bus.subscribe(HoldExpired.class, this::onHoldExpired);
         bus.subscribe(HoldReleased.class, e -> endToken(e.tokenId()));
+        bus.subscribe(SaleClosed.class, e -> closeSale(e.eventId()));
     }
 
     public void openSale(String eventId) {
@@ -66,6 +69,9 @@ public final class QueueService {
 
     public JoinResult join(String customerId, String eventId) {
         Line line = line(eventId);
+        if (line.closed) {
+            return JoinResult.refused(JoinResult.Outcome.SALE_CLOSED);
+        }
         if (!line.open) {
             return JoinResult.refused(JoinResult.Outcome.SALE_NOT_OPEN);
         }
@@ -114,6 +120,9 @@ public final class QueueService {
         if (token == null || !token.eventId().equals(eventId)) {
             return ClaimResult.NOT_ADMITTED;
         }
+        if (line(eventId).closed) {
+            return ClaimResult.SALE_CLOSED;
+        }
         if (token.moveState(QueueTokenState.ADMITTED, QueueTokenState.SPENT)) {
             return ClaimResult.CLAIMED;
         }
@@ -136,6 +145,22 @@ public final class QueueService {
 
     Line line(String eventId) {
         return lines.computeIfAbsent(eventId, id -> new Line());
+    }
+
+    // Nobody new gets in. Fans still waiting will never be admitted, so their places end now.
+    private void closeSale(String eventId) {
+        Line line = line(eventId);
+        synchronized (line) {
+            line.closed = true;
+            QueueToken waiting;
+            while ((waiting = line.waiting.poll()) != null) {
+                waiting.moveState(QueueTokenState.WAITING, QueueTokenState.EXPIRED);
+            }
+        }
+    }
+
+    public boolean isClosed(String eventId) {
+        return line(eventId).closed;
     }
 
     private void onHoldExpired(HoldExpired event) {

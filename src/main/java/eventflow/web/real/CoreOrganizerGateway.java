@@ -1,5 +1,7 @@
 package eventflow.web.real;
 
+import eventflow.admin.ChangeRefused;
+import eventflow.admin.SalesDashboardService;
 import eventflow.contract.Money;
 import eventflow.core.inventory.TicketTier;
 import eventflow.core.queue.QueueService;
@@ -12,10 +14,11 @@ import eventflow.web.dto.OrgViews.OrgEvent;
 import eventflow.web.dto.OrgViews.OrgEventRow;
 import eventflow.web.dto.OrgViews.OrgTier;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 import static eventflow.web.OrgChecks.MAX_TIERS;
 import static eventflow.web.OrgChecks.checkRow;
@@ -27,7 +30,7 @@ import static eventflow.web.OrgChecks.slug;
 
 /**
  * The organizer console on the real booking engine. A draft lives only here; core first sees the
- * event on publish. Edits core cannot make yet are refused with NOT_IN_CORE.
+ * event on publish. After that, core's EventService decides which changes are allowed.
  */
 public final class CoreOrganizerGateway implements OrganizerGateway {
 
@@ -46,7 +49,7 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
                     .sorted(Comparator.comparingLong((RealEngine.EventInfo e) -> e.dateTime).reversed())
                     .map(e -> {
                         List<OrgTier> t = tiers(e);
-                        return new OrgEventRow(e.id, e.name, e.venue, e.dateTime, e.saleOpensAt, engine.state(e),
+                        return new OrgEventRow(e.id, e.name, e.venue, e.dateTime, e.saleOpensAt, engine.orgState(e),
                                 t.stream().mapToInt(OrgTier::sold).sum(), t.stream().mapToInt(OrgTier::total).sum());
                     })
                     .toList();
@@ -101,15 +104,7 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
             engine.tick();
             RealEngine.EventInfo e = owned(organizerId, eventId);
             if (!e.draft()) {
-                boolean changes = changed(details.name(), e.name) || changed(details.venue(), e.venue)
-                        || changed(details.eventDateTime(), e.dateTime) || changed(details.saleOpensAt(), e.saleOpensAt);
-                if (changes) {
-                    throw RealEngine.notInCore("Changing a published event");
-                }
-                if (details.artwork() != null) {
-                    e.artwork = checkedArtwork(details.artwork());
-                }
-                return view(e);
+                return updatePublished(e, details);
             }
             String name = details.name() == null ? e.name : checkedName(details.name());
             String venue = details.venue() == null ? e.venue : checkedVenue(details.venue());
@@ -180,7 +175,11 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
                 e.draftTiers.add(new RealEngine.DraftTier(uniqueTierId(e.draftTiers, slug(name)), name,
                         tier.price(), tier.total()));
             } else {
-                engine.flow.events().addTier(e.coreId, name, Money.baht(tier.price()), tier.total());
+                try {
+                    engine.flow.events().addTier(e.coreId, name, Money.baht(tier.price()), tier.total());
+                } catch (ChangeRefused r) {
+                    throw RealEngine.refusal(r);
+                }
             }
             return view(e);
         }
@@ -195,7 +194,18 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
                 throw GatewayException.invalid("REQUIRED", "tier", "Required");
             }
             if (!e.draft()) {
-                throw RealEngine.notInCore("Changing a tier after publishing");
+                TicketTier t = engine.coreTiers(e).stream().filter(x -> x.tierId().equals(tierId)).findFirst()
+                        .orElseThrow(() -> GatewayException.notFound("Tier"));
+                String name = tier.name() == null ? t.name() : tier.name().trim();
+                Long price = tier.price() == null ? t.price().baht() : tier.price();
+                Integer total = tier.total() == null ? t.totalQuantity() : tier.total();
+                checkRow(0, "", name, price, total);
+                try {
+                    engine.flow.events().changeTier(e.coreId, tierId, name, Money.baht(price), total);
+                } catch (ChangeRefused r) {
+                    throw RealEngine.refusal(r);
+                }
+                return view(e);
             }
             RealEngine.DraftTier t = e.draftTiers.stream().filter(x -> x.id.equals(tierId)).findFirst()
                     .orElseThrow(() -> GatewayException.notFound("Tier"));
@@ -235,10 +245,14 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
             if (admitPerSecond == null || admitPerSecond < 1) {
                 throw GatewayException.invalid("RATE_TOO_LOW", "admitPerSecond", "Must be at least 1.");
             }
-            e.admitPerSecond = admitPerSecond;
             if (!e.draft()) {
-                engine.flow.queue().setAdmissionRate(e.coreId, admitPerSecond);
+                try {
+                    engine.flow.events().setAdmissionRate(e.coreId, admitPerSecond);
+                } catch (ChangeRefused r) {
+                    throw RealEngine.refusal(r);
+                }
             }
+            e.admitPerSecond = admitPerSecond;
             return view(e);
         }
     }
@@ -247,16 +261,27 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
     public OrgEvent closeSale(String organizerId, String eventId) {                          // O-10
         synchronized (engine) {
             engine.tick();
-            owned(organizerId, eventId);
-            throw RealEngine.notInCore("Closing a sale");
+            RealEngine.EventInfo e = owned(organizerId, eventId);
+            if (e.draft() || !engine.orgState(e).equals("ON_SALE")) {
+                throw GatewayException.conflict("NOT_ON_SALE", null, "Only a sale that is on can be closed.", null);
+            }
+            try {
+                engine.flow.events().closeSale(e.coreId);
+            } catch (ChangeRefused r) {
+                throw RealEngine.refusal(r);
+            }
+            return view(e);
         }
     }
 
     @Override
-    public Dashboard dashboard(String organizerId, String eventId) {                         // O-11, stand-in
+    public Dashboard dashboard(String organizerId, String eventId) {                         // O-11
         synchronized (engine) {
             engine.tick();
             RealEngine.EventInfo e = owned(organizerId, eventId);
+            if (!e.draft()) {
+                return dashboardFromCore(e);
+            }
             List<OrgTier> rows = tiers(e);
             int total = rows.stream().mapToInt(OrgTier::total).sum();
             int held = rows.stream().mapToInt(OrgTier::held).sum();
@@ -264,8 +289,61 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
             OrgTier all = new OrgTier("all", "All", 0, total, held, sold, total - held - sold);
             long revenue = engine.orders.values().stream().filter(o -> o.eventId.equals(e.id))
                     .mapToLong(o -> o.paid).sum();
-            return new Dashboard(e.id, e.name, engine.state(e), waiting(e), e.admitPerSecond, rows, all, revenue, null);
+            return new Dashboard(e.id, e.name, engine.orgState(e), waiting(e), e.admitPerSecond, rows, all, revenue, null);
         }
+    }
+
+    /** O-04 after publishing. Same checks, in the same order, as the fake; core has the last word. */
+    private OrgEvent updatePublished(RealEngine.EventInfo e, EventDetails details) {
+        String state = engine.orgState(e);
+        if (state.equals("CLOSING") || state.equals("CLOSED")) {
+            throw GatewayException.conflict("EVENT_LOCKED", null, "This event can no longer be changed.", null);
+        }
+        String name = details.name() == null ? e.name : checkedName(details.name());
+        String venue = details.venue() == null ? e.venue : checkedVenue(details.venue());
+        long date = details.eventDateTime() == null ? e.dateTime : details.eventDateTime();
+        long sale = e.saleOpensAt;
+        if (details.saleOpensAt() != null && details.saleOpensAt() != e.saleOpensAt) {
+            if (state.equals("ON_SALE")) {
+                throw GatewayException.conflict("EVENT_LOCKED", "saleOpensAt",
+                        "The sale time cannot change once the sale is on.", null);
+            }
+            if (details.saleOpensAt() <= engine.clock.now()) {
+                throw GatewayException.invalid("SALE_IN_PAST", "saleOpensAt", "The sale must open in the future.");
+            }
+            sale = details.saleOpensAt();
+        }
+        if (sale >= date) {
+            throw GatewayException.invalid("SALE_AFTER_EVENT", "saleOpensAt", "The sale must open before the event.");
+        }
+        String artwork = details.artwork() == null ? e.artwork : checkedArtwork(details.artwork());
+        try {
+            engine.flow.events().changeDetails(e.coreId, name, venue,
+                    LocalDateTime.ofInstant(Instant.ofEpochMilli(date), RealEngine.BANGKOK).toLocalDate(),
+                    LocalDateTime.ofInstant(Instant.ofEpochMilli(sale), RealEngine.BANGKOK));
+        } catch (ChangeRefused r) {
+            throw RealEngine.refusal(r);
+        }
+        e.name = name;
+        e.shortName = shortName(name);
+        e.venue = venue;
+        e.dateTime = date;
+        e.saleOpensAt = sale;
+        e.artwork = artwork;
+        return view(e);
+    }
+
+    /** O-11 from core's SalesDashboardService: it counts revenue by listening to OrderConfirmed. */
+    private Dashboard dashboardFromCore(RealEngine.EventInfo e) {
+        SalesDashboardService.Dashboard d = engine.flow.dashboard().dashboard(e.coreId);
+        List<OrgTier> rows = d.tiers().stream().map(CoreOrganizerGateway::row).toList();
+        Long closedAt = d.closedAt() == null ? null : d.closedAt().toEpochMilli();
+        return new Dashboard(e.id, e.name, engine.orgState(e), d.waiting(), d.admissionRate(), rows, row(d.all()),
+                d.revenue().baht(), closedAt);
+    }
+
+    private static OrgTier row(SalesDashboardService.TierRow t) {
+        return new OrgTier(t.tierId(), t.name(), t.price().baht(), t.total(), t.held(), t.sold(), t.remaining());
     }
 
     // ---------- helpers ----------
@@ -280,7 +358,7 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
 
     private OrgEvent view(RealEngine.EventInfo e) {
         List<OrgTier> rows = tiers(e);
-        return new OrgEvent(e.id, e.name, e.venue, e.dateTime, e.saleOpensAt, engine.state(e), e.admitPerSecond,
+        return new OrgEvent(e.id, e.name, e.venue, e.dateTime, e.saleOpensAt, engine.orgState(e), e.admitPerSecond,
                 rows, rows.stream().mapToInt(OrgTier::held).sum(), waiting(e), null, e.artwork);
     }
 
@@ -296,7 +374,7 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
     }
 
     private int waiting(RealEngine.EventInfo e) {
-        return engine.state(e).equals("ON_SALE") ? engine.flow.queue().queueLength(e.coreId) : 0;
+        return engine.orgState(e).equals("ON_SALE") ? engine.flow.queue().queueLength(e.coreId) : 0;
     }
 
     private void checkSale(long sale, long date) {
@@ -308,12 +386,6 @@ public final class CoreOrganizerGateway implements OrganizerGateway {
         }
     }
 
-    private static boolean changed(Object given, Object current) {
-        if (given instanceof String s) {
-            return !s.trim().equals(current);
-        }
-        return given != null && !Objects.equals(given, current);
-    }
 
     private String uniqueId(String base) {
         String id = base;

@@ -20,6 +20,7 @@ public final class TestRunner {
             TicketTest.class,
             PricingTest.class,
             ReleaseTest.class,
+            OrganizerTest.class,
             ArchitectureTest.class);
 
     public static void main(String[] args) throws Exception {

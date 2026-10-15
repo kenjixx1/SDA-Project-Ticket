@@ -191,7 +191,6 @@ row, counted from 0; the second tier row is `tiers[1]`.
 | 409 | `PRICE_FROZEN` | `price` | `Prices are frozen while the sale is on, so no customer sees a price change mid-purchase.` | O-07 changes a price while `ON_SALE` (FR-26, ext 3a) |
 | 409 | `BELOW_HELD_SOLD` | `total` | `VIP: 484 sold and 2 held. Cannot reduce below 486.` `remaining` is 486 | O-07 lowers a tier below held + sold (FR-28, ext 3b) |
 | 409 | `NOT_ON_SALE` | — | `Only a sale that is on can be closed.` | O-10 before the sale opens, or twice (FR-29) |
-| 409 | `NOT_IN_CORE` | — | `Closing a sale is not built in the booking engine yet.` | Only with `ENGINE=core`: O-04 on a published event, O-07 after publishing, O-10 |
 
 ## 9.5 Demo-only messages
 

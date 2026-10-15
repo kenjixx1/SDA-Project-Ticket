@@ -9,7 +9,8 @@ public record HoldResult(Outcome outcome, Reservation reservation) {
         NOT_ENOUGH_SEATS,
         OVER_ORDER_LIMIT,
         NOT_ADMITTED,  // still waiting, expired or unknown
-        TOKEN_ALREADY_USED
+        TOKEN_ALREADY_USED,
+        SALE_CLOSED
     }
 
     public boolean held() {

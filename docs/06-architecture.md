@@ -127,13 +127,14 @@ the clock reaching a hold's `expiresAt`.
 | # | Processing event | Published by | Who listens | What they do |
 |---|---|---|---|---|
 | 1 | **`UserAdmitted`** | `AdmissionScheduler` | Kenji's session · `SalesDashboardService` | Show "your turn" · count one more admitted |
-| 2 | **`TicketHeld`** | `InventoryService`, after the atomic hold succeeds | `SalesDashboardService` | VIP held goes 10 → 12 on the dashboard. The 10-minute deadline is already saved on the hold; `HoldExpiryScheduler` finds it by scanning, not by listening. |
+| 2 | **`TicketHeld`** | `InventoryService`, after the atomic hold succeeds | — (none yet) | The 10-minute deadline is already saved on the hold; `HoldExpiryScheduler` finds it by scanning, not by listening. The dashboard reads *held* live from inventory. |
 | 3 | **`PaymentCompleted`** | `CheckoutService`, after the `PaymentProvider` authorises | `ReservationService` | Confirm the order if the hold is still alive (FR-16). Otherwise void the payment (FR-17). |
 | 4 | **`OrderConfirmed`** | `ReservationService` | `InventoryService` · `TicketService` · `SalesDashboardService` | Move 2 seats from held to sold · issue 2 tickets · add ฿13,000 revenue |
 | 5 | **`TicketIssued`** | `TicketService` | Kenji's session | Show the two tickets |
-| — | **`HoldExpired`** | `ReservationService`, when expiry wins | `InventoryService` · `SalesDashboardService` · Kenji's session | Return the 2 seats (FR-12) · held goes back down · show "You have not been charged" |
+| — | **`HoldExpired`** | `ReservationService`, when expiry wins | `InventoryService` · `QueueService` · Kenji's session | Return the 2 seats (FR-12) · held goes back down · show "You have not been charged" |
 | — | **`HoldReleased`** | `ReservationService`, when the user gives the seats back early | `InventoryService` · `QueueService` | Return the seats at once · end the token, so the user must rejoin |
-| — | **`PaymentVoided`** | `ReservationService`, when a payment arrived too late | `SalesDashboardService` · Kenji's session | Record it · tell Kenji the money is released |
+| — | **`PaymentVoided`** | `ReservationService`, when a payment arrived too late | Kenji's session | Tell Kenji the money is released |
+| — | **`SaleClosed`** | `EventService`, when Chai closes the sale (FR-29) | `QueueService` | Let nobody new in; fans still waiting lose their place. Holds already running keep their time. |
 
 Slide 11.1 recommends that each processor **advertise what it has done**,
 *"regardless of whether or not any other event processor cares"*. That is why
@@ -454,7 +455,7 @@ eventflow
 │
 ├── admin/
 │   ├── EventService.java             UC-05, UC-06
-│   └── SalesDashboardService.java    UC-07 · listens to every event
+│   └── SalesDashboardService.java    UC-07 · listens to OrderConfirmed (revenue) and UserAdmitted
 │
 └── web/                      ◄── PRESENTATION LAYER. The doorway for the customer pages.
     ├── WebServer.java                serves resources/public/, picks the gateway
@@ -466,12 +467,19 @@ eventflow
 src/main/resources/public/    ◄── THE SCREENS. Plain HTML, CSS and JavaScript (SCR-01 to SCR-18).
 ```
 
-**Built so far.** Slices 1, 2 and 3 of `03-prd.md` §3.6, except the
-organizer dashboard: `core/event`, `core/queue`, `core/inventory`,
-`core/order` (with `PricingService` and early release), `core/registry`,
-`contract/`, the simulated `PromptPayPlugin` and `CardPlugin`, `EarlyBirdRule`,
-`ticket/`, `admin/EventService` and `EventFlow`. `src/README.md` lists what is
-built and what the tests prove.
+**Built so far.** All three slices of `03-prd.md` §3.6: `core/event`,
+`core/queue`, `core/inventory`, `core/order` (with `PricingService` and early
+release), `core/registry`, `contract/`, the simulated `PromptPayPlugin` and
+`CardPlugin`, `EarlyBirdRule`, `ticket/`, `admin/` (`EventService` with the
+UC-06 rules, and `SalesDashboardService`) and `EventFlow`. `src/README.md`
+lists what is built and what the tests prove.
+
+**Who decides an organizer change.** `EventService` checks every change
+against the event's state, using the table in UC-06: prices freeze once the
+sale is on (FR-26), seats never drop below held + sold (FR-28), and nothing
+changes once the sale is closing or closed. A refused change raises
+`ChangeRefused` with a reason, and the pages show the same message as on the
+fake engine.
 
 **Tickets are signed, not just numbered.** Each ticket's details are signed
 with HMAC-SHA256 using a secret only the server holds. Change any detail and
